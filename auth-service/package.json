@@ -9,11 +9,17 @@
   "scripts": {
     "start:dev": "nodemon --watch src --ext ts --exec tsx src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "migration": "tsx src/run.migrations.ts"
   },
   "dependencies": {
+    "@fastify/error": "^4.2.0",
+    "@fastify/sensible": "^6.0.3",
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
     "fastify": "^5.4.0",
+    "fastify-plugin": "^5.0.1",
     "nodemon": "^3.1.10",
     "tsx": "^4.20.3"
   },

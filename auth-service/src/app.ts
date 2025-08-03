@@ -1,11 +1,16 @@
 import fastify from "fastify";
 import * as dotenv from "dotenv";
+import sensible from "./plugins/sensible";
+import { authRoutes } from "./auth/auth.routes";
 
 dotenv.config();
 
 const port = +(process.env.PORT || "3001");
 const host = process.env.HOST;
 const app = fastify({ logger: true });
+
+app.register(sensible);
+app.register(authRoutes, {prefix : '/'});
 
 const start = async () => {
   try {
