@@ -5,3 +5,15 @@ export const UserAlreadyExists = createError(
   'User with this email already exists',
   409
 );
+
+export const UserNotFound = createError(
+  'USER_NOT_FOUND',
+  'User not found',
+  404
+);
+
+export const InvalidCredentials = createError(
+  'INVALID_CREDENTIALS',
+  'Wrong mail or creadintials',
+  401
+);
