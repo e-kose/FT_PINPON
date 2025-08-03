@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: 
+      context: ./api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+    #   - user-service
+    env_file:
+      - ./api-gateway/.env
+    networks:
+      - internal-network
+  auth-service:
+    build: 
+      context: ./auth-service
+    expose:
+      - "3001"
+    volumes:
+      - ./auth-service/db:/app/db
+    env_file:
+      - ./auth-service/.env
+    networks:
+      - internal-network
+
+networks:
+  internal-network:
+    driver: bridge
