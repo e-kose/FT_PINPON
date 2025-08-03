@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { registerUserBody } from "./types/register.UserBody";
-import { registerService } from "./auth.service";
-import { UserAlreadyExists } from "../errors/auth.errors";
+import { registerUserBody } from "./types/register.UserBody.js";
+import { registerService } from "./auth.service.js";
+import { UserAlreadyExists } from "../errors/auth.errors.js";
 
 export async function register(req: FastifyRequest, reply: FastifyReply) {
   try {

@@ -1,7 +1,7 @@
-import { registerUserBody } from "./types/register.UserBody";
-import { db } from "../run.migrations";
-import { hashPassword } from "./utils/hash.utils";
-import { UserAlreadyExists } from "../errors/auth.errors";
+import { registerUserBody } from "./types/register.UserBody.js";
+import { db } from "../run.migrations.js";
+import { hashPassword } from "./utils/hash.utils.js";
+import { UserAlreadyExists } from "../errors/auth.errors.js";
 
 export async function registerService(body: registerUserBody) {
   const stmt = db.prepare(

@@ -1,7 +1,7 @@
 import fastify from "fastify";
 import * as dotenv from "dotenv";
-import sensible from "./plugins/sensible";
-import { authRoutes } from "./auth/auth.routes";
+import sensible from "./plugins/sensible.js";
+import { authRoutes } from "./auth/auth.routes.js";
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ const host = process.env.HOST;
 const app = fastify({ logger: true });
 
 app.register(sensible);
-app.register(authRoutes, {prefix : '/'});
+app.register(authRoutes, {prefix : '/auth'});
 
 const start = async () => {
   try {

@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
     "target": "ES2020",
-    "module": "esnext",
+    "moduleResolution": "Node",
     "rootDir": "./src",
     "outDir": "./dist",
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "moduleResolution": "node",
     "skipLibCheck": true
-  }
+  },
+  "include": ["src"]
 }
