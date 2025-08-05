@@ -7,12 +7,13 @@ import {
 } from "./auth.service.js";
 import {
   InvalidCredentials,
+  InvalidToken,
   UserAlreadyExists,
   UserNotFound,
 } from "../errors/auth.errors.js";
 import { loginUserBody } from "./types/login.userBody.js";
-import { refreshToken } from "./types/refreh.token.js";
-import * as dotenv from 'dotenv';
+import { refreshToken } from "./types/refresh.token.js";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -39,23 +40,17 @@ export async function login(
   try {
     const { email, username, password } = req.body;
     if (!email && !username)
-      return reply
-        .code(400)
-        .send({
-          success: false,
-          message: "E-posta veya kullanıcı adı gerekli",
-        });
+      return reply.code(400).send({
+        success: false,
+        message: "E-posta veya kullanıcı adı gerekli",
+      });
     if (!password)
       return reply.code(400).send({ success: false, message: "Şifre gerekli" });
-    const { user, accesstoken,refreshtoken } = await loginUserService(req.server, req.body);
-    const maxAge = parseDuration(process.env.REFRESH_EXPIRES_IN || '7d');
-    reply.setCookie("refresh_token", refreshtoken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge
-    });
+    const { user, accesstoken, refreshtoken } = await loginUserService(
+      req.server,
+      req.body
+    );
+    reply.setRefreshTokenCookie(refreshtoken);
     return reply.code(200).send({ user, accesstoken });
   } catch (error) {
     req.log.error(error);
@@ -66,16 +61,16 @@ export async function login(
   }
 }
 
-export async function refreshToken(
-  req: FastifyRequest<{ Body: refreshToken }>,
-  reply: FastifyReply
-) {
-  const { refreshtoken } = req.body;
-  if (!refreshtoken)
-    return reply
-      .code(400)
-      .send({ success: false, message: "Refresh token gerekli" });
+export async function refreshToken(req: FastifyRequest, reply: FastifyReply) {
   try {
-    await refreshTokenService(req.server, refreshtoken);
-  } catch (error) {}
+    const { accesstoken, refreshtoken } = await refreshTokenService(req);
+    reply.setRefreshTokenCookie(refreshtoken);
+    return reply.code(200).send({ accesstoken });
+  } catch (error) {
+     req.log.error(error);
+    if (error instanceof InvalidToken) {
+      return reply.code(error.statusCode).send({ error: error.message });
+    }
+    return reply.internalServerError("Bir hata oluştu");
+  }
 }

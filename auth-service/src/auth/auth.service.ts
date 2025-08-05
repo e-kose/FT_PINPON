@@ -1,15 +1,16 @@
 import { registerUserBody } from "./types/register.userBody.js";
 import { db } from "../run.migrations.js";
-import { checkPass, hashTransaction } from "./utils/hash.utils.js";
+import { checkHash, hashTransaction } from "./utils/hash.utils.js";
 import {
   InvalidCredentials,
+  InvalidToken,
   UserAlreadyExists,
   UserNotFound,
 } from "../errors/auth.errors.js";
 import { loginUserBody } from "./types/login.userBody.js";
 import { User } from "./types/userDB.js";
 import { payload } from "./types/payload.js";
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { genarateTokens } from "./utils/tokens.utils.js";
 
 export async function registerService(body: registerUserBody) {
@@ -31,7 +32,7 @@ export async function loginUserService(
     ? findUserUserEmail(body.email!)
     : findUserUsername(body.username!);
   if (!result.success || !result.user) throw new UserNotFound();
-  const checkedPass = await checkPass(body.password, result.user.password);
+  const checkedPass = await checkHash(body.password, result.user.password);
   if (!checkedPass) throw new InvalidCredentials();
   const payload: payload = {
     id: result.user.id,
@@ -44,8 +45,15 @@ export async function loginUserService(
   return { user: userWithoutPassword, accesstoken, refreshtoken};
 }
 
-export async function refreshTokenService(app : FastifyInstance, refreshToken : string) {
-  const userRecord = db.prepare(`SELECT * FROM refresh_tokens WHERE user_id = ?`).get(id);
+export async function refreshTokenService(req : FastifyRequest) {
+  const userId = (req.user as payload).id;
+  const refreshRecord = findRefreshTokensUserId(userId);
+  if(!refreshRecord.success) throw new InvalidToken();
+  const isValid = await checkHash(req.cookies?.refresh_token,refreshRecord.tokenRecord as string);
+  if(!isValid) throw new InvalidToken();
+  const {accesstoken, refreshtoken} = await genarateTokens(req.server, req.user as payload);
+  await updateRefreshToken(userId, refreshtoken);
+  return({accesstoken, refreshtoken});
 }
 
 export function findUserUsername(userName: string) {
@@ -69,12 +77,19 @@ export function findUserUserId(id: number) {
   return { success: false, user: null };
 }
 
+export function findRefreshTokensUserId(id : number){
+  const tokenRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id);
+  if(tokenRecord)  return { success: true, tokenRecord };
+  return { success: false, tokenRecord: null }; 
+}
+
 export async function updateRefreshToken(id : number, refreshToken: string) {
-  const stmt = db.prepare(`
-      INSERT OR REPLACE INTO refresh_tokens (user_id, token) 
-      VALUES (?, ?)
-    `);
-    const hashRefresh = await hashTransaction(refreshToken);
-    stmt.run(id, hashRefresh);
+  const refreshRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id);
+  const hashRefresh = await hashTransaction(refreshToken);
+  if(refreshRecord){
+    db.prepare("UPDATE refresh_tokens SET token=? WHERE user_id=?").run(hashRefresh, id);
+  }else{
+    db.prepare("INSERT INTO refresh_tokens (user_id, token) VALUES(?,?)").run(id, hashRefresh);
+  }
   return { success: true }
 }

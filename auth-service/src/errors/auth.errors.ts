@@ -17,3 +17,9 @@ export const InvalidCredentials = createError(
   'Wrong mail or creadintials',
   401
 );
+
+export const InvalidToken = createError(
+  'INVALID_TOKEN',
+  'Token is invalid or deleted',
+  401
+);
