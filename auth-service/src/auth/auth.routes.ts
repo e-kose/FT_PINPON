@@ -7,4 +7,5 @@ import { loginUserSchema } from "./schemas/login.userSchema.js";
 export async function authRoutes(app:FastifyInstance) {
 	app.post('/register',{schema : {body: registerUserSchema}}, register);
 	app.post('/login',{schema : {body : loginUserSchema}}, login);
+	app.post('/refresh-token', refreshToken);
 }

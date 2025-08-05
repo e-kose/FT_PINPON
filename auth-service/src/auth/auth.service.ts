@@ -1,13 +1,13 @@
 import { registerUserBody } from "./types/register.userBody.js";
 import { db } from "../run.migrations.js";
-import { checkPass, hashPassword } from "./utils/hash.utils.js";
+import { checkPass, hashTransaction } from "./utils/hash.utils.js";
 import {
   InvalidCredentials,
   UserAlreadyExists,
   UserNotFound,
 } from "../errors/auth.errors.js";
 import { loginUserBody } from "./types/login.userBody.js";
-import { User } from "./types/user.js";
+import { User } from "./types/userDB.js";
 import { payload } from "./types/payload.js";
 import { FastifyInstance } from "fastify";
 import { genarateTokens } from "./utils/tokens.utils.js";
@@ -18,7 +18,7 @@ export async function registerService(body: registerUserBody) {
   );
   const { success, user } = findUserUsername(body.username);
   if (success && user) throw new UserAlreadyExists();
-  const hashedPass = await hashPassword(body.password);
+  const hashedPass = await hashTransaction(body.password);
   stmt.run(body.username, hashedPass, body.email);
   return { succes: true };
 }
@@ -38,9 +38,14 @@ export async function loginUserService(
     email: result.user.email,
     username: result.user.username,
   };
-  const { accestoken } = await genarateTokens(app, payload);
+  const { accesstoken, refreshtoken } = await genarateTokens(app, payload);
   const { password, ...userWithoutPassword } = result.user;
-  return { user: userWithoutPassword, accestoken };
+  await updateRefreshToken(payload.id, refreshtoken);
+  return { user: userWithoutPassword, accesstoken, refreshtoken};
+}
+
+export async function refreshTokenService(app : FastifyInstance, refreshToken : string) {
+  const userRecord = db.prepare(`SELECT * FROM refresh_tokens WHERE user_id = ?`).get(id);
 }
 
 export function findUserUsername(userName: string) {
@@ -49,9 +54,27 @@ export function findUserUsername(userName: string) {
   if (user) return { success: true, user };
   return { success: false, user: null };
 }
-function findUserUserEmail(email: string) {
+
+export function findUserUserEmail(email: string) {
   const stmt = db.prepare("SELECT * FROM users WHERE email= ?");
   const user = stmt.get(email) as User;
   if (user) return { success: true, user };
   return { success: false, user: null };
+}
+
+export function findUserUserId(id: number) {
+  const stmt = db.prepare("SELECT * FROM users WHERE id= ?");
+  const user = stmt.get(id) as User;
+  if (user) return { success: true, user };
+  return { success: false, user: null };
+}
+
+export async function updateRefreshToken(id : number, refreshToken: string) {
+  const stmt = db.prepare(`
+      INSERT OR REPLACE INTO refresh_tokens (user_id, token) 
+      VALUES (?, ?)
+    `);
+    const hashRefresh = await hashTransaction(refreshToken);
+    stmt.run(id, hashRefresh);
+  return { success: true }
 }
