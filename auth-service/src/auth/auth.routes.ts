@@ -1,11 +1,32 @@
-import fastify, { FastifyInstance } from "fastify";
-import { login, refreshToken, register } from "./auth.controller.js";
+import { FastifyInstance } from "fastify";
+import { login, logout, refreshToken, register } from "./auth.controller.js";
 import { registerUserSchema } from "./schemas/register.userSchema.js";
 import { loginUserSchema } from "./schemas/login.userSchema.js";
+import { refreshSchema } from "./schemas/refresh.tokenSchema.js";
+import { logoutSchema } from "./schemas/logoutSchema.js";
 
+const createSchema = (summary: string, schema: any) => ({
+  tags: ["Auth"],
+  summary,
+  ...schema
+});
 
-export async function authRoutes(app:FastifyInstance) {
-    app.post('/register',{schema : {body: registerUserSchema}}, register);
-    app.post('/login',{schema : {body : loginUserSchema}}, login);
-    app.post('/refresh-token',{preHandler : [app.verifyRefreshToken]} , refreshToken);
+export async function authRoutes(app: FastifyInstance) {
+  app.post('/register', {
+    schema: createSchema("Yeni kullanıcı kaydı", registerUserSchema)
+  }, register);
+  
+  app.post('/login', {
+    schema: createSchema("Kullanıcı girişi", loginUserSchema)
+  }, login);
+  
+  app.post('/refresh-token', {
+    preHandler: [app.verifyRefreshToken],
+    schema: createSchema("Yeni access token al", refreshSchema)
+  }, refreshToken);
+  
+  app.post('/logout', {
+    preHandler: [app.verifyRefreshToken],
+    schema: createSchema("Kullanıcı çıkışı", logoutSchema)
+  }, logout);
 }

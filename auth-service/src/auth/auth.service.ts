@@ -21,7 +21,7 @@ export async function registerService(body: registerUserBody) {
   if (success && user) throw new UserAlreadyExists();
   const hashedPass = await hashTransaction(body.password);
   stmt.run(body.username, hashedPass, body.email);
-  return { succes: true };
+  return { succes: true , message:'User successfully created' };
 }
 
 export async function loginUserService(
@@ -63,6 +63,25 @@ export function findUserUsername(userName: string) {
   return { success: false, user: null };
 }
 
+export async function   logoutService(req:FastifyRequest) {
+  const userId = (req.user as payload).id;
+  const result = await updateRefreshToken(userId, '');
+  return result;
+}
+
+export async function updateRefreshToken(id : number, refreshToken: string) {
+  let hashRefresh = '';
+  const refreshRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id);
+  if(refreshToken !== '')
+    hashRefresh = await hashTransaction(refreshToken);
+  if(refreshRecord){
+    db.prepare("UPDATE refresh_tokens SET token=? WHERE user_id=?").run(hashRefresh, id);
+  }else{
+    db.prepare("INSERT INTO refresh_tokens (user_id, token) VALUES(?,?)").run(id, hashRefresh);
+  }
+  return { success: true }
+}
+
 export function findUserUserEmail(email: string) {
   const stmt = db.prepare("SELECT * FROM users WHERE email= ?");
   const user = stmt.get(email) as User;
@@ -83,13 +102,3 @@ export function findRefreshTokensUserId(id : number){
   return { success: false, tokenRecord: null }; 
 }
 
-export async function updateRefreshToken(id : number, refreshToken: string) {
-  const refreshRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id);
-  const hashRefresh = await hashTransaction(refreshToken);
-  if(refreshRecord){
-    db.prepare("UPDATE refresh_tokens SET token=? WHERE user_id=?").run(hashRefresh, id);
-  }else{
-    db.prepare("INSERT INTO refresh_tokens (user_id, token) VALUES(?,?)").run(id, hashRefresh);
-  }
-  return { success: true }
-}

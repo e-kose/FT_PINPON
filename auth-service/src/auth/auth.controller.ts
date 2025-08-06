@@ -1,7 +1,8 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { registerUserBody } from "./types/register.userBody.js";
 import {
   loginUserService,
+  logoutService,
   refreshTokenService,
   registerService,
 } from "./auth.service.js";
@@ -27,9 +28,9 @@ export async function register(
   } catch (error) {
     req.log.error(error);
     if (error instanceof UserAlreadyExists) {
-      return reply.code(error.statusCode).send({ error: error.message });
+      return reply.code(error.statusCode).send({succues:false, error: error.message });
     }
-    return reply.internalServerError("Bir hata oluştu");
+    return reply.internalServerError("An error has occurred");
   }
 }
 
@@ -38,14 +39,6 @@ export async function login(
   reply: FastifyReply
 ) {
   try {
-    const { email, username, password } = req.body;
-    if (!email && !username)
-      return reply.code(400).send({
-        success: false,
-        message: "E-posta veya kullanıcı adı gerekli",
-      });
-    if (!password)
-      return reply.code(400).send({ success: false, message: "Şifre gerekli" });
     const { user, accesstoken, refreshtoken } = await loginUserService(
       req.server,
       req.body
@@ -57,7 +50,7 @@ export async function login(
     if (error instanceof UserNotFound || error instanceof InvalidCredentials) {
       return reply.code(error.statusCode).send({ error: error.message });
     }
-    return reply.internalServerError("Bir hata oluştu");
+    return reply.internalServerError("An error has occurred");
   }
 }
 
@@ -67,10 +60,27 @@ export async function refreshToken(req: FastifyRequest, reply: FastifyReply) {
     reply.setRefreshTokenCookie(refreshtoken);
     return reply.code(200).send({ accesstoken });
   } catch (error) {
-     req.log.error(error);
+    req.log.error(error);
     if (error instanceof InvalidToken) {
       return reply.code(error.statusCode).send({ error: error.message });
     }
-    return reply.internalServerError("Bir hata oluştu");
+    return reply.internalServerError("An error has occurred");
+  }
+}
+
+export async function logout(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const res = await logoutService(req);
+    if (res.success) {
+      reply.clearCookie("refresh_token", {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      });
+    reply.send({ success: true, message: "The exit has been made." });
+    }
+  } catch (error) {
+    return reply.internalServerError("An error has occurred");
   }
 }

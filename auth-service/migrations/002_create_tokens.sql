@@ -3,5 +3,6 @@ CREATE Table IF NOT EXISTS refresh_tokens(
     user_id INTEGER UNIQUE NOT NULL,
     token TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 )
