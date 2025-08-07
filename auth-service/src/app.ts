@@ -11,14 +11,16 @@ dotenv.config();
 
 const port = +(process.env.PORT || "3001");
 const host = process.env.HOST;
-const app = fastify({ logger: true });
+const app = fastify({ logger: true ,ajv : {
+  customOptions : {removeAdditional : false}
+}});
 
 app.register(sensible);
 app.register(cookiesPlugin);
 app.register(replyCookie);
 app.register(swaggerPlugin);
-app.register(errorHandlerPlugin);
 app.register(jwtPlugin);
+app.register(errorHandlerPlugin);
 app.register(authRoutes, {prefix : '/auth'});
 
 const start = async () => {

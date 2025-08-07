@@ -2,6 +2,9 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export default fp(async (app: FastifyInstance) => {
   await app.register(fastifySwagger, {
@@ -13,7 +16,7 @@ export default fp(async (app: FastifyInstance) => {
       },
       servers: [
         {
-          url: "http://localhost:3001",
+          url: process.env.SWAGGER_SERVER_URL || "http://localhost:3001",
           description: "Development server",
         },
       ],
@@ -30,7 +33,7 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   await app.register(fastifySwaggerUi, {
-    routePrefix: "/docs",
+    routePrefix: "/auth/docs",
     uiConfig: {
       docExpansion: "full",
       deepLinking: false,

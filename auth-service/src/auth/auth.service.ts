@@ -4,24 +4,33 @@ import { checkHash, hashTransaction } from "./utils/hash.utils.js";
 import {
   InvalidCredentials,
   InvalidToken,
-  UserAlreadyExists,
+  UserAlreadyExistsEmail,
+  UserAlreadyExistsUsername,
   UserNotFound,
 } from "../errors/auth.errors.js";
 import { loginUserBody } from "./types/login.userBody.js";
-import { User } from "./types/userDB.js";
 import { payload } from "./types/payload.js";
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { genarateTokens } from "./utils/tokens.utils.js";
+import { refreshTokenDB } from "./types/refreshTokenDB.js";
+import { User } from "./types/userDB.js";
 
 export async function registerService(body: registerUserBody) {
   const stmt = db.prepare(
     "INSERT INTO users (username, password, email) VALUES(?,?,?)"
   );
-  const { success, user } = findUserUsername(body.username);
-  if (success && user) throw new UserAlreadyExists();
+  const existingUserByUsername = findUserUsername(body.username);
+  if (existingUserByUsername.success && existingUserByUsername.user) {
+    throw new UserAlreadyExistsUsername();
+  }
+
+  const existingUserByEmail = findUserUserEmail(body.email);
+  if (existingUserByEmail.success && existingUserByEmail.user) {
+    throw new UserAlreadyExistsEmail();
+  }
   const hashedPass = await hashTransaction(body.password);
   stmt.run(body.username, hashedPass, body.email);
-  return { succes: true , message:'User successfully created' };
+  return { success: true , message:'User successfully created' };
 }
 
 export async function loginUserService(
@@ -49,7 +58,7 @@ export async function refreshTokenService(req : FastifyRequest) {
   const userId = (req.user as payload).id;
   const refreshRecord = findRefreshTokensUserId(userId);
   if(!refreshRecord.success) throw new InvalidToken();
-  const isValid = await checkHash(req.cookies?.refresh_token,refreshRecord.tokenRecord as string);
+  const isValid = await checkHash(req.cookies?.refresh_token,refreshRecord.tokenRecord?.token as string);
   if(!isValid) throw new InvalidToken();
   const {accesstoken, refreshtoken} = await genarateTokens(req.server, req.user as payload);
   await updateRefreshToken(userId, refreshtoken);
@@ -67,6 +76,13 @@ export async function   logoutService(req:FastifyRequest) {
   const userId = (req.user as payload).id;
   const result = await updateRefreshToken(userId, '');
   return result;
+}
+
+export async function getMeService(req:FastifyRequest) {
+  const userId = (req.user as User).id 
+  const user = findUserUserId(userId);
+  if(!user.success && !user.user) throw new UserNotFound();
+  return (user);
 }
 
 export async function updateRefreshToken(id : number, refreshToken: string) {
@@ -97,7 +113,7 @@ export function findUserUserId(id: number) {
 }
 
 export function findRefreshTokensUserId(id : number){
-  const tokenRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id);
+  const tokenRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id) as refreshTokenDB;
   if(tokenRecord)  return { success: true, tokenRecord };
   return { success: false, tokenRecord: null }; 
 }

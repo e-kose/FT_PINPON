@@ -2,7 +2,8 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { fastifyJwt } from "@fastify/jwt";
 import * as dotenv from "dotenv";
-import { payload } from "../auth/types/payload";
+import { payload } from "../auth/types/payload.js";
+import { InvalidToken } from "../errors/auth.errors.js";
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ export default fp(async (app: FastifyInstance) => {
       try {
         await req.jwtVerify();
       } catch (error) {
-        reply.status(401).send({ error: "Yetkisiz erişim" });
+        reply.status(401).send({ error: "Unauthorized" });
       }
     }
   );
@@ -26,14 +27,20 @@ export default fp(async (app: FastifyInstance) => {
       const token = req.cookies?.refresh_token;
 
       if (!token) {
-        return reply.status(401).send({ error: "Refresh token bulunamadı" });
+        throw new InvalidToken();
       }
 
       try {
         const payload: payload = await app.jwt.verify(token);
         req.user = payload;
-      } catch (err) {
-        return reply.status(401).send({ error: "Geçersiz refresh token" });
+      } catch (error) {
+        req.log.error(error);
+        if (error instanceof InvalidToken) {
+          return reply
+            .code(error.statusCode)
+            .send({ success: false, message: error.message });
+        }
+        return reply.internalServerError("An error has occurred");
       }
     }
   );

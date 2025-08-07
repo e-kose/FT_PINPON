@@ -1,20 +1,22 @@
-import { FastifyPluginAsync } from 'fastify';
+import fp from "fastify-plugin";
+import { FastifyInstance, FastifyReply, FastifyError } from "fastify";
 
-const errorHandlerPlugin: FastifyPluginAsync = async (fastify) => {
-  fastify.setErrorHandler((error, req, reply) => {
-    if (error.validation) {
+export default fp(async (app: FastifyInstance) => {
+  app.setErrorHandler(function (error: FastifyError, request, reply: FastifyReply) {
+    if ((error as any).validation) {
       return reply.status(400).send({
         success: false,
-        message: 'Geçersiz veri',
-        errors: error.validation,
+        error: "Bad Request",
+        message: error.message || "Geçersiz veri",
+        errors: (error as any).validation,
       });
     }
 
-    reply.status(500).send({
+    // Diğer tüm hatalar
+    return reply.status(500).send({
       success: false,
-      message: 'Sunucu hatası',
+      error: "Internal Server Error",
+      message: error.message || "Sunucu hatası",
     });
   });
-};
-
-export default errorHandlerPlugin;
+});

@@ -20,3 +20,9 @@ declare module 'fastify' {
   }
 }
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    globalErrorHandling: (error: any, reply: FastifyReply) => Promise<void>;
+  }
+}
+

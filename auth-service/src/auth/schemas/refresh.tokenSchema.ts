@@ -4,7 +4,8 @@ export const refreshSchema = {
       description: "Yeni access token",
       type: "object",
       properties: {
-        accessToken: {
+        success : {type : "boolean", example : true},
+        accesstoken: {
           type: "string",
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         },
