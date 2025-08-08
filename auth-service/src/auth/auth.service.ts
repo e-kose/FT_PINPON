@@ -14,6 +14,7 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import { genarateTokens } from "./utils/tokens.utils.js";
 import { refreshTokenDB } from "./types/refreshTokenDB.js";
 import { User } from "./types/userDB.js";
+import { generateRandom4Digit } from "./utils/parseDuration.js";
 
 export async function registerService(body: registerUserBody) {
   const stmt = db.prepare(
@@ -40,7 +41,7 @@ export async function loginUserService(
   const result = body.email
     ? findUserUserEmail(body.email!)
     : findUserUsername(body.username!);
-  if (!result.success || !result.user) throw new UserNotFound();
+  if (!result.success || !result.user || !result.user.password) throw new UserNotFound();
   const checkedPass = await checkHash(body.password, result.user.password);
   if (!checkedPass) throw new InvalidCredentials();
   const payload: payload = {
@@ -85,6 +86,26 @@ export async function getMeService(req:FastifyRequest) {
   return (user);
 }
 
+export async function googleAuthService(app: FastifyInstance, req:FastifyRequest) {
+  const token = await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
+  const googleUser = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{
+    headers : {
+      Authorization: `Bearer ${token.token.access_token}`
+    }
+  }).then(res => res.json());
+  const emailIsExist = findUserUserEmail(googleUser.email);
+  if(emailIsExist.success) return (OAuthLoginService(app, emailIsExist.user!));
+  else{
+    let userName = googleUser.email.split('@')[0];
+    while(true){
+      let isExist = findUserUsername(userName);
+      if(!isExist.success) break;
+      else  userName = userName + generateRandom4Digit();
+    }
+    return (await OAuthRegister(app, userName, googleUser));
+  }
+}
+
 export async function updateRefreshToken(id : number, refreshToken: string) {
   let hashRefresh = '';
   const refreshRecord = db.prepare("SELECT * FROM refresh_tokens WHERE user_id=?").get(id);
@@ -96,6 +117,24 @@ export async function updateRefreshToken(id : number, refreshToken: string) {
     db.prepare("INSERT INTO refresh_tokens (user_id, token) VALUES(?,?)").run(id, hashRefresh);
   }
   return { success: true }
+}
+
+export async function OAuthLoginService(app : FastifyInstance, user : User){
+  const payload: payload = {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+  };
+  const { accesstoken, refreshtoken } = await genarateTokens(app, payload);
+  await updateRefreshToken(payload.id, refreshtoken);
+  const { password, ...safeUser } = user;
+  return { user: safeUser, accesstoken, refreshtoken};
+}
+
+export async function OAuthRegister(app:FastifyInstance, userName : string, user:any) {
+  db.prepare("INSERT INTO users (email, username, google_id) VALUES(?,?,?)").run(user.email, userName, user.id);
+  const fUser = findUserUsername(userName);
+  return (await OAuthLoginService(app, fUser.user!));
 }
 
 export function findUserUserEmail(email: string) {

@@ -1,10 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { login, logout, me, refreshToken, register } from "./auth.controller.js";
+import { googleAuth, login, logout, me, refreshToken, register } from "./auth.controller.js";
 import { registerUserSchema } from "./schemas/register.userSchema.js";
 import { loginUserSchema } from "./schemas/login.userSchema.js";
 import { refreshSchema } from "./schemas/refresh.tokenSchema.js";
 import { logoutSchema } from "./schemas/logoutSchema.js";
 import { getMeSchema } from "./schemas/getMe.schema.js";
+import { OAuthSchema } from "./schemas/OAuth.schema.js";
 
 const createSchema = (summary: string, schema: any) => ({
   tags: ["Auth"],
@@ -46,7 +47,7 @@ export async function authRoutes(app: FastifyInstance) {
     },
     logout
   );
-
+  
   app.get(
     "/me",
     {
@@ -55,4 +56,6 @@ export async function authRoutes(app: FastifyInstance) {
     },
     me
   );
+
+  app.get('/google/callback', createSchema("Login user", OAuthSchema), googleAuth);
 }

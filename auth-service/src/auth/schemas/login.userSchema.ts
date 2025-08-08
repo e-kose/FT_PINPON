@@ -77,5 +77,13 @@ export const loginUserSchema = {
         message: { type: "string", example: "User not found" },
       },
     },
+    500: {
+      description: "Sunucu hatası",
+      type: "object",
+      properties: {
+        success: { type: "boolean", example: false },
+        message: { type: "string", example: "An error has occurred" },
+      },
+    },
   },
 };

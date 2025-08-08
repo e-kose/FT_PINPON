@@ -1,11 +1,14 @@
-export const getMeSchema = {
-  security: [{ bearerAuth: [] }],
+export const OAuthSchema = {
   response: {
     200: {
-      description: "Kullanıcı bilgilerini alındı",
+      description: "Başarılı giriş",
       type: "object",
       properties: {
         success: { type: "boolean", example: true },
+        accessToken: {
+          type: "string",
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        },
         user: {
           type: "object",
           properties: {
@@ -25,14 +28,6 @@ export const getMeSchema = {
             },
           },
         },
-      },
-    },
-    404: {
-      description: "Kullanıcı bulunamadı",
-      type: "object",
-      properties: {
-        success: { type: "boolean", example: false },
-        message: { type: "string", example: "User not found" },
       },
     },
     500: {

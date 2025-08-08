@@ -26,3 +26,8 @@ declare module 'fastify' {
   }
 }
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    googleOAuth2: any;
+  }
+}

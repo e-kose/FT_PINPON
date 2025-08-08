@@ -6,6 +6,7 @@ import errorHandlerPlugin from "./plugins/catchGlobError.plugin.js";
 import jwtPlugin from "./plugins/jwt.plugin.js";
 import cookiesPlugin, { replyCookie } from "./plugins/cookies.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
+import OAuthPlugins from "./plugins/OAuth.plugins.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const app = fastify({ logger: true ,ajv : {
 
 app.register(sensible);
 app.register(cookiesPlugin);
+app.register(OAuthPlugins);
 app.register(replyCookie);
 app.register(swaggerPlugin);
 app.register(jwtPlugin);

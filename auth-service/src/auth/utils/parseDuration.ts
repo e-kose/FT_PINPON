@@ -14,3 +14,7 @@ export function parseDuration(str: string): number {
     default: throw new Error('Unknown time unit');
   }
 }
+
+export function generateRandom4Digit(): number {
+  return Math.floor(1000 + Math.random() * 9000);
+}

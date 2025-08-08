@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { registerUserBody } from "./types/register.userBody.js";
 import {
   getMeService,
+  googleAuthService,
   loginUserService,
   logoutService,
   refreshTokenService,
@@ -29,8 +30,13 @@ export async function register(
     return reply.code(201).send(result);
   } catch (error) {
     req.log.error(error);
-    if (error instanceof UserAlreadyExistsEmail || error instanceof UserAlreadyExistsUsername) {
-      return reply.code(error.statusCode).send({success:false, message: error.message });
+    if (
+      error instanceof UserAlreadyExistsEmail ||
+      error instanceof UserAlreadyExistsUsername
+    ) {
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
     }
     return reply.internalServerError("An error has occurred");
   }
@@ -46,11 +52,13 @@ export async function login(
       req.body
     );
     reply.setRefreshTokenCookie(refreshtoken);
-    return reply.code(200).send({succes:true, accesstoken, user });
+    return reply.code(200).send({ succes: true, accesstoken, user });
   } catch (error) {
     req.log.error(error);
     if (error instanceof UserNotFound || error instanceof InvalidCredentials) {
-      return reply.code(error.statusCode).send({ success: false, message: error.message });
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
     }
     return reply.internalServerError("An error has occurred");
   }
@@ -60,11 +68,13 @@ export async function refreshToken(req: FastifyRequest, reply: FastifyReply) {
   try {
     const { accesstoken, refreshtoken } = await refreshTokenService(req);
     reply.setRefreshTokenCookie(refreshtoken);
-    return reply.code(200).send({success:true, accesstoken });
+    return reply.code(200).send({ success: true, accesstoken });
   } catch (error) {
     req.log.error(error);
     if (error instanceof InvalidToken) {
-      return reply.code(error.statusCode).send({success: false, message: error.message });
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
     }
     return reply.internalServerError("An error has occurred");
   }
@@ -80,21 +90,33 @@ export async function logout(req: FastifyRequest, reply: FastifyReply) {
         secure: true,
         sameSite: "strict",
       });
-    reply.send({ success: true, message: "The exit has been made." });
+      reply.send({ success: true, message: "The exit has been made." });
     }
   } catch (error) {
     return reply.internalServerError("An error has occurred");
   }
 }
 
-export async function me(req:FastifyRequest, reply : FastifyReply) {
+export async function me(req: FastifyRequest, reply: FastifyReply) {
   try {
     const result = await getMeService(req);
-    reply.code(200).send({success : result.success, user: result.user});
+    reply.code(200).send({ success: result.success, user: result.user });
   } catch (error) {
     req.log.error(error);
-    if(error instanceof UserNotFound)
-      reply.code(error.statusCode).send({success:false , message : error.message})
-    reply.internalServerError("An error has occurred")
+    if (error instanceof UserNotFound)
+      reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
+    reply.internalServerError("An error has occurred");
+  }
+}
+
+export async function googleAuth(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const user = await googleAuthService(req.server, req);
+    reply.code(200).send(user);
+  } catch (error) {
+    console.error("Google Auth Error:", error);
+    reply.internalServerError("Google Auth error");
   }
 }
