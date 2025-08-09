@@ -18,11 +18,14 @@ export const loginUserSchema = {
         maxLength: 64,
         pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
       },
+      twofaToken : {
+        type : "string"
+      }
     },
     anyOf: [{ required: ["email"] }, { required: ["username"] }],
   },
   response: {
-    201: {
+    200: {
       description: "Başarılı giriş",
       type: "object",
       properties: {

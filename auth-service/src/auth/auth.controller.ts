@@ -7,10 +7,14 @@ import {
   logoutService,
   refreshTokenService,
   registerService,
+  twoFactorDisableService,
+  twoFactorEnableService,
+  twoFactorSetupService,
 } from "./auth.service.js";
 import {
   InvalidCredentials,
   InvalidToken,
+  twoFacNotInit,
   UserAlreadyExistsEmail,
   UserAlreadyExistsUsername,
   UserNotFound,
@@ -55,7 +59,11 @@ export async function login(
     return reply.code(200).send({ succes: true, accesstoken, user });
   } catch (error) {
     req.log.error(error);
-    if (error instanceof UserNotFound || error instanceof InvalidCredentials) {
+    if (
+      error instanceof UserNotFound ||
+      error instanceof InvalidCredentials ||
+      error instanceof InvalidToken
+    ) {
       return reply
         .code(error.statusCode)
         .send({ success: false, message: error.message });
@@ -116,7 +124,43 @@ export async function googleAuth(req: FastifyRequest, reply: FastifyReply) {
     const user = await googleAuthService(req.server, req);
     reply.code(200).send(user);
   } catch (error) {
-    console.error("Google Auth Error:", error);
     reply.internalServerError("Google Auth error");
+  }
+}
+
+export async function twoFactorSetup(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const result = await twoFactorSetupService(req);
+    reply.code(200).send(result);
+  } catch (error) {
+    reply.internalServerError("An error has occurred");
+  }
+}
+
+export async function twoFactorEnable(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const result = await twoFactorEnableService(req);
+    reply.code(200).send(result);
+  } catch (error) {
+    if (error instanceof InvalidToken || error instanceof twoFacNotInit)
+      reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
+    reply.internalServerError("An error has occurred");
+  }
+}
+
+export async function twoFactorDisable(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const result = await twoFactorDisableService(req);
+    reply.code(200).send(result);
+  } catch (error) {
+    reply.internalServerError("An error has occurred");
   }
 }
