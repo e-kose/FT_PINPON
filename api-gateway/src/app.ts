@@ -7,13 +7,11 @@ const app = Fastify({ logger: true });
 const port: number = +(process.env.PORT || "3000");
 
 
-console.log("Proxy register başlıyor");
 app.register(proxy, {
     upstream : process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
     prefix: "/auth/",
     rewritePrefix : '/auth/'
 });
-console.log("Proxy register bitti");
 
 const start = async () => {
   try {

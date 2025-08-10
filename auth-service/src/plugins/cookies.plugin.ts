@@ -8,7 +8,7 @@ dotenv.config();
 
 export default fp(async function cookies(app:FastifyInstance) {
 	app.register(cookie, {
-		secret : process.env.COOKIE_SECRET || 'empty'
+		secret : process.env.JWT_SECRET || 'empty'
 	});	
 })
 

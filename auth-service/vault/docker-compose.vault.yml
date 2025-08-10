@@ -1,9 +1,0 @@
-services:
-  vault:
-    image: hashicorp/vault:1.14.0
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "devroot"
-      VAULT_ADDR: "http://127.0.0.1:8200"
-    ports:
-      - "8200:8200"
-    command: "server -dev -dev-root-token-id=devroot"

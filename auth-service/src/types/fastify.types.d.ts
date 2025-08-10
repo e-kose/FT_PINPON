@@ -31,3 +31,9 @@ declare module 'fastify' {
     googleOAuth2: any;
   }
 }
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    vaultSecrets: Record<string, any>;
+  }
+}

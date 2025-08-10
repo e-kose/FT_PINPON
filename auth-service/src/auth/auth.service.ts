@@ -49,12 +49,12 @@ export async function loginUserService(
   const checkedPass = await checkHash(body.password, result.user.password);
   if (!checkedPass) throw new InvalidCredentials();
   if (result.user.twofa_secret) {
-    if (!body.twofaToken) throw new InvalidCredentials();
+    if (!body.token) throw new InvalidCredentials();
     const speakeasy = (await import("speakeasy")).default;
     const verified = speakeasy.totp.verify({
       secret: result.user.twofa_secret,
       encoding: "base32",
-      token: body.twofaToken,
+      token: body.token,
       window: 1,
     });
     if (!verified) throw new InvalidToken();
@@ -71,19 +71,25 @@ export async function loginUserService(
 }
 
 export async function refreshTokenService(req: FastifyRequest) {
-  const userId = (req.user as payload).id;
-  const refreshRecord = findRefreshTokensUserId(userId);
+  const user = req.user as User;
+  const refreshRecord = findRefreshTokensUserId(user.id);
   if (!refreshRecord.success) throw new InvalidToken();
   const isValid = await checkHash(
     req.cookies?.refresh_token,
     refreshRecord.tokenRecord?.token as string
   );
   if (!isValid) throw new InvalidToken();
+    const payload: payload = {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+  };
   const { accesstoken, refreshtoken } = await genarateTokens(
     req.server,
-    req.user as payload
+    payload
   );
-  await updateRefreshToken(userId, refreshtoken);
+
+  await updateRefreshToken(user.id, refreshtoken);
   return { accesstoken, refreshtoken };
 }
 
@@ -219,7 +225,6 @@ export async function twoFactorEnableService(req: FastifyRequest) {
   });
   if (!verified) throw new InvalidToken();
   
-  console.log("eeeeee?>\n")
   db.prepare("UPDATE users SET is_2fa_enabled = 1 WHERE id = ?").run(payload.id);
   return { success: true, message: "2FA enabled" };
 }

@@ -56,7 +56,7 @@ export async function login(
       req.body
     );
     reply.setRefreshTokenCookie(refreshtoken);
-    return reply.code(200).send({ succes: true, accesstoken, user });
+    return reply.code(200).send({ success: true, accesstoken, user });
   } catch (error) {
     req.log.error(error);
     if (

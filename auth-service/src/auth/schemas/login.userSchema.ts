@@ -18,7 +18,7 @@ export const loginUserSchema = {
         maxLength: 64,
         pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
       },
-      twofaToken : {
+      token : {
         type : "string"
       }
     },
@@ -30,7 +30,7 @@ export const loginUserSchema = {
       type: "object",
       properties: {
         success: { type: "boolean", example: true },
-        accessToken: {
+        accesstoken: {
           type: "string",
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         },

@@ -2,5 +2,5 @@ export type loginUserBody = {
 	username? : string,
 	email? : string
 	password : string,
-	twofaToken? : string
+	token? : string
 }

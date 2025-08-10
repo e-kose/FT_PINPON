@@ -8,7 +8,7 @@ import { InvalidToken } from "../errors/auth.errors.js";
 dotenv.config();
 
 export default fp(async (app: FastifyInstance) => {
-  const secret = process.env.JWT_SECRET;
+  const secret =process.env.JWT_SECRET;
   if (!secret) throw new Error("JWT secret not found");
   app.register(fastifyJwt, { secret });
   app.decorate(
