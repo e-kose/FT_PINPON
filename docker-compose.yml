@@ -21,11 +21,12 @@ services:
       - "3000:3000"
     depends_on:
       - auth-service
-    #   - user-service
+      - user-service
     env_file:
       - ./api-gateway/.env
     networks:
       - internal-network
+    restart: always
   auth-service:
     build: 
       context: ./auth-service
@@ -37,7 +38,19 @@ services:
       - ./auth-service/.env
     networks:
       - internal-network
-
+    restart: always
+  user-service:
+    build:
+      context: ./user-service
+    expose:
+      - "3002"
+    volumes:
+      - ./user-service/db:/app/db
+    env_file:
+      - ./user-service/.env
+    networks:
+      - internal-network
+    restart: always
 networks:
   internal-network:
     driver: bridge

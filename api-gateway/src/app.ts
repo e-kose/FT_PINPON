@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import * as dotenv from 'dotenv';
 import proxy from '@fastify/http-proxy'
+
 dotenv.config();
 
 const app = Fastify({ logger: true });
@@ -13,6 +14,12 @@ app.register(proxy, {
     rewritePrefix : '/auth/'
 });
 
+app.register(proxy, {
+    upstream : process.env.USER_SERVICE_URL || 'http://localhost:3002',
+    prefix: "/user/",
+    rewritePrefix : '/user/'
+});
+
 const start = async () => {
   try {
     await app.listen({ port, host: "0.0.0.0" });
@@ -22,6 +29,7 @@ const start = async () => {
       message: "Api gateway sunucusu çalıştırılırken sorun oluştu:",
       error,
     });
+    app.log.error(error);
     process.exit(1);
   }
 };
