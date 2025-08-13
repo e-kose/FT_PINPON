@@ -1,14 +1,15 @@
 import BetterSqlite3 from "better-sqlite3";
-import { CreateUserType } from "../types/table.types/createUser.type";
 import { CreateProfileType } from "../types/table.types/createProfile.type";
+import { registerUserBody } from "../types/table.types/register.userBody";
+import { User } from "../types/table.types/userDB";
 
 export class UserRepository {
-  private db: BetterSqlite3.Database;
+  db: BetterSqlite3.Database;
   constructor(db: BetterSqlite3.Database) {
     this.db = db;
   }
 
-  createUser(user: CreateUserType) {
+  createUser(user: registerUserBody) {
     const insertUser = this.db.prepare(
       "INSERT INTO users(username,email,password) VALUES (?,?,?)"
     );
@@ -16,7 +17,7 @@ export class UserRepository {
     return info.lastInsertRowid;
   }
 
-  createProfile(id: number, profile: CreateProfileType) {
+  createProfile(id: number | bigint, profile: CreateProfileType) {
     const insertProfile = this.db.prepare(
       "INSERT INTO user_profiles(user_id, full_name, bio, avatar_url) VALUES(?,?,?,?)"
     );
@@ -56,11 +57,15 @@ export class UserRepository {
 
   getUserById(id: number) {
     const stmt = this.db.prepare("SELECT * FROM users WHERE id = ?");
-    return stmt.get(id);
+    return stmt.get(id) as User;
   }
   getUserByUsername(username: string) {
     const stmt = this.db.prepare("SELECT * FROM users WHERE username = ?");
-    return stmt.get(username);
+    return stmt.get(username) as User;
+  }
+  getUserByEmail(email: string) {
+    const stmt = this.db.prepare("SELECT * FROM users WHERE email = ?");
+    return stmt.get(email) as User;
   }
   deleteUser(id: number) {
     const stmt = this.db.prepare("DELETE FROM users WHERE id = ?");

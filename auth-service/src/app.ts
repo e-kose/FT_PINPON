@@ -1,13 +1,12 @@
 import fastify from "fastify";
 import * as dotenv from "dotenv";
-import sensible from "./plugins/sensible.plugin.js";
 import { authRoutes } from "./auth/auth.routes.js";
 import errorHandlerPlugin from "./plugins/catchGlobError.plugin.js";
 import jwtPlugin from "./plugins/jwt.plugin.js";
 import cookiesPlugin, { replyCookie } from "./plugins/cookies.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import OAuthPlugins from "./plugins/OAuth.plugins.js";
-import vaultPlugin from "./plugins/vault.plugin.js";
+import { dbPlug } from "./plugins/db.plugin.js";
 
 dotenv.config();
 
@@ -17,9 +16,9 @@ const app = fastify({ logger: true ,ajv : {
   customOptions : {removeAdditional : false}
 }});
 
-app.register(sensible);
 app.register(cookiesPlugin);
 app.register(OAuthPlugins);
+app.register(dbPlug);
 // app.register(vaultPlugin);
 app.register(replyCookie);
 app.register(swaggerPlugin);

@@ -21,6 +21,16 @@ export const registerUserSchema = {
         maxLength: 64,
         pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
       },
+      profile : {
+        type : 'object',
+       properties: {
+          full_name: { type: "string", minLength: 1, maxLength: 64 },
+          avatar_url: { type: "string", format: "uri", maxLength: 512 },
+          bio: { type: "string", maxLength: 256 }
+        },
+        required: ["full_name"],
+        additionalProperties: false
+      }
     },
   },
   response: {

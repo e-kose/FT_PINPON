@@ -1,48 +1,33 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { registerUserBody } from "./types/register.userBody.js";
 import {
   getMeService,
   googleAuthService,
   loginUserService,
   logoutService,
   refreshTokenService,
-  registerService,
   twoFactorDisableService,
   twoFactorEnableService,
   twoFactorSetupService,
 } from "./auth.service.js";
-import {
-  InvalidCredentials,
-  InvalidToken,
-  twoFacNotInit,
-  UserAlreadyExistsEmail,
-  UserAlreadyExistsUsername,
-  UserNotFound,
-} from "../errors/auth.errors.js";
-import { loginUserBody } from "./types/login.userBody.js";
+import { loginUserBody } from "../../../user-service/src/user/types/table.types/login.userBody.js";
 import { refreshToken } from "./types/refresh.token.js";
 import * as dotenv from "dotenv";
+import axios from "axios";
 
 dotenv.config();
 
-export async function register(
-  req: FastifyRequest<{ Body: registerUserBody }>,
-  reply: FastifyReply
-) {
+export async function register(req: FastifyRequest, reply: FastifyReply) {
   try {
-    const result = await registerService(req.body);
-    return reply.code(201).send(result);
-  } catch (error) {
+    const result = await axios.post("http://user-service:3002/users", req.body);
+    reply.code(result.status).send(result.data);
+  } catch (error: any) {
     req.log.error(error);
-    if (
-      error instanceof UserAlreadyExistsEmail ||
-      error instanceof UserAlreadyExistsUsername
-    ) {
-      return reply
-        .code(error.statusCode)
-        .send({ success: false, message: error.message });
+    if (error.response) {
+      return reply.code(error.response.status).send(error.response.data);
     }
-    return reply.internalServerError("An error has occurred");
+    return reply
+      .code(500)
+      .send({ success: false, message: "User service error" });
   }
 }
 
@@ -51,9 +36,9 @@ export async function login(
   reply: FastifyReply
 ) {
   try {
+    const response = await axios.post("http://user-service:3002/user/login", req.body);
     const { user, accesstoken, refreshtoken } = await loginUserService(
-      req.server,
-      req.body
+      response, body , req.server.db
     );
     reply.setRefreshTokenCookie(refreshtoken);
     return reply.code(200).send({ success: true, accesstoken, user });

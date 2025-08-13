@@ -1,69 +1,37 @@
-import { registerUserBody } from "./types/register.userBody.js";
+import { registerUserBody } from "../../../user-service/src/user/types/table.types/register.userBody.js";
 import { db } from "../run.migrations.js";
 import { checkHash, hashTransaction } from "./utils/hash.utils.js";
-import {
-  InvalidCredentials,
-  InvalidToken,
-  twoFacNotInit,
-  UserAlreadyExistsEmail,
-  UserAlreadyExistsUsername,
-  UserNotFound,
-} from "../errors/auth.errors.js";
-import { loginUserBody } from "./types/login.userBody.js";
-import { payload } from "./types/payload.js";
+import type { Database } from "better-sqlite3";
+import { loginUserBody } from "../../../user-service/src/user/types/table.types/login.userBody.js";
+import { payload } from "../../../user-service/src/user/types/table.types/payload.js";
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { genarateTokens } from "./utils/tokens.utils.js";
 import { refreshTokenDB } from "./types/refreshTokenDB.js";
-import { User } from "./types/userDB.js";
 import { generateRandom4Digit } from "./utils/parseDuration.js";
 import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 
-export async function registerService(body: registerUserBody) {
-  const stmt = db.prepare(
-    "INSERT INTO users (username, password, email) VALUES(?,?,?)"
-  );
-  const existingUserByUsername = findUserUsername(body.username);
-  if (existingUserByUsername.success && existingUserByUsername.user) {
-    throw new UserAlreadyExistsUsername();
-  }
-
-  const existingUserByEmail = findUserUserEmail(body.email);
-  if (existingUserByEmail.success && existingUserByEmail.user) {
-    throw new UserAlreadyExistsEmail();
-  }
-  const hashedPass = await hashTransaction(body.password);
-  stmt.run(body.username, hashedPass, body.email);
-  return { success: true, message: "User successfully created" };
-}
-
 export async function loginUserService(
-  app: FastifyInstance,
-  body: loginUserBody
+  response : any, body : loginUserBody, db : Database
 ) {
-  const result = body.email
-    ? findUserUserEmail(body.email!)
-    : findUserUsername(body.username!);
-  if (!result.success || !result.user || !result.user.password)
-    throw new UserNotFound();
-  const checkedPass = await checkHash(body.password, result.user.password);
-  if (!checkedPass) throw new InvalidCredentials();
-  if (result.user.twofa_secret) {
-    if (!body.token) throw new InvalidCredentials();
-    const speakeasy = (await import("speakeasy")).default;
-    const verified = speakeasy.totp.verify({
-      secret: result.user.twofa_secret,
-      encoding: "base32",
-      token: body.token,
-      window: 1,
-    });
-    if (!verified) throw new InvalidToken();
+  const authValues = getAuthTable(db, response.user.id);
+  if (authValues.twofa_secret) {
+      if (!body.token) throw new InvalidCredentials();
+      const speakeasy = (await import("speakeasy")).default;
+      const verified = speakeasy.totp.verify({
+        secret: response.user.twofa_secret,
+        encoding: "base32",
+        token: body.token,
+        window: 1,
+      });
+      if (!verified) throw new InvalidToken();
+    }
+    const payload: payload = {
+      id: response.user.id,
+      email: response.user.email,
+      username: response.user.username,
+    };
   }
-  const payload: payload = {
-    id: result.user.id,
-    email: result.user.email,
-    username: result.user.username,
-  };
   const { accesstoken, refreshtoken } = await genarateTokens(app, payload);
   const { password, twofa_secret, ...userWithoutPassword } = result.user;
   await updateRefreshToken(payload.id, refreshtoken);
@@ -255,4 +223,10 @@ export function findRefreshTokensUserId(id: number) {
     .get(id) as refreshTokenDB;
   if (tokenRecord) return { success: true, tokenRecord };
   return { success: false, tokenRecord: null };
+}
+
+
+export function getAuthTable(db : Database, id : number){
+  const value = db.prepare("SELECT * FROM auth_table WHERE user_id=?").get(id);
+  return value;
 }

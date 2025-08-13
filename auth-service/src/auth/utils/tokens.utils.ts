@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { payload } from "../types/payload";
+import { payload } from "../../../../user-service/src/user/types/table.types/payload";
 
 export async function genarateTokens(app: FastifyInstance, payload:payload) {
 	const jwt_expires = process.env.JWT_EXPIRES_IN;

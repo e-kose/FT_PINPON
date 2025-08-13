@@ -3,7 +3,7 @@ export interface User {
   username: string;
   password: string;
   email: string;
-  google_id : string,
   is_2fa_enabled : boolean,
+  oauth_id : string,
   twofa_secret : string
 }
