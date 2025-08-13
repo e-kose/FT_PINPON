@@ -1,17 +1,17 @@
 {
   "name": "user-service",
   "version": "1.0.0",
-  "main": "dist/app.js",
+  "description": "",
+  "license": "ISC",
+  "author": "e-kose",
   "type": "module",
+  "main": "dist/app.js",
   "scripts": {
-    "start": "node dist/app.js",
     "start:dev": "nodemon --watch src --ext ts --exec tsx src/app.ts",
     "build": "tsc",
+    "start": "node dist/app.js",
     "migration": "tsx src/run.migrations.ts"
   },
-  "author": "e-kose",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "@fastify/error": "^4.2.0",
     "@fastify/sensible": "^6.0.3",
@@ -20,7 +20,8 @@
     "dotenv": "^17.2.1",
     "fastify": "^5.5.0",
     "fastify-plugin": "^5.0.1",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "tsx": "^4.20.4"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

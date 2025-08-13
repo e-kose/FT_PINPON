@@ -1,5 +1,5 @@
 import "fastify"
-
+import BetterSqlite from 'better-sqlite3'
 declare module 'fastify' {
   interface FastifyInstance {
     authenticate: (request: FastifyRequest, reply: any) => Promise<void>;

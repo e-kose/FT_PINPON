@@ -1,5 +1,10 @@
 import createError from "@fastify/error";
 
+export const InvalidCredentials = createError(
+  'INVALID_CREDENTIALS',
+  'Wrong mail or credentials',
+  401
+);
 
 export const InvalidToken = createError(
   'INVALID_TOKEN',

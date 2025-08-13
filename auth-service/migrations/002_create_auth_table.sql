@@ -1,8 +1,7 @@
-CREATE Table IF NOT EXISTS auth_table{
+CREATE Table IF NOT EXISTS auth_table(
 	user_id INTEGER PRIMARY KEY,
 	oauth_id TEXT,
 	twofa_secret TEXT,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(id)
-}
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

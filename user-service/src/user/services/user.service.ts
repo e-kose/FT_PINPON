@@ -3,10 +3,10 @@ import {
   UserAlreadyExistsEmail,
   UserAlreadyExistsUsername,
   UserNotFound,
-} from "../errors/user.errors";
-import { UserRepository } from "../repository/user.repository";
-import { registerUserBody } from "../types/table.types/register.userBody";
-import { checkHash, hashTransaction } from "../utils/hash.utils";
+} from "../errors/user.errors.js";
+import { UserRepository } from "../repository/user.repository.js";
+import { registerUserBody } from "../types/table.types/register.userBody.js";
+import { checkHash, hashTransaction } from "../utils/hash.utils.js";
 
 export class UserService {
   private userRepo: UserRepository;
@@ -21,12 +21,13 @@ export class UserService {
     if (existingUserByUsername) throw new UserAlreadyExistsUsername();
     const existingUserByEmail = this.userRepo.getUserByEmail(body.email);
     if (existingUserByEmail) throw new UserAlreadyExistsEmail();
-    const hashedPass = await hashTransaction(body.email);
+    const hashedPass = await hashTransaction(body.password);
     body.password = hashedPass;
     const db = this.userRepo.db;
     const transaciton = db.transaction(() => {
       const userId = this.userRepo.createUser(body);
-      this.userRepo.createProfile(userId, body.profile);
+      if(body.profile)
+        this.userRepo.createProfile(userId, body.profile);
       return { success: true, message: "User successfully created", userId };
     });
     return transaciton();
@@ -39,5 +40,6 @@ export class UserService {
     if (!result) throw new UserNotFound();
     const checkedPass = await checkHash(body.password, result.password);
     if (!checkedPass) throw new InvalidCredentials();
-	
+    return result;
+}
 }

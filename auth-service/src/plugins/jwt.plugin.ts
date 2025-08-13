@@ -2,8 +2,8 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { fastifyJwt } from "@fastify/jwt";
 import * as dotenv from "dotenv";
-import { payload } from "../../../user-service/src/user/types/table.types/payload.js";
 import { InvalidToken } from "../auth/errors/auth.errors.js";
+import { payload } from "../auth/types/payload.js";
 
 dotenv.config();
 
@@ -25,12 +25,10 @@ export default fp(async (app: FastifyInstance) => {
     "verifyRefreshToken",
     async function (req: FastifyRequest, reply: FastifyReply) {
       const token = req.cookies?.refresh_token;
-
-      if (!token) {
-        throw new InvalidToken();
-      }
-
       try {
+        if (!token) {
+          throw new InvalidToken();
+        }
         const payload: payload = await app.jwt.verify(token);
         req.user = payload;
       } catch (error) {
@@ -40,7 +38,7 @@ export default fp(async (app: FastifyInstance) => {
             .code(error.statusCode)
             .send({ success: false, message: error.message });
         }
-        return reply.internalServerError("An error has occurred");
+        return reply.code(500).send("An error has occurred");
       }
     }
   );

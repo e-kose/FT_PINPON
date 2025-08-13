@@ -7,7 +7,7 @@ export default fp(async (app: FastifyInstance) => {
       return reply.status(400).send({
         success: false,
         error: "Bad Request",
-        message: error.message || "Geçersiz veri",
+        message: error.message || "Wrong Data",
         errors: (error as any).validation,
       });
     }
@@ -15,7 +15,7 @@ export default fp(async (app: FastifyInstance) => {
     return reply.status(500).send({
       success: false,
       error: "Internal Server Error",
-      message: error.message || "Sunucu hatası",
+      message: error.message || "Server Error",
     });
   });
 });

@@ -5,6 +5,5 @@ export async function hashTransaction(value:string) {
 }
 
 export async function checkHash(value : string | undefined, hashValue: string){
-
 	return await bcrypt.compare(value as string, hashValue);
 }

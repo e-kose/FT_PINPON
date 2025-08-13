@@ -7,6 +7,7 @@ import cookiesPlugin, { replyCookie } from "./plugins/cookies.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import OAuthPlugins from "./plugins/OAuth.plugins.js";
 import { dbPlug } from "./plugins/db.plugin.js";
+import sensiblePlugin from "./plugins/sensible.plugin.js";
 
 dotenv.config();
 
@@ -16,9 +17,10 @@ const app = fastify({ logger: true ,ajv : {
   customOptions : {removeAdditional : false}
 }});
 
+app.register(sensiblePlugin);
+app.register(dbPlug);
 app.register(cookiesPlugin);
 app.register(OAuthPlugins);
-app.register(dbPlug);
 // app.register(vaultPlugin);
 app.register(replyCookie);
 app.register(swaggerPlugin);
