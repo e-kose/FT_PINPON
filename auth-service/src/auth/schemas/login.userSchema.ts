@@ -18,9 +18,9 @@ export const loginUserSchema = {
         maxLength: 64,
         pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
       },
-      token : {
-        type : "string"
-      }
+      token: {
+        type: "string",
+      },
     },
     anyOf: [{ required: ["email"] }, { required: ["username"] }],
   },
@@ -50,6 +50,14 @@ export const loginUserSchema = {
               type: "string",
               format: "date-time",
               example: "2025-01-01T00:00:00Z",
+            },
+            profile: {
+              type: "object",
+              properties: {
+                full_name: { type: "string", example: "john doe" },
+                avatar_url: { type: "string", example: "upload/........." },
+                bio: { type: "string", example: "........." },
+              },
             },
           },
         },

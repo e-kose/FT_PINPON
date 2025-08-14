@@ -11,3 +11,9 @@ export const InvalidToken = createError(
   'Token is invalid or deleted',
   401
 );
+
+export const twoFacNotInit= createError(
+  '2FA not initialized',
+  '2FA not initialized',
+  400
+);

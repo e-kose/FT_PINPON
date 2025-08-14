@@ -1,4 +1,6 @@
 import 'fastify'
+import { UserService } from '../user/services/user.service';
+import { UserRepository } from '../user/repository/user.repository';
 import BetterSqlite from 'better-sqlite3'
 declare module 'fastify' {
   interface FastifyInstance {
@@ -6,8 +8,6 @@ declare module 'fastify' {
 	userService: UserService | null;
   }
 }
-import "fastify";
-import { UserService } from '../user/services/user.service';
 
 declare module "fastify" {
   interface FastifyInstance {

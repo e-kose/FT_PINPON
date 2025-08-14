@@ -23,6 +23,14 @@ export const getMeSchema = {
               format: "date-time",
               example: "2025-01-01T00:00:00Z",
             },
+            profile : {
+              type: 'object',
+              properties : {
+                full_name : { type : 'string' , example : 'john doe'},
+                avatar_url : { type : 'string', example : "upload/........."},
+                bio : { type : 'string', example: "........."}
+              }
+            }
           },
         },
       },

@@ -17,7 +17,7 @@ export default fp(async (app: FastifyInstance) => {
       try {
         await req.jwtVerify();
       } catch (error) {
-        reply.status(401).send({ error: "Unauthorized" });
+        return reply.status(401).send({ error: "Unauthorized" });
       }
     }
   );

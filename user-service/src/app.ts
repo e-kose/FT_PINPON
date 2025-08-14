@@ -20,7 +20,7 @@ app.register(catchGlobErrorPlugin);
 app.decorate('userRepo', null);
 app.decorate('userService', null);
 
-app.register(userRoute)
+app.register(userRoute, {prefix : '/user'})
 app.after(() => {
   app.userRepo = new UserRepository(app.db);
   app.userService = new UserService(app.userRepo);

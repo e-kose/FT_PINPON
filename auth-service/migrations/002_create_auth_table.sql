@@ -1,6 +1,7 @@
 CREATE Table IF NOT EXISTS auth_table(
 	user_id INTEGER PRIMARY KEY,
 	oauth_id TEXT,
+	twofa_enable BOOLEAN DEFAULT 0,
 	twofa_secret TEXT,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

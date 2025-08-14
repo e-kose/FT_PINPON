@@ -1,14 +1,14 @@
 import { FastifyInstance } from "fastify";
 import {
-  // googleAuth,
+  googleAuth,
   login,
   logout,
-  // me,
+  me,
   refreshToken,
   register,
-  // twoFactorDisable,
-  // twoFactorEnable,
-  // twoFactorSetup,
+  twoFactorDisable,
+  twoFactorEnable,
+  twoFactorSetup,
 } from "./auth.controller.js";
 import { registerUserSchema } from "./schemas/register.userSchema.js";
 import { loginUserSchema } from "./schemas/login.userSchema.js";
@@ -62,42 +62,43 @@ export async function authRoutes(app: FastifyInstance) {
     },
     logout
   );
-  // app.post(
-  //   "/2fa/setup",
-  //   {
-  //     preHandler: [app.jwtAuth],
-  //     schema: createSchema("2FA secret oluştur", twoFacSetupSchema),
-  //   },
-  //   twoFactorSetup
-  // );
-  // app.post(
-  //   "/2fa/enable",
-  //   {
-  //     preHandler: [app.jwtAuth],
-  //     schema: createSchema("Kullancı 2FA Aktif Etme", twoFacEnableSchema),
-  //   },
-  //   twoFactorEnable
-  // );
-  // app.post(
-  //   "/2fa/disable",
-  //   {
-  //     preHandler: [app.jwtAuth],
-  //     schema: createSchema("Kullancı 2FA Pasif Etme", twoFacDisableSchema),
-  //   },
-  //   twoFactorDisable
-  // );
-  // app.get(
-  //   "/me",
-  //   {
-  //     preHandler: [app.jwtAuth],
-  //     schema: createSchema("Kullanıcı profili getirme", getMeSchema),
-  //   },
-  //   me
-  // );
+  app.post(
+    "/2fa/setup",
+    {
+      preHandler: [app.jwtAuth],
+      schema: createSchema("2FA secret oluştur", twoFacSetupSchema),
+    },
+    twoFactorSetup
+  );
+  app.post(
+    "/2fa/enable",
+    {
+      preHandler: [app.jwtAuth],
+      schema: createSchema("Kullancı 2FA Aktif Etme", twoFacEnableSchema),
+    },
+    twoFactorEnable
+  );
+  app.post(
+    "/2fa/disable",
+    {
+      preHandler: [app.jwtAuth],
+      schema: createSchema("Kullancı 2FA Pasif Etme", twoFacDisableSchema),
+    },
+    twoFactorDisable
+  );
+  
+  app.get(
+    "/me",
+    {
+      preHandler: [app.jwtAuth],
+      schema: createSchema("Kullanıcı profili getirme", getMeSchema),
+    },
+    me
+  );
 
-  // app.get(
-  //   "/google/callback",
-  //   createSchema("Login user", OAuthSchema),
-  //   googleAuth
-  // );
+  app.get(
+    "/google/callback",
+    createSchema("Login user", OAuthSchema),
+    googleAuth
+  );
 }

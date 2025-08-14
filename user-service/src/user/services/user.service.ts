@@ -1,5 +1,5 @@
 import {
-	InvalidCredentials,
+  InvalidCredentials,
   UserAlreadyExistsEmail,
   UserAlreadyExistsUsername,
   UserNotFound,
@@ -21,13 +21,14 @@ export class UserService {
     if (existingUserByUsername) throw new UserAlreadyExistsUsername();
     const existingUserByEmail = this.userRepo.getUserByEmail(body.email);
     if (existingUserByEmail) throw new UserAlreadyExistsEmail();
-    const hashedPass = await hashTransaction(body.password);
-    body.password = hashedPass;
+    if (body.password) {
+      const hashedPass = await hashTransaction(body.password);
+      body.password = hashedPass;
+    }
     const db = this.userRepo.db;
     const transaciton = db.transaction(() => {
       const userId = this.userRepo.createUser(body);
-      if(body.profile)
-        this.userRepo.createProfile(userId, body.profile);
+      if (body.profile) this.userRepo.createProfile(userId, body.profile);
       return { success: true, message: "User successfully created", userId };
     });
     return transaciton();
@@ -41,5 +42,5 @@ export class UserService {
     const checkedPass = await checkHash(body.password, result.password);
     if (!checkedPass) throw new InvalidCredentials();
     return result;
-}
+  }
 }

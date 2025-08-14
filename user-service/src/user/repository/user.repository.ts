@@ -11,9 +11,13 @@ export class UserRepository {
 
   createUser(user: registerUserBody) {
     const insertUser = this.db.prepare(
-      "INSERT INTO users(username,email,password) VALUES (?,?,?)"
+      "INSERT INTO users(username, email, password) VALUES (?,?,?)"
     );
-    const info = insertUser.run(user.username, user.email, user.password);
+    const info = insertUser.run(
+      user.username,
+      user.email,
+      user.password || null
+    );
     return info.lastInsertRowid;
   }
 
@@ -42,17 +46,46 @@ export class UserRepository {
     instertSecurity.run(id);
   }
 
-  updateTable(tableName: string, id: number, data: Record<string, any>) {
+  /**
+   * Update table by given column (default: user_id)
+   * @param tableName - Table to update
+   * @param id - Value for WHERE column
+   * @param data - Fields to update
+   * @param whereColumn - Column name for WHERE (default: 'user_id')
+   */
+  updateTable(
+    tableName: string,
+    id: number,
+    data: Record<string, any>,
+    whereColumn: string = "user_id"
+  ) {
     const keys = Object.keys(data);
     if (keys.length === 0) return 0;
 
     const setClause = keys.map((key) => `${key} = ?`).join(", ");
     const values = keys.map((key) => data[key]);
 
-    const sql = `UPDATE ${tableName} SET ${setClause} WHERE id = ?`;
+    const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereColumn} = ?`;
     const stmt = this.db.prepare(sql);
+    return stmt.run(...values, id);
+  }
 
-    const info = stmt.run(values, id);
+  /**
+   * Dynamically inserts data into a table.
+   * @param tableName - Name of the table
+   * @param data - Fields and values to insert
+   * @returns The last inserted row id
+   */
+  insertTable(tableName: string, data: Record<string, any>) {
+    const keys = Object.keys(data);
+    const values = Object.values(data);
+    const columns = keys.join(", ");
+    const placeholders = keys.map(() => "?").join(", ");
+    const sql = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
+    console.log("sql-",sql,"vaules->", ...values);
+    const stmt = this.db.prepare(sql);
+    const info = stmt.run(...values);
+    return info.lastInsertRowid;
   }
 
   getUserById(id: number) {
@@ -67,16 +100,43 @@ export class UserRepository {
     const stmt = this.db.prepare("SELECT * FROM users WHERE email = ?");
     return stmt.get(email) as User;
   }
+
+  getFullTableById(id: number) {
+    const stmt = this.db
+      .prepare(`SELECT u.username, u.email, u.is_2fa_enabled, p.* 
+      FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
+      WHERE u.id = ?`);
+    return stmt.get(id);
+  }
+
+  getFullTableByEmail(email: string) {
+    const stmt = this.db
+      .prepare(`SELECT u.username, u.email, u.is_2fa_enabled, p.* 
+      FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
+      WHERE u.email = ?`);
+    return stmt.get(email);
+  }
+
+  getFullTableByUsername(username: string) {
+    const stmt = this.db
+      .prepare(`SELECT u.username, u.email, u.is_2fa_enabled, p.* 
+      FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
+      WHERE u.username = ?`);
+    return stmt.get(username);
+  }
+
   deleteUser(id: number) {
     const stmt = this.db.prepare("DELETE FROM users WHERE id = ?");
     return stmt.run(id);
   }
+
   listUsers() {
     const stmt = this.db.prepare("SELECT * FROM users");
     return stmt.all();
   }
+
   updateUser(id: number, data: Record<string, any>) {
-    return this.updateTable("users", id, data);
+    return this.updateTable("users", id, data, "id");
   }
 
   getUserAll(id: number) {
