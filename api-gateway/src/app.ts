@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import * as dotenv from "dotenv";
 import proxy from "@fastify/http-proxy";
-import jwtPlugin from "./plugins/jwt.plugin";
+import jwtPlugin from "./plugins/jwt.plugin.js";
 
 dotenv.config();
 
@@ -31,8 +31,8 @@ app.register(proxy, {
 
 app.register(proxy, {
   upstream: process.env.USER_SERVICE_URL || "http://localhost:3002",
-  prefix: "/user/",
-  rewritePrefix: "/user/",
+  prefix: "/user",
+  rewritePrefix: "/user",
   preHandler: async (req, reply) => {
     if (req.url.startsWith("/user") && !req.url.startsWith("/user/docs")) {
       await app.jwtAuth(req, reply);
