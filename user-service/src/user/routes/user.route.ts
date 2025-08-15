@@ -1,14 +1,62 @@
 import { FastifyInstance } from "fastify";
-import { createUserHandler,getUserByEmail,getUserById,getUserByUsername,login } from "../controller/user.controller.js";
+import {
+  createUserHandler,
+  deleteUserHandler,
+  getUserByEmail,
+  getUserById,
+  getUserByUsername,
+  login,
+  updateUserHandler,
+} from "../controller/user.controller.js";
+import { registerUserSchema } from "../schemas/register.user.schema.js";
+import { loginUserSchema } from "../schemas/login.user.schema.js";
+import { deleteUserSchema } from "../schemas/delete.user.schema.js";
+import { updateUserSchema } from "../schemas/update.user.schema.js";
+import { getUserSchema } from "../schemas/get.user.schema.js";
 
-export async function userRoute(app:FastifyInstance) {
-	
-	app.post("/user", createUserHandler);
-	app.post("/login", login);
+const createSchema = (summary: string, schema: any) => ({
+  tags: ["User"],
+  summary,
+  ...schema,
+});
 
-	app.get("/user/id/:id", getUserById);
-	app.get("/user/email/:email", getUserByEmail);
-	app.get("/user/username/:username", getUserByUsername);
+export async function userRoute(app: FastifyInstance) {
+  app.post(
+    "/internal/user",
+    { preHandler: [], schema: createSchema("User create", registerUserSchema) },
+    createUserHandler
+  );
+  app.post(
+    "/internal/login",
+    { preHandler: [], schema: createSchema("User login", loginUserSchema) },
+    login
+  );
 
+  app.get(
+    "/user/id/:id",
+    { schema: createSchema("Get user by id", getUserSchema) },
+    getUserById
+  );
+  app.get(
+    "/user/email/:email",
+    { schema: createSchema("Get user by email", getUserSchema) },
+    getUserByEmail
+  );
+  app.get(
+    "/user/username/:username",
+    { schema: createSchema("Get user by username", getUserSchema) },
+    getUserByUsername
+  );
 
+  app.patch(
+    "/user",
+    { schema: createSchema("User update", updateUserSchema) },
+    updateUserHandler
+  );
+
+  app.delete(
+    "/user",
+    { schema: createSchema("User delete", deleteUserSchema) },
+    deleteUserHandler
+  );
 }

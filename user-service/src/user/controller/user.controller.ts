@@ -7,6 +7,7 @@ import {
   UserNotFound,
 } from "../errors/user.errors.js";
 import { userParam } from "../types/req.type/params.types.js";
+import { UserRepository } from "../repository/user.repository.js";
 
 export async function createUserHandler(
   req: FastifyRequest,
@@ -120,5 +121,46 @@ export async function getUserByUsername(
     return reply
       .code(500)
       .send({ success: false, message: "An error has occurred" });
+  }
+}
+
+export async function updateUserHandler(
+  req: FastifyRequest<{ Params: { id: string }; Body: Record<string, any> }>,
+  reply: FastifyReply
+) {
+  try {
+    const id = +(req.headers['x-user-id']!);
+    const data = req.body;
+    const userRepo = req.server.userRepo as UserRepository;
+    const result = userRepo.updateUser(id, data);
+    if (result) {
+      return reply.send({ success: true, message: "User updated" });
+    } else {
+      throw new UserNotFound();
+    }
+  } catch (error) {
+    if (error instanceof UserNotFound)
+      return reply.code(error.statusCode).send({succcess : false, message : error.message});
+    return reply.code(500).send({ success: false, message: "An error has occurred" });
+  }
+}
+
+export async function deleteUserHandler(
+  req: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const id = +(req.headers['x-user-id']!);
+    const userRepo = req.server.userRepo as UserRepository;
+    const result = userRepo.deleteUser(id);
+    if (result && result.changes > 0) {
+      return reply.send({ success: true, message: "User deleted" });
+    } else {
+      throw new UserNotFound();
+    }
+  } catch (error) {
+    if (error instanceof UserNotFound)
+      return reply.code(error.statusCode).send({ success: false, message: error.message });
+    return reply.code(500).send({ success: false, message: "An error has occurred" });
   }
 }

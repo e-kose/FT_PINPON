@@ -12,6 +12,13 @@ export default fp(async (app: FastifyInstance) => {
       });
     }
 
+    if(error.code === 'FORBIDDEN'){
+      return reply.status(403).send({
+        success: false,
+        message: error.message || "Geçersiz veri",
+      });
+    }
+
     return reply.status(500).send({
       success: false,
       error: "Internal Server Error",

@@ -65,7 +65,6 @@ export async function authRoutes(app: FastifyInstance) {
   app.post(
     "/2fa/setup",
     {
-      preHandler: [app.jwtAuth],
       schema: createSchema("2FA secret oluştur", twoFacSetupSchema),
     },
     twoFactorSetup
@@ -73,7 +72,6 @@ export async function authRoutes(app: FastifyInstance) {
   app.post(
     "/2fa/enable",
     {
-      preHandler: [app.jwtAuth],
       schema: createSchema("Kullancı 2FA Aktif Etme", twoFacEnableSchema),
     },
     twoFactorEnable
@@ -81,16 +79,14 @@ export async function authRoutes(app: FastifyInstance) {
   app.post(
     "/2fa/disable",
     {
-      preHandler: [app.jwtAuth],
       schema: createSchema("Kullancı 2FA Pasif Etme", twoFacDisableSchema),
     },
     twoFactorDisable
   );
-  
+
   app.get(
     "/me",
     {
-      preHandler: [app.jwtAuth],
       schema: createSchema("Kullanıcı profili getirme", getMeSchema),
     },
     me

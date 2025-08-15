@@ -6,6 +6,8 @@ import { UserService } from "./user/services/user.service.js";
 import catchGlobErrorPlugin from "./plugins/catchGlobError.plugin.js";
 import sensiblePlugin from "./plugins/sensible.plugin.js";
 import { userRoute } from "./user/routes/user.route.js";
+import internalAuthPlugin from "./plugins/internalAuth.plugin.js";
+import swaggerPlugin from "./plugins/swagger.plugin.js";
 
 dotenv.config();
 
@@ -14,13 +16,15 @@ const port = +(process.env.PORT || "3003");
 const app = fastify({ logger: true });
 
 app.register(sensiblePlugin);
-app.register(dbPlug)
+app.register(dbPlug);
+app.register(swaggerPlugin);
 app.register(catchGlobErrorPlugin);
+app.register(internalAuthPlugin);
 
 app.decorate('userRepo', null);
 app.decorate('userService', null);
 
-app.register(userRoute, {prefix : '/user'})
+app.register(userRoute)
 app.after(() => {
   app.userRepo = new UserRepository(app.db);
   app.userService = new UserService(app.userRepo);

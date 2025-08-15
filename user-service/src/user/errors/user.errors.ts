@@ -30,3 +30,9 @@ export const InvalidToken = createError(
   'Token is invalid or deleted',
   401
 );
+
+export const Forbidden = createError (
+  'FORBIDDEN',
+  'Forbidden',
+  403
+)

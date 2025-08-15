@@ -86,7 +86,8 @@ export async function logoutService(req: FastifyRequest) {
 }
 
 export async function getMeService(req: FastifyRequest) {
-  const userId = (req.user as payload).id;
+  const userId = req.headers['x-user-id'];
+  console.log("userID->",userId);
   const user = await checkUserExist(userService + `/user/id/${userId}`);
   return user;
 }
@@ -175,24 +176,25 @@ export async function OAuthRegister(
 }
 
 export async function twoFactorSetupService(req: FastifyRequest) {
-  const user = req.user as payload;
+  const id = req.headers['x-user-id'];
+  const email =  req.headers['x-user-email'];
   const db = req.server.db;
   const secret = speakeasy.generateSecret({
-    name: `FtTranscendence:${user.email}`,
+    name: `FtTranscendence:${email}`,
     issuer: "FtTranscendence",
     length: 32,
   });
   const userIsExist = db
     .prepare("SELECT * FROM auth_table WHERE user_id = ?")
-    .get(user.id);
+    .get(id);
   if (!userIsExist) {
     db.prepare(
       "INSERT INTO auth_table(user_id, twofa_secret) VALUES(?, ?)"
-    ).run(user.id, secret.base32);
+    ).run(id, secret.base32);
   } else {
     db.prepare("UPDATE auth_table SET twofa_secret = ? WHERE user_id = ?").run(
       secret.base32,
-      user.id
+      id
     );
   }
   const qrDataUrl = await QRCode.toDataURL(secret.otpauth_url || "");
@@ -200,12 +202,12 @@ export async function twoFactorSetupService(req: FastifyRequest) {
 }
 
 export async function twoFactorEnableService(req: FastifyRequest) {
-  const user = req.user as payload;
+  const id = req.headers['x-user-id'];
   const db = req.server.db;
   const { token } = req.body as { token: string };
   const row = db
     .prepare("SELECT twofa_secret FROM auth_table WHERE user_id = ?")
-    .get(user.id);
+    .get(id);
   if (!row?.twofa_secret) throw new twoFacNotInit();
   const verified = speakeasy.totp.verify({
     secret: row.twofa_secret,
@@ -217,17 +219,17 @@ export async function twoFactorEnableService(req: FastifyRequest) {
 
   //->>>>>>>>>>>>>>>>>>MESAJ BROKER EKLE>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   db.prepare("UPDATE auth_table SET twofa_enable = 1 WHERE user_id = ?").run(
-    user.id
+    id
   );
   return { success: true, message: "2FA enabled" };
 }
 
 export async function twoFactorDisableService(req: FastifyRequest) {
   const db = req.server.db;
-  const payload = req.user as { userId: number };
+  const id = req.headers['x-user-id'];
   db.prepare(
     "UPDATE auth_table SET twofa_enable = 0, twofa_secret = NULL WHERE user_id = ?"
-  ).run(payload.userId);
+  ).run(id);
   return { success: true, message: "2FA disabled" };
 }
 

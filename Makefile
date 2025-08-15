@@ -1,6 +1,5 @@
-.PHONY: auth-dev user-dev api-dev frontend-dev
+.PHONY: auth-dev user-dev api-dev 
 
-# all: auth-dev user-dev api-dev
 all:
 	$(MAKE) auth-dev & \
 	$(MAKE) user-dev & \
@@ -15,6 +14,3 @@ user-dev:
 
 api-dev:
 	cd api-gateway && npm run start:dev
-
-
-# Start all services in parallel

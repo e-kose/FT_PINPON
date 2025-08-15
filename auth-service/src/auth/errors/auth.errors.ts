@@ -17,3 +17,10 @@ export const twoFacNotInit= createError(
   '2FA not initialized',
   400
 );
+
+
+export const Forbidden = createError (
+  'FORBIDDEN',
+  'Forbidden',
+  403
+)
