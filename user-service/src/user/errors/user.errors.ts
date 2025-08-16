@@ -21,7 +21,7 @@ export const UserNotFound = createError(
 
 export const InvalidCredentials = createError(
   'INVALID_CREDENTIALS',
-  'Wrong mail or credentials',
+  'Wrong mail/username or credentials',
   401
 );
 
@@ -36,3 +36,9 @@ export const Forbidden = createError (
   'Forbidden',
   403
 )
+
+export const BadRequest = createError(
+  'BAD_REQUEST',
+  'Bad request',
+  400
+);

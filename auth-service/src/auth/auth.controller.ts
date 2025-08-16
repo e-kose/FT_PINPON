@@ -23,8 +23,10 @@ import {
   InvalidToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
+import { registerUserBody } from "./types/register.userBody.js";
 
 dotenv.config();
+const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
 const headers = {
   headers: {
@@ -32,8 +34,10 @@ const headers = {
   },
 };
 
-export async function register(req: FastifyRequest, reply: FastifyReply) {
+export async function register(req: FastifyRequest<{Body : registerUserBody}>, reply: FastifyReply) {
   try {
+    if (!req.body.profile) req.body.profile = { avatar_url: DEFAULT_AVATAR };
+    else req.body.profile.avatar_url = DEFAULT_AVATAR;
     const result = await axios.post(
       userService + "/internal/user",
       req.body,
@@ -126,7 +130,6 @@ export async function logout(req: FastifyRequest, reply: FastifyReply) {
 export async function me(req: FastifyRequest, reply: FastifyReply) {
   try {
     const result = await getMeService(req);
-    console.log(result);
     return reply.code(200).send({ success: result.success, user: result.user });
   } catch (error: any) {
     if (error.response) {

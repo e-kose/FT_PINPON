@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
-import { Forbidden, InvalidToken } from "../user/errors/user.errors";
+import { Forbidden, InvalidToken } from "../user/errors/user.errors.js";
 
 export default fp(async function internalAuth(app: FastifyInstance) {
   app.addHook(

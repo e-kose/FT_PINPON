@@ -1,17 +1,24 @@
+import { create } from "domain";
+
 export const loginUserSchema = {
   headers: {
     type: "object",
     properties: {
-      "x-api-key": { type: "string" },
+      "X-Internal-Secret": { type: "string" },
     },
-    required: ["x-api-key"],
+    required: ["X-Internal-Secret"],
   },
   response: {
     200: {
       description: "User logged in successfully",
       type: "object",
       properties: {
-        user: { type: "object" },
+        id: { type: "string" },
+        email: { type: "string" },
+        username: { type: "string" },
+        created_at: { type: "string", format: "date-time" },
+        updated_at: { type: "string", format: "date-time" },
+        is_2fa_enabled: { type: "boolean" },
         success: { type: "boolean", example: true },
         message: { type: "string", example: "User successfully logged in" },
       },

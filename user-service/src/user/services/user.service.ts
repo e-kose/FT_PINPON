@@ -1,4 +1,6 @@
+import { FastifyInstance, FastifyRequest } from "fastify";
 import {
+  BadRequest,
   InvalidCredentials,
   UserAlreadyExistsEmail,
   UserAlreadyExistsUsername,
@@ -7,7 +9,9 @@ import {
 import { UserRepository } from "../repository/user.repository.js";
 import { registerUserBody } from "../types/table.types/register.userBody.js";
 import { checkHash, hashTransaction } from "../utils/hash.utils.js";
-
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import * as dotenv from "dotenv";
+dotenv.config();
 export class UserService {
   private userRepo: UserRepository;
   constructor(userRepo: UserRepository) {
@@ -42,5 +46,26 @@ export class UserService {
     const checkedPass = await checkHash(body.password, result.password);
     if (!checkedPass) throw new InvalidCredentials();
     return result;
+  }
+
+  async avatarUpdateService(req: FastifyRequest, id: number) {
+    const app = req.server as FastifyInstance;
+    const file = await req.file();
+    if (!file) throw new BadRequest("No file uploaded");
+
+    const file_name = `user-${id}-${Date.now()}-${file.filename || "avatar"}`;
+
+    const object = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: file_name,
+      Body: await file.toBuffer(),
+      ContentType: file.mimetype,
+    });
+    await app.r2.send(object);
+
+    const url = `${process.env.R2_PUBLIC_URL}/${file_name}`;
+    app.userRepo?.updateTable("user_profiles", id, { avatar_url: url });
+
+    return { message: "Avatar updated", avatar_url: url };
   }
 }

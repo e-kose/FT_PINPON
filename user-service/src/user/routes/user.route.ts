@@ -6,6 +6,7 @@ import {
   getUserById,
   getUserByUsername,
   login,
+  updateAvatarHandler,
   updateUserHandler,
 } from "../controller/user.controller.js";
 import { registerUserSchema } from "../schemas/register.user.schema.js";
@@ -53,6 +54,8 @@ export async function userRoute(app: FastifyInstance) {
     { schema: createSchema("User update", updateUserSchema) },
     updateUserHandler
   );
+
+  app.patch("/user/avatar", updateAvatarHandler);
 
   app.delete(
     "/user",

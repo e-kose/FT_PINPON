@@ -20,6 +20,12 @@ import { checkUserExist, userServicePost } from "./utils/axios.js";
 
 dotenv.config();
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
+const headers = {
+  headers: {
+    "X-Internal-Secret": process.env.INTERNAL_API_KEY,
+  },
+};
+
 
 export async function loginUserService(response: any, req: FastifyRequest) {
   const body = req.body as loginUserBody;
@@ -87,7 +93,6 @@ export async function logoutService(req: FastifyRequest) {
 
 export async function getMeService(req: FastifyRequest) {
   const userId = req.headers['x-user-id'];
-  console.log("userID->",userId);
   const user = await checkUserExist(userService + `/user/id/${userId}`);
   return user;
 }
@@ -163,10 +168,13 @@ export async function OAuthRegister(
   userName: string,
   user: any
 ) {
-  const result = await userServicePost(userService + `/user`, {
+  const result = await userServicePost(userService + `/internal/user`, {
     username: userName,
     email: user.email,
     password: null,
+    profile : {
+      avatar_url: user.picture
+    }
   });
   app.db
     .prepare("INSERT INTO auth_table (user_id, oauth_id) VALUES(?,?)")

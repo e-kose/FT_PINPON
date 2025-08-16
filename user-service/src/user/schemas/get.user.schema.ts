@@ -1,27 +1,20 @@
 export const getUserSchema = {
-	security : [{ bearerAuth: [] }],
-	headers: {
-		type: "object",
-		properties: {
-			"x-user-id": { type: "string" },
-		},
-		required: ["x-user-id"],
-	},
 	response: {
 		200: {
 			description: "User found",
 			type: "object",
 			properties: {
 				success: { type: "boolean", example: true },
-				data: {
+				user: {
 					type: "object",
 					properties: {
-						id: { type: "string" },
+						id: { type: "number" },
 						email: { type: "string", format: "email" },
-						name: { type: "string" },
+						username: { type: "string" },
 						profile: {
 							type: "object",
 							properties: {
+								user_id: { type: "number" },
 								full_name: { type: "string" },
 								avatar_url: { type: "string", format: "uri" },
 								bio: { type: "string" },

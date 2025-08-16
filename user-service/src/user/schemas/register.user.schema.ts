@@ -2,11 +2,11 @@ export const registerUserSchema = {
   headers: {
     type: "object",
     properties: {
-      "x-api-key": { type: "string" },
+      "X-Internal-Secret": { type: "string" },
       "x-user-id": { type: "string" },
       "x-user-email": { type: "string", format: "email" }
     },
-    required: ["x-api-key"],
+    required: ["X-Internal-Secret"],
   },
   response: {
     201: {

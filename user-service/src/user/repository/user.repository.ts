@@ -82,7 +82,6 @@ export class UserRepository {
     const columns = keys.join(", ");
     const placeholders = keys.map(() => "?").join(", ");
     const sql = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
-    console.log("sql-",sql,"vaules->", ...values);
     const stmt = this.db.prepare(sql);
     const info = stmt.run(...values);
     return info.lastInsertRowid;
@@ -103,7 +102,7 @@ export class UserRepository {
 
   getFullTableById(id: number) {
     const stmt = this.db
-      .prepare(`SELECT u.username, u.email, u.is_2fa_enabled, p.* 
+      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.* 
       FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.id = ?`);
     return stmt.get(id);
@@ -111,7 +110,7 @@ export class UserRepository {
 
   getFullTableByEmail(email: string) {
     const stmt = this.db
-      .prepare(`SELECT u.username, u.email, u.is_2fa_enabled, p.* 
+      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.* 
       FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.email = ?`);
     return stmt.get(email);
@@ -119,7 +118,7 @@ export class UserRepository {
 
   getFullTableByUsername(username: string) {
     const stmt = this.db
-      .prepare(`SELECT u.username, u.email, u.is_2fa_enabled, p.* 
+      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.* 
       FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.username = ?`);
     return stmt.get(username);
@@ -128,6 +127,11 @@ export class UserRepository {
   deleteUser(id: number) {
     const stmt = this.db.prepare("DELETE FROM users WHERE id = ?");
     return stmt.run(id);
+  }
+
+  getProfileById(id: number) {
+    const stmt = this.db.prepare("SELECT * FROM user_profiles WHERE user_id = ?");
+    return stmt.get(id);
   }
 
   listUsers() {

@@ -26,6 +26,7 @@ export const getMeSchema = {
             profile : {
               type: 'object',
               properties : {
+                user_id : { type: 'number', example: 1 },
                 full_name : { type : 'string' , example : 'john doe'},
                 avatar_url : { type : 'string', example : "upload/........."},
                 bio : { type : 'string', example: "........."}

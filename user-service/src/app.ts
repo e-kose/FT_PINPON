@@ -8,6 +8,8 @@ import sensiblePlugin from "./plugins/sensible.plugin.js";
 import { userRoute } from "./user/routes/user.route.js";
 import internalAuthPlugin from "./plugins/internalAuth.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
+import multipart from "@fastify/multipart";
+import r2Plugin from "./plugins/r2.plugin.js";
 
 dotenv.config();
 
@@ -16,6 +18,8 @@ const port = +(process.env.PORT || "3003");
 const app = fastify({ logger: true });
 
 app.register(sensiblePlugin);
+app.register(multipart);
+app.register(r2Plugin);
 app.register(dbPlug);
 app.register(swaggerPlugin);
 app.register(catchGlobErrorPlugin);

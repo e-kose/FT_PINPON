@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { registerUserBody } from "../types/table.types/register.userBody.js";
 import {
+  BadRequest,
   InvalidCredentials,
   UserAlreadyExistsEmail,
   UserAlreadyExistsUsername,
@@ -37,7 +38,12 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
   try {
     const userService = req.server.userService;
     const result = await userService!.loginUserService(req.body);
-    return reply.code(200).send(result);
+    const { password, ...user } = result;
+    return reply.code(200).send({
+      ...user,
+      success: true,
+      message: "User successfully logged in"
+    });
   } catch (error) {
     req.log.error(error);
     if (error instanceof UserNotFound || error instanceof InvalidCredentials) {
@@ -56,10 +62,10 @@ export async function getUserById(req: FastifyRequest, reply: FastifyReply) {
     const userRepo = req.server.userRepo;
     const user: any = userRepo?.getFullTableById((req.params as userParam).id);
     if (!user) throw new UserNotFound();
-    const { full_name, avatar_url, bio, ...userFields } = user;
+    const { user_id, full_name, avatar_url, bio, ...userFields } = user;
     const userData = {
       ...userFields,
-      profile: { full_name, avatar_url, bio },
+      profile: { user_id, full_name, avatar_url, bio },
     };
     return reply.code(200).send({ success: true, user: userData });
   } catch (error) {
@@ -80,10 +86,10 @@ export async function getUserByEmail(req: FastifyRequest, reply: FastifyReply) {
       (req.params as userParam).email
     );
     if (!user) throw new UserNotFound();
-    const { full_name, avatar_url, bio, ...userFields } = user;
+   const { user_id, full_name, avatar_url, bio, ...userFields } = user;
     const userData = {
       ...userFields,
-      profile: { full_name, avatar_url, bio },
+      profile: { user_id, full_name, avatar_url, bio },
     };
     return reply.code(200).send({ success: true, user: userData });
   } catch (error) {
@@ -107,10 +113,10 @@ export async function getUserByUsername(
       (req.params as userParam).username
     );
     if (!user) throw new UserNotFound();
-    const { full_name, avatar_url, bio, ...userFields } = user;
+    const { user_id, full_name, avatar_url, bio, ...userFields } = user;
     const userData = {
       ...userFields,
-      profile: { full_name, avatar_url, bio },
+      profile: { user_id, full_name, avatar_url, bio },
     };
     return reply.code(200).send({ success: true, user: userData });
   } catch (error) {
@@ -141,6 +147,21 @@ export async function updateUserHandler(
   } catch (error) {
     if (error instanceof UserNotFound)
       return reply.code(error.statusCode).send({succcess : false, message : error.message});
+    return reply.code(500).send({ success: false, message: "An error has occurred" });
+  }
+}
+
+export async function updateAvatarHandler(req : FastifyRequest, reply : FastifyReply){
+  try {
+    const id = +(req.headers['x-user-id']!);
+    if (!req.isMultipart()) {
+      return reply.code(406).send({ success: false, message: "Request must be multipart/form-data" });
+    }
+    const result = await req.server.userService!.avatarUpdateService(req, id);
+  } catch (error) {
+    console.error(error);
+    if(error instanceof BadRequest)
+      return reply.code(error.statusCode).send({ success: false, message: error.message });
     return reply.code(500).send({ success: false, message: "An error has occurred" });
   }
 }
