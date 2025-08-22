@@ -21,3 +21,9 @@ declare module "fastify" {
     r2 : S3Client
   }
 }
+
+declare module "fastify" {
+  interface FastifyInstance {
+    logger : pino.Logger
+  }
+}

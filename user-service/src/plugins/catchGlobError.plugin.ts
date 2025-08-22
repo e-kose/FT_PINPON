@@ -1,9 +1,11 @@
 import fp from "fastify-plugin";
 import { FastifyInstance, FastifyReply, FastifyError } from "fastify";
+import { logError } from "../user/utils/log.utils.js";
 
 export default fp(async (app: FastifyInstance) => {
   app.setErrorHandler(function (error: FastifyError, request:any, reply: FastifyReply) {
     if ((error as any).validation) {
+      logError(app, request, error);
       return reply.status(400).send({
         success: false,
         error: "Bad Request",

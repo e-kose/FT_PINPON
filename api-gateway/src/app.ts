@@ -2,6 +2,8 @@ import Fastify from "fastify";
 import * as dotenv from "dotenv";
 import proxy from "@fastify/http-proxy";
 import jwtPlugin from "./plugins/jwt.plugin.js";
+import loggerPlugin from "./plugins/logger.plugin.js";
+import { startLogError } from "./utils/log.utils.js";
 
 dotenv.config();
 
@@ -9,6 +11,7 @@ const app = Fastify({ logger: true });
 const port: number = +(process.env.PORT || "3000");
 
 app.register(jwtPlugin);
+app.register(loggerPlugin);
 app.register(proxy, {
   upstream: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
   prefix: "/auth/",
@@ -47,13 +50,13 @@ app.register(proxy, {
 const start = async () => {
   try {
     await app.listen({ port, host: "0.0.0.0" });
-    console.log(`Api-gateway ${port} portunda çalıştı`);
-  } catch (error) {
+    app.logger.info(`Api-gateway ${port} portunda çalıştı`);
+  } catch (error: any) {
     console.log({
       message: "Api gateway sunucusu çalıştırılırken sorun oluştu:",
       error,
     });
-    app.log.error(error);
+    startLogError(app, error);
     process.exit(1);
   }
 };

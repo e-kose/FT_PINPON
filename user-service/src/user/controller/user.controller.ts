@@ -9,6 +9,7 @@ import {
 } from "../errors/user.errors.js";
 import { userParam } from "../types/req.type/params.types.js";
 import { UserRepository } from "../repository/user.repository.js";
+import { logError } from "../utils/log.utils.js";
 
 export async function createUserHandler(
   req: FastifyRequest,
@@ -19,7 +20,7 @@ export async function createUserHandler(
     const result = await userService!.createUser(req.body as registerUserBody);
     return reply.code(201).send(result);
   } catch (error) {
-    req.log.error(error);
+    logError(req.server, req, error);
     if (
       error instanceof UserAlreadyExistsEmail ||
       error instanceof UserAlreadyExistsUsername
@@ -45,7 +46,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
       message: "User successfully logged in"
     });
   } catch (error) {
-    req.log.error(error);
+    logError(req.server, req, error);
     if (error instanceof UserNotFound || error instanceof InvalidCredentials) {
       return reply
         .code(error.statusCode)
@@ -69,6 +70,7 @@ export async function getUserById(req: FastifyRequest, reply: FastifyReply) {
     };
     return reply.code(200).send({ success: true, user: userData });
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof UserNotFound)
       return reply
         .code(error.statusCode)
@@ -93,6 +95,7 @@ export async function getUserByEmail(req: FastifyRequest, reply: FastifyReply) {
     };
     return reply.code(200).send({ success: true, user: userData });
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof UserNotFound)
       return reply
         .code(error.statusCode)
@@ -120,6 +123,7 @@ export async function getUserByUsername(
     };
     return reply.code(200).send({ success: true, user: userData });
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof UserNotFound)
       return reply
         .code(error.statusCode)
@@ -145,6 +149,7 @@ export async function updateUserHandler(
       throw new UserNotFound();
     }
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof UserNotFound)
       return reply.code(error.statusCode).send({succcess : false, message : error.message});
     return reply.code(500).send({ success: false, message: "An error has occurred" });
@@ -159,7 +164,7 @@ export async function updateAvatarHandler(req : FastifyRequest, reply : FastifyR
     }
     const result = await req.server.userService!.avatarUpdateService(req, id);
   } catch (error) {
-    console.error(error);
+    logError(req.server, req, error);
     if(error instanceof BadRequest)
       return reply.code(error.statusCode).send({ success: false, message: error.message });
     return reply.code(500).send({ success: false, message: "An error has occurred" });
@@ -180,6 +185,7 @@ export async function deleteUserHandler(
       throw new UserNotFound();
     }
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof UserNotFound)
       return reply.code(error.statusCode).send({ success: false, message: error.message });
     return reply.code(500).send({ success: false, message: "An error has occurred" });

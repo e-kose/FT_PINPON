@@ -4,6 +4,7 @@ import { fastifyJwt } from "@fastify/jwt";
 import * as dotenv from "dotenv";
 import { InvalidToken } from "../auth/errors/auth.errors.js";
 import { payload } from "../auth/types/payload.js";
+import { logError } from "../auth/utils/log.utils.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ export default fp(async (app: FastifyInstance) => {
       try {
         await req.jwtVerify();
       } catch (error) {
+        logError(req.server, req, error);
         return reply.status(401).send({success: false, error: "Unauthorized" });
       }
     }
@@ -32,7 +34,7 @@ export default fp(async (app: FastifyInstance) => {
         const payload: payload = await app.jwt.verify(token);
         req.user = payload;
       } catch (error) {
-        req.log.error(error);
+        logError(req.server, req, error);
         if (error instanceof InvalidToken) {
           return reply
             .code(error.statusCode)

@@ -24,6 +24,7 @@
     "@fastify/jwt": "^10.0.0",
     "dotenv": "^17.2.1",
     "fastify": "^5.4.0",
+    "pino-socket": "^7.4.0",
     "ts-node-dev": "^2.0.0"
   }
 }

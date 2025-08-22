@@ -24,6 +24,7 @@ import {
   twoFacNotInit,
 } from "./errors/auth.errors.js";
 import { registerUserBody } from "./types/register.userBody.js";
+import { logError } from "./utils/log.utils.js";
 
 dotenv.config();
 const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
@@ -45,7 +46,7 @@ export async function register(req: FastifyRequest<{Body : registerUserBody}>, r
     );
     return reply.code(result.status).send(result.data);
   } catch (error: any) {
-    req.log.error(error);
+    logError(req.server, req, error);
     if (error.response) {
       return reply.code(error.response.status).send(error.response.data);
     }
@@ -72,7 +73,7 @@ export async function login(
     reply.setRefreshTokenCookie(refreshtoken);
     return reply.code(200).send({ success: true, accesstoken, user });
   } catch (error: any) {
-    req.log.error(error);
+    logError(req.server, req, error);
     if (
       error instanceof InvalidToken ||
       error instanceof InvalidCredentials ||
@@ -96,7 +97,7 @@ export async function refreshToken(req: FastifyRequest, reply: FastifyReply) {
     reply.setRefreshTokenCookie(refreshtoken);
     return reply.code(200).send({ success: true, accesstoken });
   } catch (error) {
-    req.log.error(error);
+    logError(req.server, req, error);
     if (error instanceof InvalidToken) {
       return reply
         .code(error.statusCode)
@@ -119,6 +120,7 @@ export async function logout(req: FastifyRequest, reply: FastifyReply) {
       return reply.send({ success: true, message: "The exit has been made." });
     }
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof InvalidToken)
       return reply
         .code(error.statusCode)
@@ -132,6 +134,7 @@ export async function me(req: FastifyRequest, reply: FastifyReply) {
     const result = await getMeService(req);
     return reply.code(200).send({ success: result.success, user: result.user });
   } catch (error: any) {
+    logError(req.server, req, error);
     if (error.response) {
       return reply.code(error.response.status).send(error.response.data);
     }
@@ -150,6 +153,7 @@ export async function googleAuth(req: FastifyRequest, reply: FastifyReply) {
     reply.setRefreshTokenCookie(refreshtoken);
     return reply.code(200).send({ success: true, accesstoken, user });
   } catch (error) {
+    logError(req.server, req, error);
     return reply.internalServerError("Google Auth error");
   }
 }
@@ -159,7 +163,7 @@ export async function twoFactorSetup(req: FastifyRequest, reply: FastifyReply) {
     const result = await twoFactorSetupService(req);
     return reply.code(200).send(result);
   } catch (error) {
-    req.log.error(error);
+    logError(req.server, req, error);
     if (error instanceof InvalidToken || error instanceof twoFactorSetup) {
       return reply.code((error as any).statusCode).send({
         success: false,
@@ -178,6 +182,7 @@ export async function twoFactorEnable(
     const result = await twoFactorEnableService(req);
     return reply.code(200).send(result);
   } catch (error) {
+    logError(req.server, req, error);
     if (error instanceof InvalidToken || error instanceof twoFacNotInit)
       return reply
         .code(error.statusCode)
@@ -194,6 +199,7 @@ export async function twoFactorDisable(
     const result = await twoFactorDisableService(req);
     return reply.code(200).send(result);
   } catch (error) {
+    logError(req.server, req, error);
     return reply.internalServerError("An error has occurred");
   }
 }

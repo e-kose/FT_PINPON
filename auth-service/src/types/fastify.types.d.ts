@@ -43,3 +43,9 @@ declare module "fastify" {
     db: BetterSqlite;
   }
 }
+
+declare module "fastify" {
+  interface FastifyInstance {
+    logger: pino.Logger;
+  }
+}

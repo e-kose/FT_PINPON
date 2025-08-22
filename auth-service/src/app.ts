@@ -8,15 +8,21 @@ import swaggerPlugin from "./plugins/swagger.plugin.js";
 import OAuthPlugins from "./plugins/OAuth.plugins.js";
 import { dbPlug } from "./plugins/db.plugin.js";
 import sensiblePlugin from "./plugins/sensible.plugin.js";
+import loggerPlugin from "./plugins/logger.plugin.js";
+import { startLogError } from "./auth/utils/log.utils.js";
 
 dotenv.config();
 
 const port = +(process.env.PORT || "3001");
 const host = process.env.HOST;
-const app = fastify({ logger: true ,ajv : {
-  customOptions : {removeAdditional : false}
-}});
+const app = fastify({
+  logger: true,
+  ajv: {
+    customOptions: { removeAdditional: false },
+  },
+});
 
+app.register(loggerPlugin);
 app.register(sensiblePlugin);
 app.register(dbPlug);
 app.register(cookiesPlugin);
@@ -26,7 +32,8 @@ app.register(replyCookie);
 app.register(swaggerPlugin);
 app.register(jwtPlugin);
 app.register(errorHandlerPlugin);
-app.register(authRoutes, {prefix : '/auth'});
+
+app.register(authRoutes, { prefix: "/auth" });
 
 const start = async () => {
   try {
@@ -35,13 +42,11 @@ const start = async () => {
         host,
         port,
       })
-      .then(() => console.log(`Auth servisi ${port} portunda çalıştı`))
-      .catch((err) =>
-        console.log({ Message: `Auth servisi başlatılamadı`, err })
-      );
-  } catch (error) {
-	app.log.error(error);
-	process.exit(1);
+      .then(() => app.logger.info(`Auth servisi ${port} portunda çalıştı`))
+      .catch((error) => {startLogError(app, error)});
+  } catch (error: any) {
+    startLogError(app, error)
+    process.exit(1);
   }
 };
 

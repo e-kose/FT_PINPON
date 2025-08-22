@@ -5,3 +5,15 @@ declare module "fastify" {
     jwtAuth: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
+
+declare module "fastify" {
+  interface FastifyInstance {
+    logger: pino.Logger;
+  }
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    startTime?: number;
+  }
+}
