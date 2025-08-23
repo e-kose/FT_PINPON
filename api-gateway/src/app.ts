@@ -14,8 +14,8 @@ app.register(jwtPlugin);
 app.register(loggerPlugin);
 app.register(proxy, {
   upstream: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
-  prefix: "/auth/",
-  rewritePrefix: "/auth/",
+  prefix: "/auth",
+  rewritePrefix: "/auth",
   preHandler: async (req, reply) => {
     if (
       req.url.startsWith("/auth/2fa/setup") ||

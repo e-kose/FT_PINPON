@@ -14,6 +14,6 @@ export default fp(async (app: FastifyInstance) => {
       auth: fastifyOauth2.GOOGLE_CONFIGURATION, 
     },
     startRedirectPath: '/auth/google',
-    callbackUri: 'http://localhost:3001/auth/google/callback'
+    callbackUri: process.env.GOOGLE_CALLBACK_URI || 'http://localhost:3000/auth/google/callback'
   });
 });

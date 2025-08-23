@@ -21,6 +21,7 @@ const app = fastify({
     customOptions: { removeAdditional: false },
   },
 });
+console.log("host",host);
 
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
