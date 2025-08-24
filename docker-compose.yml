@@ -85,8 +85,8 @@ services:
       - "5044:5044"
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=logstash_system
-      - ELASTICSEARCH_PASSWORD=logstash_pass
+    env_file:
+      - ./elastic-search/.env
     volumes:
     - /home/ekose/Desktop/FT_PINPON/elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     networks:
@@ -111,7 +111,8 @@ services:
       - XPACK_SECURITY_ENABLED=true
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=kibana_pass
+    env_file:
+      - ./elastic-search/.env
 
     depends_on:
       - elasticsearch
