@@ -30,6 +30,12 @@ curl -u elastic:${ELASTIC_PASSWORD} -X POST "http://localhost:9200/_security/use
 }
 '
 
+curl -u elastic:elastic_pass -X POST "http://localhost:9200/_security/user/logstash_writer_user/_password" -H 'Content-Type: application/json' -d'
+{
+  "password": "'"${LOGSTASH_WRITER_PASSWORD}"'"
+}
+'
+
 curl -u elastic:${ELASTIC_PASSWORD} -X PUT "http://localhost:9200/_ilm/policy/log_retention_policy" -H 'Content-Type: application/json' -d'
 {
   "policy": {

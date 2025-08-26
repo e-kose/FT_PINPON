@@ -1,0 +1,7 @@
+{
+    local_certs
+}
+
+localhost {
+    reverse_proxy api-gateway:3000
+}

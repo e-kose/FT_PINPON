@@ -53,7 +53,7 @@ export class UserService {
     const file = await req.file();
     if (!file) throw new BadRequest("No file uploaded");
 
-    const file_name = `user-${id}-${Date.now()}-${file.filename || "avatar"}`;
+    const file_name = `user-${id}-${Date.now()}-${file.filename.replace(/\s+/g, "_") || "avatar"}`;
 
     const object = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,

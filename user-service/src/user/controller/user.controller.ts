@@ -162,10 +162,13 @@ export async function updateAvatarHandler(req : FastifyRequest, reply : FastifyR
     if (!req.isMultipart()) {
       return reply.code(406).send({ success: false, message: "Request must be multipart/form-data" });
     }
+    const user = req.server.userRepo?.getUserById(id);
+    if(!user) throw new UserNotFound();
     const result = await req.server.userService!.avatarUpdateService(req, id);
+    reply.send(result);
   } catch (error) {
     logError(req.server, req, error);
-    if(error instanceof BadRequest)
+    if(error instanceof BadRequest || error instanceof UserNotFound)
       return reply.code(error.statusCode).send({ success: false, message: error.message });
     return reply.code(500).send({ success: false, message: "An error has occurred" });
   }
