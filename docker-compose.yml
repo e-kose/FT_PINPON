@@ -63,6 +63,18 @@ services:
     networks:
       - internal-network
     restart: always
+  chat-service:
+    build: 
+      context: ./chat-service
+    expose:
+      - "3003"
+    volumes:
+      - ./chat-service/db:/app/db
+    env_file:
+      - ./chat-service/.env
+    networks:
+      - internal-network
+    restart: always
   elasticsearch :
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
     container_name: "elasticsearch"

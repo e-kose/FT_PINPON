@@ -14,14 +14,13 @@ import { startLogError } from "./auth/utils/log.utils.js";
 dotenv.config();
 
 const port = +(process.env.PORT || "3001");
-const host = process.env.HOST;
+const host = process.env.HOST || "0.0.0.0";
 const app = fastify({
   logger: true,
   ajv: {
     customOptions: { removeAdditional: false },
   },
 });
-console.log("host",host);
 
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
@@ -43,8 +42,7 @@ const start = async () => {
         host,
         port,
       })
-      .then(() => app.logger.info(`Auth servisi ${port} portunda çalıştı`))
-      .catch((error) => {startLogError(app, error)});
+      app.logger.info(`The auth service has been started on port ${host}:${port}.`)
   } catch (error: any) {
     startLogError(app, error)
     process.exit(1);

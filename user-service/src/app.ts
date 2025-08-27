@@ -39,17 +39,11 @@ app.after(() => {
 
 const start = async () => {
   try {
-    await app
-      .listen({
-        host,
-        port,
-      })
-      .then(() =>
-        app.logger.info(`User servis ${host}:${port} portunda başlatıldı.`)
-      )
-      .catch((error) => {
-        startLogError(app, error);
-      });
+    await app.listen({
+      host,
+      port,
+    });
+    app.logger.info(`The user service has been started on port ${host}:${port}.`);
   } catch (error: any) {
     startLogError(app, error);
     process.exit(1);
