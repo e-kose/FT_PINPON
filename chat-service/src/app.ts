@@ -10,6 +10,7 @@ import { messageService } from "./chat/service/message.service.js";
 import { chatRoute } from "./chat/routes/chat.route.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import fastifyCors from "@fastify/cors";
+import redisPlugin from "./plugins/redis.plugin.js";
 
 dotenv.config();
 const port = +(process.env.PORT || "3003");
@@ -20,11 +21,9 @@ const app = fastify({ logger: true });
 app.decorate("messageRepo", null);
 app.decorate("messageService", null);
 
-app.register(fastifyCors, {
-  origin: true,
-  credentials: true
-});
+
 app.register(dbPlugin);
+app.register(redisPlugin)
 app.register(loggerPlugin);
 app.register(fastifySensible);
 app.register(swaggerPlugin);

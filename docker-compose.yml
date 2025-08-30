@@ -145,10 +145,21 @@ services:
     mem_limit: 2g
     restart: always
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - internal-network
+
 volumes:
   es_data:
   caddy_data:
   caddy_config:
+  redis-data:
 
 networks:
   internal-network:

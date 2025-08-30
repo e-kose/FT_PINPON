@@ -2,12 +2,10 @@ import type { FastifyRequest } from "fastify";
 import type { MessageRepository } from "../repository/messages.repository";
 import type { CreateMessage } from "../types/createMessage.type";
 import type { userParam } from "../types/params.types";
-import axios from "axios";
 import { chatNotFound } from "../errors/chat.errors";
+import { UserCache } from "./cache.service";
 
-const userService = process.env.USER_SERVICE || "http://localhost:3002";
 const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
-
 export class messageService {
   messageRepo: MessageRepository;
   constructor(messageRepo: MessageRepository) {
@@ -15,8 +13,8 @@ export class messageService {
   }
 
   async getConversation(req: FastifyRequest) {
+    const userCache = new UserCache(req.server)
     const currentUser = +req.headers["x-user-id"]!;
-
     const othetUser = +(req.params as userParam).id;
     const offset = +((req.query as any).offset ?? 0);
     const limit = +((req.query as any).limit ?? 50);
@@ -33,7 +31,7 @@ export class messageService {
     ];
     for (const id of uniqUserId) {
       try {
-        const res = (await axios(userService + `/user/id/${id}`)).data;
+        const res = await userCache.getUser(id);
         users[id] = {
           id: res.user.id,
           username: res.user.username,
