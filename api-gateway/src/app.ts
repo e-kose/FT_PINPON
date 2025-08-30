@@ -4,6 +4,7 @@ import proxy from "@fastify/http-proxy";
 import jwtPlugin from "./plugins/jwt.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
 import { startLogError } from "./utils/log.utils.js";
+import fastifyCors from "@fastify/cors";
 
 dotenv.config();
 
@@ -13,6 +14,10 @@ const host = process.env.HOST || "0.0.0.0";
 
 app.register(jwtPlugin);
 app.register(loggerPlugin);
+app.register(fastifyCors, {
+  origin: true,
+  credentials: true
+});
 app.register(proxy, {
   upstream: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
   prefix: "/auth",
@@ -47,6 +52,21 @@ app.register(proxy, {
     }
   },
 });
+
+app.register(proxy, {
+  upstream : process.env.CHAT_SERVICE_URL || "http://localhost:3003",
+  prefix : "/chat",
+  rewritePrefix : "/chat",
+  preHandler : async (req, reply) => {
+    if (req.url.startsWith("/chat") && !req.url.startsWith("/chat/docs")){
+      await app.jwtAuth(req, reply);
+      if(req.user){
+        req.headers["x-user-id"] = (req.user as any).id;
+        req.headers["x-user-email"] = (req.user as any).email;
+      }
+    }
+  }
+})
 
 const start = async () => {
   try {

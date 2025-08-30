@@ -1,6 +1,8 @@
 import "fastify"
 import BetterSqlite from 'better-sqlite3'
 import type pino from "pino"
+import type { MessageRepository } from "../chat/repository/messages.repository"
+import type { messageService } from "../chat/service/message.service"
 
 declare module "fastify"{
 	interface FastifyInstance{
@@ -11,5 +13,12 @@ declare module "fastify"{
 declare module "fastify"{
 	interface FastifyInstance{
 		logger : pino.Logger
+	}
+}
+
+declare module "fastify"{
+	interface FastifyInstance{
+		messageRepo : MessageRepository | null,
+		messageService : messageService | null
 	}
 }

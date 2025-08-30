@@ -16,7 +16,7 @@ export default fp(async (app: FastifyInstance) => {
       },
       servers: [
         {
-          url: process.env.SWAGGER_SERVER_URL || "http://localhost:3001",
+          url: process.env.SWAGGER_SERVER_URL || "http://localhost:3000",
           description: "Development server",
         },
       ],
