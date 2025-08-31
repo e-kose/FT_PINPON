@@ -3,5 +3,8 @@
 }
 
 localhost {
-    reverse_proxy api-gateway:3000
+    reverse_proxy /chat/ws chat-service:3003 {
+    # WebSocket için özel ayar gerekmez, Caddy otomatik olarak Upgrade header’larını iletir.
+  }
+
 }

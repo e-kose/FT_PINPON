@@ -6,11 +6,11 @@ import { startLogError } from "./utils/log.utils.js";
 import fastifySensible from "@fastify/sensible";
 import catchGlobErrorPlugin from "./plugins/catchGlobError.plugin.js";
 import { MessageRepository } from "./chat/repository/messages.repository.js";
-import { messageService } from "./chat/service/message.service.js";
+import { MessageService } from "./chat/service/message.service.js";
 import { chatRoute } from "./chat/routes/chat.route.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
-import fastifyCors from "@fastify/cors";
 import redisPlugin from "./plugins/redis.plugin.js";
+import fastifyWebsocket from "@fastify/websocket";
 
 dotenv.config();
 const port = +(process.env.PORT || "3003");
@@ -21,7 +21,7 @@ const app = fastify({ logger: true });
 app.decorate("messageRepo", null);
 app.decorate("messageService", null);
 
-
+app.register(fastifyWebsocket);
 app.register(dbPlugin);
 app.register(redisPlugin)
 app.register(loggerPlugin);
@@ -30,9 +30,8 @@ app.register(swaggerPlugin);
 app.register(catchGlobErrorPlugin);
 app.after(()=>{
   app.messageRepo = new MessageRepository(app.db);
-  app.messageService = new messageService(app.messageRepo);
+  app.messageService = new MessageService(app.messageRepo);
 });
-
 app.register(chatRoute)
 
 const start = async () => {

@@ -2,18 +2,19 @@ import type { FastifyRequest } from "fastify";
 import type { MessageRepository } from "../repository/messages.repository";
 import type { CreateMessage } from "../types/createMessage.type";
 import type { userParam } from "../types/params.types";
-import { chatNotFound } from "../errors/chat.errors";
-import { UserCache } from "./cache.service";
+import { chatNotFound } from "../errors/chat.errors.js";
+import { UserCache } from "./cache.service.js";
+import { connections } from "../controller/message.controller";
 
 const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
-export class messageService {
+export class MessageService {
   messageRepo: MessageRepository;
   constructor(messageRepo: MessageRepository) {
     this.messageRepo = messageRepo;
   }
 
   async getConversation(req: FastifyRequest) {
-    const userCache = new UserCache(req.server)
+    const userCache = new UserCache(req.server);
     const currentUser = +req.headers["x-user-id"]!;
     const othetUser = +(req.params as userParam).id;
     const offset = +((req.query as any).offset ?? 0);
@@ -48,5 +49,24 @@ export class messageService {
       sender: users[msg.sender_id],
       receiver: users[msg.recv_id],
     }));
+  }
+
+  async sendMessage(req: FastifyRequest, data: any) {
+    const currentUser = +req.headers["x-user-id"]!;
+    const othetUser = +data.recv_id;
+    const receiverConn = connections.get(+data.recv_id);
+    if(receiverConn){
+      receiverConn.send(JSON.stringify({
+        from : currentUser,
+        content : data.content
+      }))
+    }
+
+    const message: CreateMessage = {
+      sender_id: currentUser,
+      recv_id: othetUser,
+      content: data.content as string,
+    };
+    return this.messageRepo.createMessage(message);
   }
 }

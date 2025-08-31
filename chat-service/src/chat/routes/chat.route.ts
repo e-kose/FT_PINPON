@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
-import { conversationHandler } from "../controller/message.controller";
-import { conversationSchema } from "../schemas/conversation.schema";
+import { conversationHandler, sendMessageHandler } from "../controller/message.controller.js";
+import { conversationSchema } from "../schemas/conversation.schema.js";
 
 const createSchema = (summary: string, schema: any) => ({
   tags: ["Chat"],
@@ -14,5 +14,7 @@ export async function chatRoute(app: FastifyInstance) {
     { schema: createSchema("Chat History", conversationSchema) },
     conversationHandler
   );
-
+  app.get(
+    "/chat/ws", {websocket : true}, sendMessageHandler
+  )
 }
