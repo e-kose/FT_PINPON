@@ -43,7 +43,11 @@ export default fp(async (app: FastifyInstance) => {
     prefix: "/chat",
     rewritePrefix: "/chat",
     preHandler: async (req, reply) => {
-      if (req.url.startsWith("/chat") && !req.url.startsWith("/chat/docs")) {
+      if (
+        req.url.startsWith("/chat") &&
+        !req.url.startsWith("/chat/docs") &&
+        !req.url.startsWith("/chat/notify-tournament")
+      ) {
         await app.jwtAuth(req, reply);
         if (req.user) {
           req.headers["x-user-id"] = (req.user as any).id;

@@ -71,7 +71,7 @@ export async function removeBlockUserHandler(
   try {
     const chatService = req.server.chatService;
     const res = await chatService?.removeBlockUser(req);
-    return reply.code(200).send({success : true, affectedRow : res});
+    return reply.code(200).send({ success: true, affectedRow: res });
   } catch (error) {
     logError(req.server, req, error);
     return reply
@@ -80,11 +80,72 @@ export async function removeBlockUserHandler(
   }
 }
 
-export async function getBlockedUserHandler(req:FastifyRequest, reply: FastifyReply) {
+export async function getBlockedUserHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
   try {
     const chatService = req.server.chatService;
     const res = await chatService?.getBlockUser(req);
-    return reply.code(200).send({success : true, blockList : res});
+    return reply.code(200).send({ success: true, blockList: res });
+  } catch (error) {
+    logError(req.server, req, error);
+    return reply
+      .code(500)
+      .send({ success: false, message: "Chat service error" });
+  }
+}
+
+export async function inviteUserHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const chatService = req.server.chatService;
+    const res = await chatService?.inviteUser(req);
+    return reply.code(201).send({ success: true, inviteId: res });
+  } catch (error) {
+    logError(req.server, req, error);
+    return reply
+      .code(500)
+      .send({ success: false, message: "Chat service error" });
+  }
+}
+
+export async function getInvitesHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const chatService = req.server.chatService;
+    const res = await chatService?.getInvites(req);
+    return reply.code(200).send({ success: true, invites: res });
+  } catch (error) {
+    logError(req.server, req, error);
+    return reply
+      .code(500)
+      .send({ success: false, message: "Chat service error" });
+  }
+}
+
+export async function notifyHandler(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const chatService = req.server.chatService;
+    const res = await chatService?.sendNotify(req);
+    return reply.code(200).send({ success: true, notifyId: res });
+  } catch (error) {
+    logError(req.server, req, error);
+    return reply
+      .code(500)
+      .send({ success: false, message: "Chat service error" });
+  }
+}
+
+export async function getNotifyHandler(req:FastifyRequest, reply :FastifyReply) {
+  try {
+    const chatService = req.server.chatService;
+    const res = await chatService?.getNotify(req);
+    return reply.code(200).send({success : true, notifications : res});
   } catch (error) {
     logError(req.server, req, error);
     return reply

@@ -59,6 +59,7 @@ export class ChatService {
     const receiverConn = connections.get(+data.recv_id);
     if(receiverConn){
       receiverConn.send(JSON.stringify({
+        type: "message",
         from : currentUser,
         content : data.content
       }))
@@ -98,5 +99,51 @@ export class ChatService {
     const currentUser = +(req.headers["x-user-id"]!);
     const res = this.messageRepo.getBlockUserList(currentUser);
     return res;
+  }
+
+  async inviteUser(req : FastifyRequest){
+    const currentUser = +(req.headers["x-user-id"]!);
+    const invitedUser = (req.body as any).to_user_id;
+    const inviteId = this.messageRepo.createInvite(currentUser, invitedUser);
+    const receiverConn = connections.get(invitedUser);
+    if(receiverConn){
+      receiverConn.send(JSON.stringify({
+        type : "invite",
+        from : currentUser,
+        inviteId
+      }))
+    }
+    return inviteId;
+  }
+
+  async getInvites(req : FastifyRequest){
+    const currentUser = +(req.headers["x-user-id"]!);
+    const { type = "received" } = req.query as any;
+    let invites;
+    if(type === "received"){
+      invites = this.messageRepo.getReceivedInvites(currentUser);
+    } else {
+      invites = this.messageRepo.getSentInvites(currentUser);
+    }
+    return invites;
+  }
+
+  async sendNotify(req : FastifyRequest){
+    const { user_id, message } = req.body as any;
+    const notifyId = this.messageRepo.createNotify(user_id, message);
+    const receiverConn = connections.get(user_id);
+    if(receiverConn){
+      receiverConn.send(JSON.stringify({
+        type : "tournament-notify",
+        message
+      }))
+    }
+    return notifyId;
+  }
+
+  async getNotify(req : FastifyRequest){
+    const currentUser = +(req.headers["x-user-id"]!);
+    const notifyList = this.messageRepo.getNotify(currentUser);
+    return notifyList; 
   }
 }

@@ -98,6 +98,44 @@ export class ChatRepository {
         "DELETE FROM blocked_users WHERE (blocking_id = ? AND blocked_id = ?)"
       )
       .run(blocking_id, blocked_id);
-      return res.changes;
+    return res.changes;
+  }
+
+  createInvite(inviting_user: number, invited_user: number) {
+    const info = this.db
+      .prepare(
+        "INSERT INTO game_invites(inviting_user, invited_user) VALUES(?, ?)"
+      )
+      .run(inviting_user, invited_user);
+    console.log(invited_user, inviting_user);
+    return info.lastInsertRowid;
+  }
+
+  getReceivedInvites(invited_user: number) {
+    const invites = this.db
+      .prepare("SELECT * FROM game_invites WHERE invited_user = ?")
+      .all(invited_user);
+    return invites;
+  }
+
+  getSentInvites(inviting_user: number) {
+    const invites = this.db
+      .prepare("SELECT * FROM game_invites WHERE inviting_user = ?")
+      .all(inviting_user);
+    return invites;
+  }
+
+  createNotify(user_id: number, content: string) {
+    const info = this.db
+      .prepare("INSERT INTO notifications(user_id, content) VALUES(?, ?)")
+      .run(user_id, content);
+    return info.lastInsertRowid;
+  }
+
+  getNotify(user_id: number) {
+    const notifyList = this.db
+      .prepare("SELECT * FROM notifications WHERE user_id = ?")
+      .all(user_id);
+    return notifyList;
   }
 }

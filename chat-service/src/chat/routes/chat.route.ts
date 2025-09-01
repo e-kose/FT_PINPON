@@ -3,6 +3,10 @@ import {
   blockUserHandler,
   conversationHandler,
   getBlockedUserHandler,
+  getInvitesHandler,
+  getNotifyHandler,
+  inviteUserHandler,
+  notifyHandler,
   removeBlockUserHandler,
   sendMessageHandler,
 } from "../controller/chat.controller.js";
@@ -12,6 +16,8 @@ import {
   blockSchema,
   removeBlockSchema,
 } from "../schemas/block.schema.js";
+import { getInvitesSchema, inviteSchema } from "../schemas/invite.schema.js";
+import { getNotifySchema, notifySchema } from "../schemas/notify.schema.js";
 
 const createSchema = (summary: string, schema: any) => ({
   tags: ["Chat"],
@@ -40,5 +46,25 @@ export async function chatRoute(app: FastifyInstance) {
     "/chat/block",
     { schema: createSchema("Remove Block User", removeBlockSchema) },
     removeBlockUserHandler
+  );
+  app.post(
+    "/chat/invite",
+    { schema: createSchema("Invite user", inviteSchema) },
+    inviteUserHandler
+  );
+  app.get(
+    "/chat/invites",
+    { schema: createSchema("Get invites", getInvitesSchema) },
+    getInvitesHandler
+  );
+  app.post(
+    "/chat/notify-tournament",
+    { schema: createSchema("Send notify", notifySchema) },
+    notifyHandler
+  );
+  app.get(
+    "/chat/notify",
+    { schema: createSchema("Get notifications", getNotifySchema) },
+    getNotifyHandler
   );
 }
