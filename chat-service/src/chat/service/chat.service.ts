@@ -1,15 +1,15 @@
 import type { FastifyRequest } from "fastify";
-import type { MessageRepository } from "../repository/messages.repository";
+import type { ChatRepository } from "../repository/chat.repository";
 import type { CreateMessage } from "../types/createMessage.type";
 import type { userParam } from "../types/params.types";
 import { chatNotFound } from "../errors/chat.errors.js";
 import { UserCache } from "./cache.service.js";
-import { connections } from "../controller/message.controller";
+import { connections } from "../controller/chat.controller";
 
 const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
-export class MessageService {
-  messageRepo: MessageRepository;
-  constructor(messageRepo: MessageRepository) {
+export class ChatService {
+  messageRepo: ChatRepository;
+  constructor(messageRepo: ChatRepository) {
     this.messageRepo = messageRepo;
   }
 
@@ -54,6 +54,8 @@ export class MessageService {
   async sendMessage(req: FastifyRequest, data: any) {
     const currentUser = +req.headers["x-user-id"]!;
     const othetUser = +data.recv_id;
+    const isBlocked = this.messageRepo.getBlockBetweenTwoUser(currentUser, othetUser);
+    if(isBlocked) return ;
     const receiverConn = connections.get(+data.recv_id);
     if(receiverConn){
       receiverConn.send(JSON.stringify({
@@ -67,6 +69,34 @@ export class MessageService {
       recv_id: othetUser,
       content: data.content as string,
     };
-    return this.messageRepo.createMessage(message);
+    this.messageRepo.createMessage(message);
+  }
+
+  async blockUser(req : FastifyRequest){
+    const currentUser = +(req.headers["x-user-id"]!);
+    const blockedUser = (req.body as any).blocked_user_id;
+    const isExist = this.messageRepo.getBlockUserOne(currentUser, blockedUser);
+    if(!isExist){
+      const res = this.messageRepo.createBlock(currentUser, blockedUser);
+      return res;
+    }
+    return (isExist as any).id;
+  }
+
+  async removeBlockUser(req : FastifyRequest){
+    const currentUser = +(req.headers["x-user-id"]!);
+    const blockedUser = (req.body as any).blocked_user_id;
+    const isExist = this.messageRepo.getBlockUserOne(currentUser, blockedUser);
+    if(isExist){
+      const res = this.messageRepo.deleteBlock(currentUser, blockedUser);
+      return res;
+    }
+    return 0;
+  }
+
+  async getBlockUser(req : FastifyRequest){
+    const currentUser = +(req.headers["x-user-id"]!);
+    const res = this.messageRepo.getBlockUserList(currentUser);
+    return res;
   }
 }

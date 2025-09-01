@@ -1,8 +1,8 @@
 import "fastify"
 import BetterSqlite from 'better-sqlite3'
 import type pino from "pino"
-import type { MessageRepository } from "../chat/repository/messages.repository"
-import type { messageService } from "../chat/service/message.service"
+import type { ChatRepository } from "../chat/repository/chat.repository"
+import type { ChatService } from "../chat/service/chat.service"
 import type Redis from "ioredis"
 
 declare module "fastify"{
@@ -19,8 +19,8 @@ declare module "fastify"{
 
 declare module "fastify"{
 	interface FastifyInstance{
-		messageRepo : MessageRepository | null,
-		messageService : messageService | null
+		chatRepo : ChatRepository | null,
+		chatService : ChatService | null
 	}
 }
 

@@ -1,6 +1,17 @@
 import type { FastifyInstance } from "fastify";
-import { conversationHandler, sendMessageHandler } from "../controller/message.controller.js";
+import {
+  blockUserHandler,
+  conversationHandler,
+  getBlockedUserHandler,
+  removeBlockUserHandler,
+  sendMessageHandler,
+} from "../controller/chat.controller.js";
 import { conversationSchema } from "../schemas/conversation.schema.js";
+import {
+  blockListSchema,
+  blockSchema,
+  removeBlockSchema,
+} from "../schemas/block.schema.js";
 
 const createSchema = (summary: string, schema: any) => ({
   tags: ["Chat"],
@@ -14,7 +25,20 @@ export async function chatRoute(app: FastifyInstance) {
     { schema: createSchema("Chat History", conversationSchema) },
     conversationHandler
   );
+  app.get("/chat/ws", { websocket: true }, sendMessageHandler);
   app.get(
-    "/chat/ws", {websocket : true}, sendMessageHandler
-  )
+    "/chat/block",
+    { schema: createSchema("Get block list", blockListSchema) },
+    getBlockedUserHandler
+  );
+  app.post(
+    "/chat/block",
+    { schema: createSchema("Block User", blockSchema) },
+    blockUserHandler
+  );
+  app.delete(
+    "/chat/block",
+    { schema: createSchema("Remove Block User", removeBlockSchema) },
+    removeBlockUserHandler
+  );
 }

@@ -5,8 +5,8 @@ import loggerPlugin from "./plugins/logger.plugin.js";
 import { startLogError } from "./utils/log.utils.js";
 import fastifySensible from "@fastify/sensible";
 import catchGlobErrorPlugin from "./plugins/catchGlobError.plugin.js";
-import { MessageRepository } from "./chat/repository/messages.repository.js";
-import { MessageService } from "./chat/service/message.service.js";
+import { ChatRepository } from "./chat/repository/chat.repository.js";
+import { ChatService } from "./chat/service/chat.service.js";
 import { chatRoute } from "./chat/routes/chat.route.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import redisPlugin from "./plugins/redis.plugin.js";
@@ -29,8 +29,8 @@ app.register(fastifySensible);
 app.register(swaggerPlugin);
 app.register(catchGlobErrorPlugin);
 app.after(()=>{
-  app.messageRepo = new MessageRepository(app.db);
-  app.messageService = new MessageService(app.messageRepo);
+  app.chatRepo = new ChatRepository(app.db);
+  app.chatService = new ChatService(app.chatRepo);
 });
 app.register(chatRoute)
 
