@@ -1,7 +1,6 @@
 import { fillIndex } from "../router/ReWriteInHtml";
-import { UserRegisterionForm } from "../components/forms/UserOperations";
 import "../components/forms/UserOperations";
+import "../components/forms/SignupForm";
 export default function loadHomePage(): void {
-	const userRegForm = new UserRegisterionForm();
-	userRegForm.createForm();
+	fillIndex(`<signup-form></signup-form>`);
 }

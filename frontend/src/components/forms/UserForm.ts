@@ -1,4 +1,5 @@
 export abstract class UserForm extends HTMLElement {
+
   protected form!: HTMLFormElement;
 
   connectedCallback() {
