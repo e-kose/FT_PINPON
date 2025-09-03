@@ -1,4 +1,5 @@
 import loadHomePage from "./pages/Home"
+import { setupRouter } from "./router/Router"
 import "./styles/style.css"
 // import "./components/forms/SignupForm"
 
@@ -9,6 +10,9 @@ import "./styles/style.css"
 
 // const html = await loadTemplate("template")
 // document.querySelector('#app')!.innerHTML = html
+
+// Router'ı başlat
+setupRouter();
 
 loadHomePage();
 

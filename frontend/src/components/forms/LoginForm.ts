@@ -1,5 +1,5 @@
 import { UserForm } from "./UserForm";
-import { fillIndex } from "../../router/ReWriteInHtml";
+import { fillIndex } from "../../router/Router";
 import SuccesForm from "../succes/SuccesMessage";
 
 interface UserLogin {

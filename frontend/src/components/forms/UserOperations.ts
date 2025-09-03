@@ -1,4 +1,4 @@
-import { fillIndex } from "../../router/ReWriteInHtml";
+import { fillIndex } from "../../router/Router";
 
 interface User {
 	userName: string;
