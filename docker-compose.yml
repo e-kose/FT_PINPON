@@ -113,7 +113,7 @@ services:
     env_file:
       - ./elastic-search/.env
     volumes:
-    - /home/ekose/Desktop/FT_PINPON/elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     networks:
       - internal-network
     depends_on:

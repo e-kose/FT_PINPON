@@ -12,6 +12,17 @@ const app = Fastify({ logger: true });
 const port: number = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
 
+// CORS plugin'ini register et (diğer plugin'lerden ÖNCE)
+app.register(import('@fastify/cors'), {
+  origin: [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Kendi portun
+    'http://127.0.0.1:5173', // Alternatif localhost
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+});
+
 app.register(jwtPlugin);
 app.register(loggerPlugin);
 app.register(proxyPlugin);
