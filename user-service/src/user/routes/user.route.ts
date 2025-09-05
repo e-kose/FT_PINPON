@@ -12,7 +12,10 @@ import {
 import { registerUserSchema } from "../schemas/register.user.schema.js";
 import { loginUserSchema } from "../schemas/login.user.schema.js";
 import { deleteUserSchema } from "../schemas/delete.user.schema.js";
-import { updateUserSchema } from "../schemas/update.user.schema.js";
+import {
+  updateAvatarSchema,
+  updateUserSchema,
+} from "../schemas/update.user.schema.js";
 import { getUserSchema } from "../schemas/get.user.schema.js";
 
 const createSchema = (summary: string, schema: any) => ({
@@ -55,7 +58,11 @@ export async function userRoute(app: FastifyInstance) {
     updateUserHandler
   );
 
-  app.patch("/user/avatar", updateAvatarHandler);
+  app.patch(
+    "/user/avatar",
+    { schema: createSchema("Avatar update", updateAvatarSchema) },
+    updateAvatarHandler
+  );
 
   app.delete(
     "/user",
