@@ -1,4 +1,35 @@
 import ErrorPages  from "../components/errors/ErrorPages";
+import "../components/forms/SignupForm";
+import "../components/forms/UserForm";
+class Router
+{
+
+	
+	private routes: { path: string; component: string }[] = [];
+	
+	public addRoute(path: string, component: string): void {
+		this.routes.push({ path, component });
+	}
+	public navigate(path: string): void {
+		console.log("Navigating to:", path);
+		const route = this.routes.find(r => r.path === path);
+		if (route) {
+			fillIndex(route.component, path);
+		} else {
+			const errPages = new ErrorPages();
+			fillIndex(errPages.ErrorPages.notFound(), path);
+		}
+	}
+};
+
+
+function stringToHTMLElement(htmlString: string): HTMLElement {
+	// CSP-safe HTML parsing
+	const template = document.createElement('template');
+	template.innerHTML = htmlString.trim();
+	const element = template.content.firstElementChild as HTMLElement;
+	return element || document.createElement('div');
+}
 
 function fillIndex(htmlValue: string, path?: string): void {
 	const app = document.getElementById("app");
@@ -6,27 +37,35 @@ function fillIndex(htmlValue: string, path?: string): void {
 	
 	if (app) {
 		if (htmlValue) {
-			app.innerHTML = htmlValue;
-			
-			// URL path'i güncelle (eğer path verilmişse)
+			//xss koruması
+			app.innerHTML = "";
+			app.appendChild(stringToHTMLElement(htmlValue));	
 			if (path && window.location.pathname !== path) {
 				window.history.pushState({ path }, '', path);
 			}
 		} else {
-			errPages.ErrorPages.general();
+			const errorElement = stringToHTMLElement(errPages.ErrorPages.general());
+			app.appendChild(errorElement);
 		}
 	} else {
 		throw new Error("Error: root is undefined");
 	}
 }
 
-// Route'ları handle etmek için yardımcı fonksiyon
-function navigateTo(path: string, component: string): void {
-	fillIndex(component, path);
-}
 
-// Link click'lerini yakalamak için global event listener
-function setupRouter(): void {
+const router = new Router();
+addEventListener('popstate', (event) => {
+	console.log("Popstate event:", event);
+	if (event.state && event.state.path) {
+		router.navigate(event.state.path);
+	}
+});
+
+function initializeRouter(): void {
+	router.addRoute('/', '<signup-form></signup-form>');
+	router.addRoute('/login', '<login-form></login-form>');
+	router.addRoute('/signup', '<signup-form></signup-form>');
+	
 	document.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
 		const link = target.closest('a');
@@ -34,27 +73,13 @@ function setupRouter(): void {
 		if (link && link.href && !link.href.startsWith('http') && !link.href.includes('://')) {
 			e.preventDefault();
 			const path = new URL(link.href).pathname;
-			
-			// Route'a göre component'i belirle
-			let component = '';
-			switch (path) {
-				case '/login':
-					component = '<login-form> </login-form>';
-					break;
-				case '/signup':
-					component = '<signup-form> </signup-form>';
-					break;
-				case '/':
-				case '/home':
-					component = '<home-page> </home-page>';
-					break;
-				default:
-					component = '<error-404> </error-404>';
-			}
-			
-			navigateTo(path, component);
+			router.navigate(path);
 		}
 	});
+	router.navigate(window.location.pathname);
 }
 
-export { fillIndex, navigateTo, setupRouter };
+
+
+
+export { fillIndex, router, initializeRouter };

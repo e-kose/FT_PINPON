@@ -1,7 +1,9 @@
-import loadHomePage from "./pages/Home"
-import { setupRouter } from "./router/Router"
+
+import { initializeRouter, router } from "./router/Router"
 import "./styles/style.css"
-// import "./components/forms/SignupForm"
+import "./components/forms/SignupForm"
+import "./components/forms/LoginForm"
+import "./pages/Home"
 
 // export async function loadTemplate(templateName: string): Promise<string> {
 //   const response = await fetch(`../${templateName}.html`)
@@ -12,7 +14,7 @@ import "./styles/style.css"
 // document.querySelector('#app')!.innerHTML = html
 
 // Router'ı başlat
-setupRouter();
-
-loadHomePage();
+initializeRouter();
+// Başlangıç sayfasına yönlendir
+router.navigate(document.location.pathname || "/signup");
 

@@ -1,13 +1,41 @@
 import { UserForm } from "./UserForm";
-import { fillIndex } from "../../router/Router";
-import SuccesForm from "../succes/SuccesMessage";
+import { router } from "../../router/Router";
+import messages from "../Messages";
 
-interface UserLogin {
-	emailOrUsername: string;
-	password: string;
-}
+	interface UserLogin {
+		email: string;
+		username: string;
+		password: string;
+		token?: string;
+		//remember: boolean;
+	}
 
 class LoginForm extends UserForm{
+
+	private handleGoogleLogin(): void {
+		// Google OAuth işlemi burada yapılacak
+		// Örneğin: window.location.href = "http://localhost:3000/auth/google"
+		console.log("Google OAuth işlemi başlatılıyor...");
+		// veya
+		// window.open("http://localhost:3000/auth/google", "_self");
+	}
+	protected setupEvents(): void {
+		super.setupEvents(); 
+
+		const googleButton = this.querySelector("#googleButton") as HTMLButtonElement;
+		googleButton?.addEventListener("click", (e) => {
+			e.preventDefault();
+			this.handleGoogleLogin();
+		});
+
+		const signupLink = this.querySelector("#signupLink") as HTMLAnchorElement;
+		signupLink?.addEventListener("click", (e) => {
+			e.preventDefault();
+			router.navigate("/signup");
+		});
+		
+	}
+
 	protected createForm(): string {
 		return(`
 			<section class="bg-gray-50 dark:bg-gray-900">
@@ -23,8 +51,12 @@ class LoginForm extends UserForm{
 			  </h1>
 			  <form class="space-y-6 md:space-y-8" action="#">
 				  <div>
-					  <label for="emailOrUsername" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">E-posta veya Kullanıcı Adı</label>
-					  <input type="text" name="emailOrUsername" id="emailOrUsername" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="E-posta veya Kullanıcı Adı" required="">
+					  <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">E-posta</label>
+					  <input type="email" name="email" id="email" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="example@example.com" required>
+				  </div>
+				  <div>
+					  <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kullanıcı Adı</label>
+					  <input type="text" name="username" id="username" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="Kullanıcı Adı" required>
 				  </div>
 				  <div>
 					  <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Şifre</label>
@@ -33,7 +65,7 @@ class LoginForm extends UserForm{
 				  <div class="flex items-center justify-between">
 					  <div class="flex items-start">
 						  <div class="flex items-center h-5">
-							  <input id="remember" aria-describedby="remember" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
+							  <input id="remember" name="remember" aria-describedby="remember" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
 						  </div>
 						  <div class="ml-3 text-sm">
 							  <label for="remember" class="text-gray-500 dark:text-gray-300">Beni Hatırla</label>
@@ -43,7 +75,10 @@ class LoginForm extends UserForm{
 				  <button type="submit" class="w-full text-white bg-blue-900 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-900 dark:hover:bg-blue-800 dark:focus:ring-blue-800">Giriş Yap</button>
 				  
 				  <!-- Google Sign In Button -->
-				  <button type="button" class="w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+				  <button 
+				  		type="button"
+						id="googleButton" 
+						class="w-full text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
 					  <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
 						  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
 						  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -54,7 +89,11 @@ class LoginForm extends UserForm{
 				  </button>
 				  
 				  <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-					  Henüz hesabınız yok mu? <a href="#" class="font-medium text-white bg-blue-900 hover:bg-blue-800 px-2 py-1 rounded hover:underline dark:bg-blue-900 dark:hover:bg-blue-800">Kayıt Ol</a>
+					  Henüz hesabınız yok mu? 
+					  <a
+					  	id="signupLink"
+					  	href="/signup" 
+					  	class="font-medium text-white bg-blue-900 hover:bg-blue-800 px-2 py-1 rounded hover:underline dark:bg-blue-900 dark:hover:bg-blue-800">Kayıt Ol</a>
 				  </p>
 			  </form>
 		  </div>
@@ -66,13 +105,22 @@ class LoginForm extends UserForm{
 	protected async handleSubmit(e: Event): Promise<void> {
 		e.preventDefault();
 		const formData = new FormData(this.form);
+		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
+		if (!this.checkInput(emailPattern, '#email', 'label[for="email"]', 'E-posta'))
+				return;
+		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/; 
+		if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
+			return;
+
 		const userData: UserLogin = {
-			emailOrUsername: formData.get("emailOrUsername") as string,
-			password: formData.get("password") as string,
+			email: (formData.get("email") as string || "").trim(),
+			username: (formData.get("username") as string || "").trim(),
+			password: (formData.get("password") as string || "").trim(),
+			//remember: formData.has("remember"),
 		};
 		
 		try {
-			const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+			await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -87,28 +135,25 @@ class LoginForm extends UserForm{
 				}
 			})
 			.then(data => {
-				const succesForm = new SuccesForm();
+				
 				if (data.success) {
-					fillIndex(succesForm.userRegister("Giriş Başarılı", "Başarıyla giriş yaptınız, ana sayfaya yönlendiriliyorsunuz."));
-					// 2 saniye sonra ana sayfaya yönlendir
 					setTimeout(() => {
-						fillIndex("<Home> </Home>");
-					}, 2000);
+						console.log(data);
+						messages.showMessage("Başarılı", "Giriş işleminiz başarıyla tamamlandı. Ana sayfaya yönlendiriliyorsunuz...", "success", ".p-8");
+					}, 10000);
+					router.navigate("/");
 				} else {
-					fillIndex(succesForm.userRegister("Giriş Başarısız", data.message));
-				}
+					messages.showMessage("Hata", data.message || "Giriş işlemi başarısız. Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.", "error", ".p-8");}
 			})
 			.catch(error => {
 				console.error('Login error:', error);
-				const succesForm = new SuccesForm();
-				fillIndex(succesForm.userRegister("Hata", "Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin."));
+				messages.showMessage("Hata", "Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.", "error", ".p-8");
 			});
 		} catch (error) {
 			console.error('Network error:', error);
-			const succesForm = new SuccesForm();
-			fillIndex(succesForm.userRegister("Ağ Hatası", "Bağlantı hatası oluştu. Lütfen internet bağlantınızı kontrol edin."));
-		}
+			messages.showMessage("Hata", "Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.", "error", ".p-8");
 	}
-	
+}
+
 }
 customElements.define("login-form", LoginForm);

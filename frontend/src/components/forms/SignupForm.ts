@@ -1,13 +1,14 @@
 import { UserForm } from "./UserForm"
-import { navigateTo } from "../../router/Router.ts";
-import "./LoginForm.ts"
+import { router } from "../../router/Router";
+import messages from "../Messages";
+import "./LoginForm";
 interface UserSignup {
 	email: string;
   username: string;
   password: string;
 }
 
-class SignupForm extends UserForm 
+export default class SignupForm extends UserForm 
 {
 	protected setupEvents(): void {
 		super.setupEvents(); // sbmti butonunu bağladım
@@ -21,7 +22,7 @@ class SignupForm extends UserForm
 		const loginLink = this.querySelector("#loginLink") as HTMLAnchorElement;
 		loginLink?.addEventListener("click", (e) => {
 			e.preventDefault();
-			navigateTo("/login", "<login-form> </login-form>");
+			router.navigate("/login");
 		});
 	}
 
@@ -35,40 +36,21 @@ class SignupForm extends UserForm
 
 	protected async handleSubmit(e: Event): Promise<void> 
 	{
-		e.preventDefault();
+			e.preventDefault();
 		const formData = new FormData(this.form);
 		const userData: UserSignup = {
 			email: formData.get("email") as string,
 			username: formData.get("username") as string,
 			password: formData.get("password") as string,
 		};
-		
-		const checkInput = (rule : RegExp, inputElement:string, labelElement: string, labelText: string): boolean =>{
-			const input = this.querySelector(inputElement) as HTMLInputElement;
-			const label = this.querySelector(labelElement) as HTMLLabelElement;
-			if (!rule.test(input.value)) {
-				label.innerHTML = `${labelText} <span class="text-red-500 text-xs">(Geçerli bir değer girin)</span>`;
-				label.classList.add('text-red-500');
-				
-				const handleInput = () => {
-					if (rule.test(input.value)) {
-						label.innerHTML = labelText;
-						label.classList.remove('text-red-500');
-						input.removeEventListener('input', handleInput);
-					}
-				};
-				input.addEventListener('input', handleInput);
-				return false;
-			}
-			return true;
-		}
+			
 		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
-		if (!checkInput(emailPattern, '#email', 'label[for="email"]', 'E-posta'))
+		if (!this.checkInput(emailPattern, '#email', 'label[for="email"]', 'E-posta'))
 				return;
 		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/; 
-		if (!checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
+		if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
 			return;
-
+	
 		try {
 			 await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
 				method: 'POST',
@@ -78,19 +60,18 @@ class SignupForm extends UserForm
 				body: JSON.stringify(userData)
 			})
 			.then(res => {
-				if (res.ok)
 				return res.ok ? res.json() : Promise.reject(new Error('Registration failed'));
 			})
 			.then(data => {
 				console.log(data);
 				if (data.success) {
-					this.showMessage("Başarılı","Kayıt işleminiz başarıyla tamamlandı. Giriş Ekranına Yönlendiriliyorsunuz...", "success");
+					messages.showMessage("Başarılı","Kayıt işleminiz başarıyla tamamlandı. Giriş Ekranına Yönlendiriliyorsunuz...", "success", ".p-8");
 					setTimeout(() => {
-						navigateTo("/login", "<login-form> </login-form>");
+						router.navigate("/login");
 					}, 5000);
 				} else {
 					console.log("false: ", data.message);
-					this.showMessage("Hata",data.message || "Kayıt işlemi başarısız.", "error");
+					messages.showMessage("Hata",data.message || "Kayıt işlemi başarısız.", "error", ".p-8");
 				}
 			})
 			.catch(error => {
@@ -121,7 +102,7 @@ class SignupForm extends UserForm
                   </div>
                   <div>
                       <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">E-posta</label>
-                      <input type="email" name="email" id="email" title="Geçerli bir email adresi girin (örn: test@example.com)" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="ornek@example.com" required="">
+                      <input type="email" name="email" id="email" title="Geçerli bir email adresi girin (örn: test@example.com)" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="example@example.com" required="">
                   </div>
                   <div>
                       <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Şifre</label>
@@ -158,25 +139,6 @@ class SignupForm extends UserForm
 			`);
 	}
 
-	private showMessage(status: string, message: string, msgType: string): void {
-		
-		const messageDiv = document.createElement('div');
-		const msgClass = msgType === "error" ? 'mt-4 bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20 dark:border-red-700' : 'mt-4 bg-green-50 border border-green-200 rounded-lg p-4 dark:bg-green-900/20 dark:border-green-700';
-		messageDiv.className = msgClass;
-		messageDiv.innerHTML = `
-			<div class="flex items-center">
-				<svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-					<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-				</svg>
-				<p class="text-green-800 dark:text-green-200 font-medium">${status} !</p>
-			</div>
-			<p class="text-green-700 dark:text-green-300 mt-2">${message}</p>
-		`;
-		
-		const formContainer = this.querySelector('.p-8');
-		if (formContainer) {
-			formContainer.appendChild(messageDiv);
-		}
-	}	
+	
 }
 customElements.define("signup-form", SignupForm);
