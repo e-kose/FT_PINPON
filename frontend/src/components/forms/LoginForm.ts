@@ -3,14 +3,16 @@ import { router } from "../../router/Router";
 import messages from "../Messages";
 
 	interface UserLogin {
-		email: string;
-		username: string;
+		email?: string;
+		username?: string;
 		password: string;
 		token?: string;
 		//remember: boolean;
 	}
 
 class LoginForm extends UserForm{
+
+	
 
 	private handleGoogleLogin(): void {
 		// Google OAuth işlemi burada yapılacak
@@ -51,12 +53,8 @@ class LoginForm extends UserForm{
 			  </h1>
 			  <form class="space-y-6 md:space-y-8" action="#">
 				  <div>
-					  <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">E-posta</label>
-					  <input type="email" name="email" id="email" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="example@example.com" required>
-				  </div>
-				  <div>
-					  <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kullanıcı Adı</label>
-					  <input type="text" name="username" id="username" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="Kullanıcı Adı" required>
+					  <label for="emailOrUsername" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">E-posta veya Kullanıcı Adı</label>
+					  <input type="text" name="emailOrUsername" id="emailOrUsername" class="bg-gray-50 border border-blue-900 text-gray-900 text-sm rounded-lg focus:ring-blue-900 focus:border-blue-900 block w-full p-2.5 dark:bg-gray-700 dark:border-blue-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-900 dark:focus:border-blue-900" placeholder="E-posta veya Kullanıcı Adı" required>
 				  </div>
 				  <div>
 					  <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Şifre</label>
@@ -102,30 +100,37 @@ class LoginForm extends UserForm{
 </section>
 			`)
 	}
-	protected async handleSubmit(e: Event): Promise<void> {
+	protected async handleSubmit(e: Event): Promise<void> 
+	{
 		e.preventDefault();
 		const formData = new FormData(this.form);
-		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
-		if (!this.checkInput(emailPattern, '#email', 'label[for="email"]', 'E-posta'))
-				return;
+		
+		// Email veya kullanıcı adı boş olamaz
+		const emailOrUsername = (formData.get("emailOrUsername") as string || "").trim();
+		if (!emailOrUsername) {
+			messages.showMessage("Hata", "Lütfen e-posta veya kullanıcı adı girin.", "error", ".p-8");
+			return;
+		}
+		
 		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/; 
 		if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
 			return;
 
 		const userData: UserLogin = {
-			email: (formData.get("email") as string || "").trim(),
-			username: (formData.get("username") as string || "").trim(),
+			email: emailOrUsername.includes('@') ? emailOrUsername : undefined,
+			username: emailOrUsername.includes('@') ? undefined : emailOrUsername,
 			password: (formData.get("password") as string || "").trim(),
 			//remember: formData.has("remember"),
 		};
-		
+		console.log("Giriş için gönderilen veri:", userData);
 		try {
 			await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(userData)
+				body: JSON.stringify(userData),
+				credentials : 'include' 
 			})
 			.then(res => {
 				if (res.ok) {
@@ -137,11 +142,12 @@ class LoginForm extends UserForm{
 			.then(data => {
 				
 				if (data.success) {
+					messages.showLoadingAnimation(".p-8");
+					userData.token = data.token;
+					console.log("token: --_>", userData.token)
 					setTimeout(() => {
-						console.log(data);
-						messages.showMessage("Başarılı", "Giriş işleminiz başarıyla tamamlandı. Ana sayfaya yönlendiriliyorsunuz...", "success", ".p-8");
-					}, 10000);
-					router.navigate("/");
+						router.navigate("/");
+					}, 5000);
 				} else {
 					messages.showMessage("Hata", data.message || "Giriş işlemi başarısız. Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.", "error", ".p-8");}
 			})
