@@ -2,6 +2,8 @@ import ErrorPages  from "../components/errors/ErrorPages";
 import "../components/forms/SignupForm";
 import "../components/forms/UserForm";
 import "../components/DashboardComponent";
+import "../components/sideBarComponents/Settings";
+
 class Router
 {
 
@@ -66,6 +68,11 @@ function initializeRouter(): void {
 	router.addRoute('/', '<dashboard-component></dashboard-component>');
 	router.addRoute('/login', '<login-form></login-form>');
 	router.addRoute('/signup', '<signup-form></signup-form>');
+	router.addRoute('/settings', '<settings-component></settings-component>');
+	router.addRoute('/play', '<play-component></play-component>');
+	router.addRoute('/tournament', '<tournament-component></tournament-component>');
+	router.addRoute('/friends', '<friends-component></friends-component>');
+	router.addRoute('/chat', '<chat-component></chat-component>');
 	
 	document.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;

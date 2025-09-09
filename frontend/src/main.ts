@@ -10,6 +10,8 @@ import "./components/SideBar"
 import "./components/Statistics"
 import "./components/PlayerList"
 import "./components/LastGames"
+import "./components/sideBarComponents/Settings"
+
 
 // Router'ı başlat
 initializeRouter();

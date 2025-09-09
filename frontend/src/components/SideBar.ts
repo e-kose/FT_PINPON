@@ -1,5 +1,7 @@
 
-class Navbar extends HTMLElement {
+import { router } from "../router/Router";
+
+class SideBar extends HTMLElement {
     private activeRoute: string = "dashboard";
     private isCollapsed: boolean = true;
 
@@ -9,6 +11,11 @@ class Navbar extends HTMLElement {
     }
 
     connectedCallback(): void {
+        // Get current route from attribute
+        const currentRoute = this.getAttribute('current-route');
+        if (currentRoute) {
+            this.activeRoute = currentRoute;
+        }
         this.setupEvents();
     }
 
@@ -23,27 +30,27 @@ class Navbar extends HTMLElement {
             <div class="${width} bg-white dark:bg-gray-800 shadow-lg h-screen border-r border-gray-200 dark:border-gray-700 transition-all duration-300 fixed left-0 top-0 z-40">
                 <div class="py-6 ${padding} mt-20">
                     <nav class="space-y-1">
-                        <a href="#" data-route="dashboard" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-blue-900 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 rounded-xl font-semibold transition-all duration-200 border-2 border-blue-200 dark:border-blue-800 shadow-sm" title="Dashboard">
+                        <a href="/" data-route="dashboard" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-blue-900 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 rounded-xl font-semibold transition-all duration-200 border-2 border-blue-200 dark:border-blue-800 shadow-sm" title="Dashboard">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'}">🏠</span>
                             <span class="${this.isCollapsed ? 'hidden' : ''}">Dashboard</span>
                         </a>
-                        <a href="#" data-route="play" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Play Pong">
+                        <a href="/play" data-route="play" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Play Pong">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'}">🎮</span>
                             <span class="${this.isCollapsed ? 'hidden' : ''}">Play Pong</span>
                         </a>
-                        <a href="#" data-route="tournament" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Tournament">
+                        <a href="/tournament" data-route="tournament" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Tournament">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'}">🏆</span>
                             <span class="${this.isCollapsed ? 'hidden' : ''}">Tournament</span>
                         </a>
-                        <a href="#" data-route="friends" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Friends">
+                        <a href="/friends" data-route="friends" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Friends">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'}">👥</span>
                             <span class="${this.isCollapsed ? 'hidden' : ''}">Friends</span>
                         </a>
-                        <a href="#" data-route="chat" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Chat">
+                        <a href="/chat" data-route="chat" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Chat">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'}">💬</span>
                             <span class="${this.isCollapsed ? 'hidden' : ''}">Chat</span>
                         </a>
-                        <a href="#" data-route="settings" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Settings">
+                        <a href="/settings" data-route="settings" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-all duration-200 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md" title="Settings">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'}">⚙️</span>
                             <span class="${this.isCollapsed ? 'hidden' : ''}">Settings</span>
                         </a>
@@ -145,7 +152,7 @@ class Navbar extends HTMLElement {
         });
     }
 
-    // Event Handler Methods - İçleri boş, sen dolduracaksın
+    // Event Handler Methods - Router ile navigasyon
     private handleNavigation(route: string | null): void {
         if (!route) return;
         
@@ -153,9 +160,9 @@ class Navbar extends HTMLElement {
         this.activeRoute = route;
         this.setActiveNavItem(route);
         
-        // Navigation logic buraya eklenecek
-        // Router ile yönlendirme yapılabilir
-        // router.navigate(`/${route}`);
+        // Router ile yönlendirme yap
+        const routePath = route === 'dashboard' ? '/' : `/${route}`;
+        router.navigate(routePath);
     }
 
     // Public Methods - İçleri boş, sen dolduracaksın
@@ -212,4 +219,4 @@ class Navbar extends HTMLElement {
     }
 }
 
-customElements.define("sidebar-component", Navbar);
+customElements.define("sidebar-component", SideBar);
