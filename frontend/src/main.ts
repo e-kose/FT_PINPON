@@ -3,15 +3,13 @@ import { initializeRouter, router } from "./router/Router"
 import "./styles/style.css"
 import "./components/forms/SignupForm"
 import "./components/forms/LoginForm"
-import "./pages/Home"
-
-// export async function loadTemplate(templateName: string): Promise<string> {
-//   const response = await fetch(`../${templateName}.html`)
-//   return response.text()
-// }
-
-// const html = await loadTemplate("template")
-// document.querySelector('#app')!.innerHTML = html
+import "./pages/DashboardPage"
+import "./components/DashboardComponent"
+import "./components/Header"
+import "./components/SideBar"
+import "./components/Statistics"
+import "./components/PlayerList"
+import "./components/LastGames"
 
 // Router'ı başlat
 initializeRouter();

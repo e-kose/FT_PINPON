@@ -1,6 +1,7 @@
 import ErrorPages  from "../components/errors/ErrorPages";
 import "../components/forms/SignupForm";
 import "../components/forms/UserForm";
+import "../components/DashboardComponent";
 class Router
 {
 
@@ -62,7 +63,7 @@ addEventListener('popstate', (event) => {
 });
 
 function initializeRouter(): void {
-	router.addRoute('/', '<signup-form></signup-form>');
+	router.addRoute('/', '<dashboard-component></dashboard-component>');
 	router.addRoute('/login', '<login-form></login-form>');
 	router.addRoute('/signup', '<signup-form></signup-form>');
 	
