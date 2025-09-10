@@ -1,13 +1,12 @@
 import { UserForm } from "./UserForm";
 import { router } from "../../router/Router";
 import messages from "../Messages";
+import { setUser } from "../../store/UserStore";
 
-	interface UserLogin {
+	type UserLogin = {
 		email?: string;
 		username?: string;
 		password: string;
-		token?: string;
-		//remember: boolean;
 	}
 
 class LoginForm extends UserForm{
@@ -20,6 +19,28 @@ class LoginForm extends UserForm{
 		console.log("Google OAuth işlemi başlatılıyor...");
 		// veya
 		// window.open("http://localhost:3000/auth/google", "_self");
+	}
+
+	private handleApiError(status: number, data: any): void {
+		const errorMessage = data?.message || "Bilinmeyen bir hata oluştu.";
+		let errorTitle = "Giriş Başarısız";
+
+		switch (status) {
+			case 400:
+				errorTitle = "Geçersiz İstek";
+				break;
+			case 401:
+				errorTitle = "Hatalı Giriş Bilgisi";
+				break;
+			case 404:
+				errorTitle = "Kullanıcı Bulunamadı";
+				break;
+			case 500:
+				errorTitle = "Sunucu Hatası";
+				break;
+		}
+
+		messages.showMessage(errorTitle, errorMessage, "error", ".p-8");
 	}
 	protected setupEvents(): void {
 		super.setupEvents(); 
@@ -37,7 +58,103 @@ class LoginForm extends UserForm{
 		});
 		
 	}
+	protected async handleSubmit(e: Event): Promise<void> 
+		{
+			e.preventDefault();
+			const formData = new FormData(this.form);
+			
+			// Email veya kullanıcı adı boş olamaz
+			const emailOrUsername = (formData.get("emailOrUsername") as string || "").trim();
+			if (!emailOrUsername) {
+				messages.showMessage("Hata", "Lütfen e-posta veya kullanıcı adı girin.", "error", ".p-8");
+				return;
+			}
+			
+			const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/; 
+			if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
+				return;
 
+			const userData: UserLogin = {
+				email: emailOrUsername.includes('@') ? emailOrUsername : undefined,
+				username: emailOrUsername.includes('@') ? undefined : emailOrUsername,
+				password: (formData.get("password") as string || "").trim(),
+				//remember: formData.has("remember"),
+			};
+			console.log("Giriş için gönderilen veri:", userData);
+			try {
+				const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(userData),
+					credentials : 'include' 
+				});
+
+				// API yanıtını al ve parse et
+				let data;
+				try {
+					const responseText = await response.text();
+					data = JSON.parse(responseText);
+				} catch (parseError) {
+					console.error('JSON parse error:', parseError);
+					messages.showMessage("Hata", "Sunucudan geçersiz yanıt alındı. Lütfen tekrar deneyin.", "error", ".p-8");
+					return;
+				}
+
+				// Hata durumunu kontrol et
+				if (!response.ok) {
+					this.handleApiError(response.status, data);
+					return;
+				}
+
+				// Başarılı yanıt kontrolü
+				if (data.success) {
+					if (!data.user || typeof data.user !== 'object') {
+						messages.showMessage("Hata", "Kullanıcı bilgileri alınamadı. Lütfen tekrar deneyin.", "error", ".p-8");
+						return;
+					}
+
+					messages.showLoadingAnimation(".p-8");
+					
+					const userSetSuccess = setUser(data.user);
+					if (!userSetSuccess) {
+						messages.showMessage("Hata", "Kullanıcı verisi işlenirken hata oluştu.", "error", ".p-8");
+						return;
+					}
+
+					setTimeout(() => {
+						router.navigate("/");
+					}, 4000);
+				} else {
+					// Backend'den gelen spesifik hata mesajı
+					const errorMessage = typeof data.message === 'string' 
+						? data.message.slice(0, 200) 
+						: "Giriş işlemi başarısız. Bilgilerinizi kontrol edin.";
+					
+					messages.showMessage("Giriş Başarısız", errorMessage, "error", ".p-8");
+				}
+			} catch (error) {
+				console.error('Network error:', error);
+				
+				// Network ve diğer hatalar için spesifik mesajlar
+				let userMessage = "Bilinmeyen bir hata oluştu.";
+				
+				if (error instanceof TypeError && error.message.includes('fetch')) {
+					userMessage = "İnternet bağlantınızı kontrol edin ve tekrar deneyin.";
+				} else if (error instanceof Error) {
+					if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+						userMessage = "Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edin.";
+					} else if (error.message.includes('timeout')) {
+						userMessage = "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.";
+					} else {
+						userMessage = "Bağlantı hatası oluştu. Lütfen tekrar deneyin.";
+					}
+				}
+				
+				messages.showMessage("Bağlantı Hatası", userMessage, "error", ".p-8");
+			}
+	}
 	protected createForm(): string {
 		return(`
 			<section class="bg-gray-50 dark:bg-gray-900">
@@ -100,66 +217,7 @@ class LoginForm extends UserForm{
 </section>
 			`)
 	}
-	protected async handleSubmit(e: Event): Promise<void> 
-	{
-		e.preventDefault();
-		const formData = new FormData(this.form);
-		
-		// Email veya kullanıcı adı boş olamaz
-		const emailOrUsername = (formData.get("emailOrUsername") as string || "").trim();
-		if (!emailOrUsername) {
-			messages.showMessage("Hata", "Lütfen e-posta veya kullanıcı adı girin.", "error", ".p-8");
-			return;
-		}
-		
-		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/; 
-		if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
-			return;
-
-		const userData: UserLogin = {
-			email: emailOrUsername.includes('@') ? emailOrUsername : undefined,
-			username: emailOrUsername.includes('@') ? undefined : emailOrUsername,
-			password: (formData.get("password") as string || "").trim(),
-			//remember: formData.has("remember"),
-		};
-		console.log("Giriş için gönderilen veri:", userData);
-		try {
-			await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(userData),
-				credentials : 'include' 
-			})
-			.then(res => {
-				if (res.ok) {
-					return res.json();
-				} else {
-					throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-				}
-			})
-			.then(data => {
-				
-				if (data.success) {
-					messages.showLoadingAnimation(".p-8");
-					userData.token = data.token;
-					console.log("token: --_>", userData.token)
-					setTimeout(() => {
-						router.navigate("/");
-					}, 5000);
-				} else {
-					messages.showMessage("Hata", data.message || "Giriş işlemi başarısız. Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.", "error", ".p-8");}
-			})
-			.catch(error => {
-				console.error('Login error:', error);
-				messages.showMessage("Hata", "Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.", "error", ".p-8");
-			});
-		} catch (error) {
-			console.error('Network error:', error);
-			messages.showMessage("Hata", "Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.", "error", ".p-8");
-	}
-}
+	
 
 }
 customElements.define("login-form", LoginForm);

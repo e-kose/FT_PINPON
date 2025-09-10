@@ -1,7 +1,7 @@
 import ErrorPages  from "../components/errors/ErrorPages";
 import "../components/forms/SignupForm";
 import "../components/forms/UserForm";
-import "../components/DashboardComponent";
+import "../components/Dashboard";
 import "../components/sideBarComponents/Settings";
 
 class Router
@@ -73,6 +73,7 @@ function initializeRouter(): void {
 	router.addRoute('/tournament', '<tournament-component></tournament-component>');
 	router.addRoute('/friends', '<friends-component></friends-component>');
 	router.addRoute('/chat', '<chat-component></chat-component>');
+	router.addRoute('/error', new ErrorPages().ErrorPages.general());
 	
 	document.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
