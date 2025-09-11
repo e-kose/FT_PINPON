@@ -1,6 +1,11 @@
+import messages from "../Messages";
+
 export abstract class UserForm extends HTMLElement {
 
   protected form!: HTMLFormElement;
+
+  // Abstract error mapping - alt sınıflar kendi error mapping'lerini tanımlayacak
+  protected abstract errorMappings: Record<number, { title: string, message: string }>;
 
   connectedCallback() {
     this.innerHTML = this.createForm();
@@ -13,6 +18,35 @@ export abstract class UserForm extends HTMLElement {
   protected setupEvents(): void {
     this.form?.addEventListener("submit", this.handleSubmit.bind(this));
   }
+
+  // Ortak hata yönetim metodu
+  protected getErrorMessage(status: number): { title: string, message: string } {
+    const errorInfo = this.errorMappings[status];
+    
+    if (!errorInfo) {
+      return {
+        title: "Beklenmeyen Hata",
+        message: "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin."
+      };
+    }
+
+    return errorInfo;
+  }
+
+  // Ortak API hata işleme metodu
+  protected handleApiError(status: number): void {
+    const { title, message } = this.getErrorMessage(status);
+    messages.showMessage(title, message, "error", ".p-8");
+  }
+
+  // XSS güvenliği için input sanitization
+  protected sanitizeInput(input: string): string {
+    return input.trim()
+      .replace(/[<>]/g, '') // Remove < and > characters
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+=/gi, ''); // Remove event handlers like onclick=
+  }
+
   protected checkInput = (rule : RegExp, inputElement:string, labelElement: string, labelText: string): boolean =>{
 			const input = this.querySelector(inputElement) as HTMLInputElement;
 			const label = this.querySelector(labelElement) as HTMLLabelElement;

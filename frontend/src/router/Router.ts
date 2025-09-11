@@ -43,8 +43,12 @@ function fillIndex(htmlValue: string, path?: string): void {
 			//xss koruması
 			app.innerHTML = "";
 			app.appendChild(stringToHTMLElement(htmlValue));	
-			if (path && window.location.pathname !== path) {
-				window.history.pushState({ path }, '', path);
+			if (path) {
+				if (window.location.pathname !== path) {
+					window.history.pushState({ path }, '', path);
+				} else {
+					window.history.replaceState({ path }, '', path);
+				}
 			}
 		} else {
 			const errorElement = stringToHTMLElement(errPages.ErrorPages.general());
@@ -59,9 +63,9 @@ function fillIndex(htmlValue: string, path?: string): void {
 const router = new Router();
 addEventListener('popstate', (event) => {
 	console.log("Popstate event:", event);
-	if (event.state && event.state.path) {
-		router.navigate(event.state.path);
-	}
+	const path = (event.state && event.state.path) ? event.state.path : window.location.pathname;
+	console.log("Navigating to path from popstate:", path);
+	router.navigate(path);
 });
 
 function initializeRouter(): void {

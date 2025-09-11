@@ -10,6 +10,22 @@ interface UserSignup {
 
 export default class SignupForm extends UserForm 
 {
+	// Signup'a özel error mapping'i override ediyoruz
+	protected errorMappings = {
+		400: {
+			title: "Geçersiz Veri",
+			message: "Girdiğiniz bilgilerde bir hata var. Lütfen tüm alanları doğru şekilde doldurup tekrar deneyin."
+		},
+		409: {
+			title: "Kullanıcı Zaten Mevcut",
+			message: "Bu e-posta adresi ile zaten bir hesap var. Giriş yapmayı deneyin."
+		},
+		500: {
+			title: "Sistemsel Hata",
+			message: "Sunucuda teknik bir sorun oluştu. Lütfen daha sonra tekrar deneyin."
+		}
+	};
+
 	protected setupEvents(): void {
 		super.setupEvents(); // sbmti butonunu bağladım
 		
@@ -34,52 +50,84 @@ export default class SignupForm extends UserForm
 		// window.open("http://localhost:3000/auth/google", "_self");
 	}
 
-	protected async handleSubmit(e: Event): Promise<void> 
-	{
-			e.preventDefault();
+	protected handleSubmit(e: Event): void {
+		e.preventDefault();
 		const formData = new FormData(this.form);
+		
+		// XSS güvenliği ile input sanitization
 		const userData: UserSignup = {
-			email: formData.get("email") as string,
-			username: formData.get("username") as string,
-			password: formData.get("password") as string,
+			email: this.sanitizeInput(formData.get("email") as string || ""),
+			username: this.sanitizeInput(formData.get("username") as string || ""),
+			password: this.sanitizeInput(formData.get("password") as string || ""),
 		};
 			
 		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 		if (!this.checkInput(emailPattern, '#email', 'label[for="email"]', 'E-posta'))
-				return;
-		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/; 
+			return;
+		
+		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/; 
 		if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', 'Şifre'))
 			return;
-	
-		try {
-			 await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},	
-				body: JSON.stringify(userData)
-			})
-			.then(res => {
-				return res.ok ? res.json() : Promise.reject(new Error('Registration failed'));
-			})
-			.then(data => {
-				console.log(data);
-				if (data.success) {
-					messages.showMessage("Başarılı","Kayıt işleminiz başarıyla tamamlandı. Giriş Ekranına Yönlendiriliyorsunuz...", "success", ".p-8");
-					setTimeout(() => {
-						router.navigate("/login");
-					}, 5000);
-				} else {
-					console.log("false: ", data.message);
-					messages.showMessage("Hata",data.message || "Kayıt işlemi başarısız.", "error", ".p-8");
-				}
-			})
-			.catch(error => {
-				alert("Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin!\n" + error.message);
-			});
-		} catch (error) {
-			alert("Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+
+		fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},	
+			body: JSON.stringify(userData)
+		})
+		.then(res => {
+			return res.text().then(text => ({
+				status: res.status,
+				ok: res.ok,
+				data: text ? JSON.parse(text) : {}
+			}));
+		})
+		.then(({ status, ok, data }) => {
+			if (ok) {
+				this.handleSuccessfulRegistration(data);
+			} else {
+				this.handleApiError(status);
+			}
+		})
+		.catch(error => {
+			console.error('Registration error:', error);
+			this.handleNetworkError(error);
+		});
+	}
+
+	private handleSuccessfulRegistration(data: any): void {
+		if (!data.success) {
+			const errorMessage = typeof data.message === 'string' 
+				? data.message.slice(0, 200) 
+				: "Kayıt işlemi başarısız oldu.";
+			
+			messages.showMessage("Kayıt Başarısız", errorMessage, "error", ".p-8");
+			return;
 		}
+
+		messages.showMessage("Başarılı", "Kayıt işleminiz başarıyla tamamlandı. Giriş Ekranına Yönlendiriliyorsunuz...", "success", ".p-8");
+		setTimeout(() => {
+			router.navigate("/login");
+		}, 5000);
+	}
+
+	private handleNetworkError(error: any): void {
+		let userMessage = "Bilinmeyen bir hata oluştu.";
+		
+		if (error instanceof TypeError && error.message.includes('fetch')) {
+			userMessage = "İnternet bağlantınızı kontrol edin ve tekrar deneyin.";
+		} else if (error instanceof Error) {
+			if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+				userMessage = "Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edin.";
+			} else if (error.message.includes('timeout')) {
+				userMessage = "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.";
+			} else {
+				userMessage = "Bağlantı hatası oluştu. Lütfen tekrar deneyin.";
+			}
+		}
+		
+		messages.showMessage("Bağlantı Hatası", userMessage, "error", ".p-8");
 	}
 	
 	protected createForm(): string {
