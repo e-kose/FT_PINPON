@@ -8,12 +8,14 @@ import {
   login,
   updateAvatarHandler,
   updateUserHandler,
+  updateUserPassword,
 } from "../controller/user.controller.js";
 import { registerUserSchema } from "../schemas/register.user.schema.js";
 import { loginUserSchema } from "../schemas/login.user.schema.js";
 import { deleteUserSchema } from "../schemas/delete.user.schema.js";
 import {
   updateAvatarSchema,
+  updatePasswordSchema,
   updateUserSchema,
 } from "../schemas/update.user.schema.js";
 import { getUserSchema } from "../schemas/get.user.schema.js";
@@ -64,6 +66,12 @@ export async function userRoute(app: FastifyInstance) {
     updateAvatarHandler
   );
 
+  app.patch(
+    "/user/password",
+    { schema: createSchema("Password change", updatePasswordSchema) },
+    updateUserPassword
+  );
+  
   app.delete(
     "/user",
     { schema: createSchema("User delete", deleteUserSchema) },

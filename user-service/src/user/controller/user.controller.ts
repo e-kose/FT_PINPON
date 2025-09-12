@@ -43,7 +43,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
     return reply.code(200).send({
       ...user,
       success: true,
-      message: "User successfully logged in"
+      message: "User successfully logged in",
     });
   } catch (error) {
     logError(req.server, req, error);
@@ -88,7 +88,7 @@ export async function getUserByEmail(req: FastifyRequest, reply: FastifyReply) {
       (req.params as userParam).email
     );
     if (!user) throw new UserNotFound();
-   const { user_id, full_name, avatar_url, bio, ...userFields } = user;
+    const { user_id, full_name, avatar_url, bio, ...userFields } = user;
     const userData = {
       ...userFields,
       profile: { user_id, full_name, avatar_url, bio },
@@ -139,10 +139,11 @@ export async function updateUserHandler(
   reply: FastifyReply
 ) {
   try {
-    const id = +(req.headers['x-user-id']!);
+    const id = +req.headers["x-user-id"]!;
     const data = req.body;
     const userRepo = req.server.userRepo as UserRepository;
     const result = userRepo.updateUser(id, data);
+    console.log(result);
     if (result) {
       return reply.send({ success: true, message: "User updated" });
     } else {
@@ -151,26 +152,69 @@ export async function updateUserHandler(
   } catch (error) {
     logError(req.server, req, error);
     if (error instanceof UserNotFound)
-      return reply.code(error.statusCode).send({succcess : false, message : error.message});
-    return reply.code(500).send({ success: false, message: "An error has occurred" });
+      return reply
+        .code(error.statusCode)
+        .send({ succcess: false, message: error.message });
+    return reply
+      .code(500)
+      .send({ success: false, message: "An error has occurred" });
   }
 }
 
-export async function updateAvatarHandler(req : FastifyRequest, reply : FastifyReply){
+export async function updateAvatarHandler(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
   try {
-    const id = +(req.headers['x-user-id']!);
+    const id = +req.headers["x-user-id"]!;
     if (!req.isMultipart()) {
-      return reply.code(406).send({ success: false, message: "Request must be multipart/form-data" });
+      return reply
+        .code(406)
+        .send({
+          success: false,
+          message: "Request must be multipart/form-data",
+        });
     }
     const user = req.server.userRepo?.getUserById(id);
-    if(!user) throw new UserNotFound();
+    if (!user) throw new UserNotFound();
     const result = await req.server.userService!.avatarUpdateService(req, id);
     reply.send(result);
   } catch (error) {
     logError(req.server, req, error);
-    if(error instanceof BadRequest || error instanceof UserNotFound)
-      return reply.code(error.statusCode).send({ success: false, message: error.message });
-    return reply.code(500).send({ success: false, message: "An error has occurred" });
+    if (error instanceof BadRequest || error instanceof UserNotFound)
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
+    return reply
+      .code(500)
+      .send({ success: false, message: "An error has occurred" });
+  }
+}
+
+export async function updateUserPassword(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const id = +req.headers["x-user-id"]!;
+    const user = req.server.userRepo?.getUserById(id);
+    if (!user) throw new UserNotFound();
+    const res = await req.server.userService!.updatePassword(req, id);
+    return reply
+      .code(200)
+      .send({
+        success: true,
+        message: "The password has been successfully changed.",
+      });
+  } catch (error) {
+    logError(req.server, req, error);
+    if (error instanceof InvalidCredentials || error instanceof UserNotFound)
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
+    return reply
+      .code(500)
+      .send({ success: false, message: "An error has occurred" });
   }
 }
 
@@ -179,7 +223,7 @@ export async function deleteUserHandler(
   reply: FastifyReply
 ) {
   try {
-    const id = +(req.headers['x-user-id']!);
+    const id = +req.headers["x-user-id"]!;
     const userRepo = req.server.userRepo as UserRepository;
     const result = userRepo.deleteUser(id);
     if (result && result.changes > 0) {
@@ -190,7 +234,11 @@ export async function deleteUserHandler(
   } catch (error) {
     logError(req.server, req, error);
     if (error instanceof UserNotFound)
-      return reply.code(error.statusCode).send({ success: false, message: error.message });
-    return reply.code(500).send({ success: false, message: "An error has occurred" });
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
+    return reply
+      .code(500)
+      .send({ success: false, message: "An error has occurred" });
   }
 }

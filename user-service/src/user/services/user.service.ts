@@ -53,7 +53,9 @@ export class UserService {
     const file = await req.file();
     if (!file) throw new BadRequest("No file uploaded");
 
-    const file_name = `user-${id}-${Date.now()}-${file.filename.replace(/\s+/g, "_") || "avatar"}`;
+    const file_name = `user-${id}-${Date.now()}-${
+      file.filename.replace(/\s+/g, "_") || "avatar"
+    }`;
 
     const object = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
@@ -67,5 +69,18 @@ export class UserService {
     app.userRepo?.updateTable("user_profiles", id, { avatar_url: url });
 
     return { message: "Avatar updated", avatar_url: url };
+  }
+
+  async updatePassword(req: FastifyRequest, id: number) {
+    const { oldPass, newPass } = req.body as {
+      oldPass: string;
+      newPass: string;
+    };
+    const userPass = this.userRepo.getUserById(id).password;
+    const checkedPass = await checkHash(oldPass, userPass);
+    if (!checkedPass) throw new InvalidCredentials();
+    const hashedPass = await hashTransaction(newPass);
+    const res = this.userRepo.updateUser(id, { password: hashedPass });
+    return res;
   }
 }
