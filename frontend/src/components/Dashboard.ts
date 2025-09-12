@@ -5,6 +5,7 @@ import "./PlayerList";
 import "./LastGames";
 import { getUser, subscribeUser } from "../store/UserStore";
 import type { User } from "../types/User";
+import { router } from "../router/Router";
 
 class Dashboard extends HTMLElement {
 
@@ -282,11 +283,11 @@ class Dashboard extends HTMLElement {
     }
 
     private handleCtaSignup(): void {
-        // TODO: Navigate to signup page
+        router.navigate('/signup');
     }
 
     private handleCtaLogin(): void {
-        // TODO: Navigate to login page
+        router.navigate('/login');
     }
 }
 

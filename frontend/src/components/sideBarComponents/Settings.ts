@@ -44,16 +44,16 @@ class Settings extends HTMLElement {
                     <div class="mb-8">
                         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
                             <span class="mr-4 text-4xl">⚙️</span>
-                            Settings
+                            Ayarlar
                         </h1>
-                        <p class="text-gray-600 dark:text-gray-400 ml-16">Manage your account and preferences</p>
+                        <p class="text-gray-600 dark:text-gray-400 ml-16">Hesabınızı ve tercihlerinizi yönetin</p>
                     </div>
 
                     <!-- Profile Section -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                             <span class="text-2xl mr-3">👤</span>
-                            Profile Information
+                            Profil Bilgileri
                         </h2>
 
                         <!-- Avatar Upload -->
@@ -63,15 +63,15 @@ class Settings extends HTMLElement {
                                     ${this.getInitials()}
                                 </div>
                                 <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer" id="avatar-overlay">
-                                    <span class="text-white text-sm font-medium">Change</span>
+                                    <span class="text-white text-sm font-medium">Değiştir</span>
                                 </div>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Profile Picture</h3>
-                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Upload a new avatar to personalize your profile</p>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Profil Fotoğrafı</h3>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Profilinizi kişiselleştirmek için yeni bir avatar yükleyin</p>
                                 <input type="file" id="avatar-input" accept="image/*" class="hidden">
                                 <button id="upload-avatar-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
-                                    Upload New Avatar
+                                    Yeni Avatar Yükle
                                 </button>
                             </div>
                         </div>
@@ -82,7 +82,7 @@ class Settings extends HTMLElement {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                             <span class="text-2xl mr-3">📝</span>
-                            Account Information
+                            Hesap Bilgileri
                         </h2>
 
                         <!-- Username Section -->
@@ -90,10 +90,10 @@ class Settings extends HTMLElement {
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
                                     <span class="mr-2">👤</span>
-                                    Username
+                                    Kullanıcı Adı
                                 </h3>
                                 <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                                    Current: ${this.currentUser.username || 'Not Set'}
+                                    Mevcut: ${this.currentUser.username || 'Ayarlanmamış'}
                                 </span>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
@@ -103,12 +103,12 @@ class Settings extends HTMLElement {
                                         id="username" 
                                         value="${this.currentUser.username || ''}" 
                                         class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500 shadow-md"
-                                        placeholder="Enter new username"
+                                        placeholder="Yeni kullanıcı adını girin"
                                     >
                                 </div>
                                 <button id="save-username-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center">
                                     <span class="mr-2">💾</span>
-                                    Save Username
+                                    Kullanıcı Adını Kaydet
                                 </button>
                             </div>
                         </div>
@@ -118,10 +118,10 @@ class Settings extends HTMLElement {
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
                                     <span class="mr-2">📧</span>
-                                    Email Address
+                                    E-posta Adresi
                                 </h3>
                                 <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
-                                    Current: ${this.currentUser.email || 'Not Set'}
+                                    Mevcut: ${this.currentUser.email || 'Ayarlanmamış'}
                                 </span>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
@@ -131,12 +131,12 @@ class Settings extends HTMLElement {
                                         id="email" 
                                         value="${this.currentUser.email || ''}" 
                                         class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-green-400 dark:hover:border-green-500 shadow-md"
-                                        placeholder="Enter new email address"
+                                        placeholder="Yeni e-posta adresini girin"
                                     >
                                 </div>
                                 <button id="save-email-btn" class="px-6 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center">
                                     <span class="mr-2">📨</span>
-                                    Save Email
+                                    E-postayı Kaydet
                                 </button>
                             </div>
                         </div>
@@ -146,51 +146,51 @@ class Settings extends HTMLElement {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                             <span class="text-2xl mr-3">🔒</span>
-                            Security
+                            Güvenlik
                         </h2>
 
                         <!-- Change Password -->
                         <div class="space-y-4">
                             <div>
                                 <label for="current-password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                    Current Password
+                                    Mevcut Şifre
                                 </label>
                                 <input 
                                     type="password" 
                                     id="current-password" 
                                     class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                                    placeholder="Enter current password"
+                                    placeholder="Mevcut şifrenizi girin"
                                 >
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="new-password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        New Password
+                                        Yeni Şifre
                                     </label>
                                     <input 
                                         type="password" 
                                         id="new-password" 
                                         class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                                        placeholder="Enter new password"
+                                        placeholder="Yeni şifrenizi girin"
                                     >
                                 </div>
 
                                 <div>
                                     <label for="confirm-password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        Confirm Password
+                                        Şifreyi Onayla
                                     </label>
                                     <input 
                                         type="password" 
                                         id="confirm-password" 
                                         class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                                        placeholder="Confirm new password"
+                                        placeholder="Yeni şifrenizi onaylayın"
                                     >
                                 </div>
                             </div>
 
                             <button id="change-password-btn" class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white rounded-xl font-bold transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
-                                Update Password
+                                Şifreyi Güncelle
                             </button>
                         </div>
                     </div>
@@ -199,7 +199,7 @@ class Settings extends HTMLElement {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                             <span class="text-2xl mr-3">🎮</span>
-                            Game Preferences
+                            Oyun Tercihleri
                         </h2>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -207,16 +207,16 @@ class Settings extends HTMLElement {
                             <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200">
                                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
                                     <span class="mr-2">🔊</span>
-                                    Sound Settings
+                                    Ses Ayarları
                                 </h3>
                                 <div class="space-y-3">
                                     <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
                                         <input type="checkbox" id="sound-effects" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Sound Effects</span>
+                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Ses Efektleri</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
                                         <input type="checkbox" id="background-music" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Background Music</span>
+                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Arka Plan Müziği</span>
                                     </label>
                                 </div>
                             </div>
@@ -225,16 +225,16 @@ class Settings extends HTMLElement {
                             <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200">
                                 <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
                                     <span class="mr-2">🖥️</span>
-                                    Display Settings
+                                    Görüntü Ayarları
                                 </h3>
                                 <div class="space-y-3">
                                     <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
                                         <input type="checkbox" id="dark-mode" class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Dark Mode</span>
+                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Karanlık Mod</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
                                         <input type="checkbox" id="animations" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Animations</span>
+                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Animasyonlar</span>
                                     </label>
                                 </div>
                             </div>
@@ -245,7 +245,7 @@ class Settings extends HTMLElement {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                             <span class="text-2xl mr-3">🔐</span>
-                            Privacy Settings
+                            Gizlilik Ayarları
                         </h2>
 
                         <div class="space-y-4">
@@ -253,9 +253,9 @@ class Settings extends HTMLElement {
                                 <div>
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center">
                                         <span class="mr-2">👁️</span>
-                                        Show Online Status
+                                        Çevrimiçi Durumu Göster
                                     </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Let other players see when you're online</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Diğer oyuncuların çevrimiçi olduğunuzu görmesine izin verin</p>
                                 </div>
                                 <input type="checkbox" id="show-online-status" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
                             </label>
@@ -264,9 +264,9 @@ class Settings extends HTMLElement {
                                 <div>
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center">
                                         <span class="mr-2">👥</span>
-                                        Allow Friend Requests
+                                        Arkadaşlık İsteklerine İzin Ver
                                     </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Allow other players to send you friend requests</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Diğer oyuncuların size arkadaşlık isteği göndermesine izin verin</p>
                                 </div>
                                 <input type="checkbox" id="allow-friend-requests" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
                             </label>
@@ -275,9 +275,9 @@ class Settings extends HTMLElement {
                                 <div>
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center">
                                         <span class="mr-2">📊</span>
-                                        Show Game Stats
+                                        Oyun İstatistiklerini Göster
                                     </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Display your game statistics on your profile</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Oyun istatistiklerinizi profilinizde görüntüleyin</p>
                                 </div>
                                 <input type="checkbox" id="show-game-stats" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
                             </label>
