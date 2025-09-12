@@ -16,5 +16,5 @@ import "./components/sideBarComponents/Settings"
 // Router'ı başlat
 initializeRouter();
 // Başlangıç sayfasına yönlendir
-router.navigate(document.location.pathname || "/signup");
+router.navigate(document.location.pathname || "/");
 

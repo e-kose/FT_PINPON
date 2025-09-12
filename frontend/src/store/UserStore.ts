@@ -1,7 +1,10 @@
 import type { User } from '../types/User.ts';
 import { router } from '../router/Router.ts';
+
 // Simple in-memory user store
 let currentUser: User | null = null;
+type UserListener = (user: User | null) => void;
+const listeners: UserListener[] = [];
 
 // XSS Protection - HTML sanitization
 function sanitizeString(str: string): string {
@@ -68,6 +71,9 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
       const updatedAt = sanitizeString(userData.updated_at.toString());
       sanitizedUser.updated_at = updatedAt;
     }
+  const random = Math.floor(Math.random() * 13) + 1;
+  console.log("Random:" , random);
+  sanitizedUser.avatar = `/Avatar/${random}.png`
 
     return sanitizedUser;
   } catch (error) {
@@ -76,16 +82,16 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
   }
 }
 
+
 export function setUser(userData: any): boolean {
   const sanitizedData = validateAndSanitizeUser(userData);
-  
   if (!sanitizedData) {
-	router.navigate("/error");
+    router.navigate("/error");
     console.warn('Failed to set user - invalid data');
     return false;
   }
-
-    currentUser ?  Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;
+  currentUser ? Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;
+  notifyListeners();
   return true;
 }
 
@@ -93,14 +99,36 @@ export function getUser(): User | null {
   return currentUser ? { ...currentUser } : null;
 }
 
+
 export function clearUser(): void {
   currentUser = null;
+  notifyListeners();
 }
 
+
 export function updateUser(updates: Partial<User>): boolean {
-  !currentUser ?  router.navigate("/error") : null;
+  if (!currentUser) {
+    router.navigate("/error");
+    return false;
+  }
   const updatedUserData = { ...currentUser, ...updates };
   return setUser(updatedUserData);
+}
+
+// --- Reactivity ---
+function notifyListeners() {
+  listeners.forEach(listener => listener(getUser()));
+}
+
+export function subscribeUser(listener: UserListener): () => void {
+  listeners.push(listener);
+  // Hemen mevcut user ile bilgilendir
+  listener(getUser());
+  // Unsubscribe fonksiyonu döndür
+  return () => {
+    const idx = listeners.indexOf(listener);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
 }
 
 export function isAuthenticated(): boolean {

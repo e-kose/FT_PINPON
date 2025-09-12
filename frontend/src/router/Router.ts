@@ -6,21 +6,34 @@ import "../components/sideBarComponents/Settings";
 
 class Router
 {
-
-	
 	private routes: { path: string; component: string }[] = [];
 	
 	public addRoute(path: string, component: string): void {
 		this.routes.push({ path, component });
 	}
-	public navigate(path: string): void {
+	private handleRoute(path: string | null): void 
+	{
+		if (path) {
+			if (window.location.pathname !== path) {
+				window.history.pushState({ path }, '', path);
+			} else {
+				window.history.replaceState({ path }, '', path);
+			}
+		}
+	}
+	public navigate(path: string): void 
+	{
+		const previouesPath = window.location.pathname;
 		console.log("Navigating to:", path);
+		const app = document.getElementById("app");
 		const route = this.routes.find(r => r.path === path);
 		if (route) {
-			fillIndex(route.component, path);
+			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
+			fillIndex(route.component, app);
 		} else {
 			const errPages = new ErrorPages();
-			fillIndex(errPages.ErrorPages.notFound(), path);
+			this.handleRoute('/error');
+			fillIndex(errPages.ErrorPages.notFound(), app);
 		}
 	}
 };
@@ -34,27 +47,12 @@ function stringToHTMLElement(htmlString: string): HTMLElement {
 	return element || document.createElement('div');
 }
 
-function fillIndex(htmlValue: string, path?: string): void {
-	const app = document.getElementById("app");
-	const errPages = new ErrorPages();
-	
+function fillIndex(htmlValue: string, app: HTMLElement | null): void {
 	if (app) {
-		if (htmlValue) {
-			//xss koruması
-			app.innerHTML = "";
-			app.appendChild(stringToHTMLElement(htmlValue));	
-			if (path) {
-				if (window.location.pathname !== path) {
-					window.history.pushState({ path }, '', path);
-				} else {
-					window.history.replaceState({ path }, '', path);
-				}
-			}
-		} else {
-			const errorElement = stringToHTMLElement(errPages.ErrorPages.general());
-			app.appendChild(errorElement);
-		}
-	} else {
+		app.innerHTML = "";
+		htmlValue ? app.appendChild(stringToHTMLElement(htmlValue)) : app.appendChild(stringToHTMLElement(new ErrorPages().ErrorPages.general()));
+	}
+	else{
 		throw new Error("Error: root is undefined");
 	}
 }
@@ -62,9 +60,7 @@ function fillIndex(htmlValue: string, path?: string): void {
 
 const router = new Router();
 addEventListener('popstate', (event) => {
-	console.log("Popstate event:", event);
 	const path = (event.state && event.state.path) ? event.state.path : window.location.pathname;
-	console.log("Navigating to path from popstate:", path);
 	router.navigate(path);
 });
 

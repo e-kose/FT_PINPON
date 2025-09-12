@@ -27,7 +27,7 @@ class Statistics extends HTMLElement {
 
     private render(): void {
         this.innerHTML = `
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-xl shadow-xl border border-white/20 p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
                         <span class="mr-3 text-2xl">📊</span>
@@ -58,10 +58,10 @@ class Statistics extends HTMLElement {
     private generateStatsHTML(): string {
         return `
             <!-- Wins Card -->
-            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 hover:bg-green-100 dark:hover:bg-green-900/30 hover:border-green-300 dark:hover:border-green-700 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
+            <div class="bg-green-50/80 backdrop-blur-sm dark:bg-green-900/30 border border-green-200/50 dark:border-green-800/50 rounded-lg p-4 hover:bg-green-100/80 dark:hover:bg-green-900/40 hover:border-green-300/60 dark:hover:border-green-700/60 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                        <div class="w-10 h-10 bg-green-100/80 dark:bg-green-800/80 rounded-full flex items-center justify-center backdrop-blur-sm">
                             <span class="text-green-600 dark:text-green-400 text-lg">🏆</span>
                         </div>
                         <div>
@@ -73,10 +73,10 @@ class Statistics extends HTMLElement {
             </div>
             
             <!-- Losses Card -->
-            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-300 dark:hover:border-red-700 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
+            <div class="bg-red-50/80 backdrop-blur-sm dark:bg-red-900/30 border border-red-200/50 dark:border-red-800/50 rounded-lg p-4 hover:bg-red-100/80 dark:hover:bg-red-900/40 hover:border-red-300/60 dark:hover:border-red-700/60 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center">
+                        <div class="w-10 h-10 bg-red-100/80 dark:bg-red-800/80 rounded-full flex items-center justify-center backdrop-blur-sm">
                             <span class="text-red-600 dark:text-red-400 text-lg">💔</span>
                         </div>
                         <div>
@@ -88,10 +88,10 @@ class Statistics extends HTMLElement {
             </div>
             
             <!-- Rank Card -->
-            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 hover:border-yellow-300 dark:hover:border-yellow-700 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
+            <div class="bg-yellow-50/80 backdrop-blur-sm dark:bg-yellow-900/30 border border-yellow-200/50 dark:border-yellow-800/50 rounded-lg p-4 hover:bg-yellow-100/80 dark:hover:bg-yellow-900/40 hover:border-yellow-300/60 dark:hover:border-yellow-700/60 hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-800 rounded-full flex items-center justify-center">
+                        <div class="w-10 h-10 bg-yellow-100/80 dark:bg-yellow-800/80 rounded-full flex items-center justify-center backdrop-blur-sm">
                             <span class="text-yellow-600 dark:text-yellow-400 text-lg">⭐</span>
                         </div>
                         <div>

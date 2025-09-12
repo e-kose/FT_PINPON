@@ -74,7 +74,7 @@ class Dashboard extends HTMLElement {
                         </div>
 
                         <!-- Last Games Component -->
-                        <div class="bg-white/40 backdrop-blur-sm dark:bg-gray-800/20 p-6 rounded-xl shadow-xl border border-white/20">
+                        <div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-6 rounded-xl shadow-xl border border-white/20">
                             <last-games-component></last-games-component>
                         </div>
                     </div>
@@ -93,20 +93,12 @@ class Dashboard extends HTMLElement {
 					<div class="px-8 py-16 min-h-screen" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5))">
 						<!-- Hero Section -->
 						<div class="max-w-6xl mx-auto text-center mb-16">
-							<div class="mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-2xl p-12 border border-white/20 shadow-xl">
-								<!-- Logo ve Ana Başlık -->
-								<div class="flex flex-col items-center mb-8">
-									<div class="flex items-center mb-6">
-										<img class="w-24 h-24 mr-6 drop-shadow-2xl" src="/pong.png" alt="Ft_Transcendance Logo">
-										<h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white drop-shadow-2xl tracking-wide">
-											Ft_Transcendance
-										</h1>
-									</div>
-									<h2 class="text-3xl md:text-4xl font-semibold text-gray-700 dark:text-gray-300 mb-6 drop-shadow-lg">
-										🎮 Hoş Geldiniz
-									</h2>
-								</div>
-								<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto drop-shadow-md leading-relaxed">
+							<div class="mb-8 bg-white/30 backdrop-blur-md rounded-2xl p-12 border border-white/40 shadow-2xl">
+								<img class="w-32 h-32 mx-auto mb-8 drop-shadow-lg" src="/pong.png" alt="Ft_Transcendance Logo">
+								<h1 class="text-6xl font-bold text-white mb-6 drop-shadow-lg">
+									Ft_Transcendance'a Hoş Geldin
+								</h1>
+								<p class="text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
 									En eski ve en sevilen oyunlardan biri olan Pong'u modern bir yaklaşımla yeniden keşfedin. 
 									Arkadaşlarınızla oynayın, turnuvalara katılın ve liderlik tablosunda zirvede yer alın!
 								</p>
@@ -115,27 +107,27 @@ class Dashboard extends HTMLElement {
 
 						<!-- Features Grid -->
 						<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300 border border-white/20">
+							<div class="bg-white/35 backdrop-blur-md dark:bg-white/25 p-8 rounded-xl shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300 border border-white/50 hover:bg-white/45">
 								<div class="text-4xl mb-4">🎮</div>
-								<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 drop-shadow-md">Gerçek Zamanlı Oyun</h3>
-								<p class="text-gray-600 dark:text-gray-300 drop-shadow-sm">Arkadaşlarınızla veya rastgele rakiplerle gerçek zamanlı Pong oyunu oynayın.</p>
+								<h3 class="text-xl font-bold text-white mb-3 drop-shadow-md">Gerçek Zamanlı Oyun</h3>
+								<p class="text-white/95 drop-shadow-sm">Arkadaşlarınızla veya rastgele rakiplerle gerçek zamanlı Pong oyunu oynayın.</p>
 							</div>
 							
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300 border border-white/20">
+							<div class="bg-white/35 backdrop-blur-md dark:bg-white/25 p-8 rounded-xl shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300 border border-white/50 hover:bg-white/45">
 								<div class="text-4xl mb-4">🏆</div>
-								<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 drop-shadow-md">Turnuvalar</h3>
-								<p class="text-gray-600 dark:text-gray-300 drop-shadow-sm">Düzenli turnuvalara katılın ve şampiyonluk için mücadele edin.</p>
+								<h3 class="text-xl font-bold text-white mb-3 drop-shadow-md">Turnuvalar</h3>
+								<p class="text-white/95 drop-shadow-sm">Düzenli turnuvalara katılın ve şampiyonluk için mücadele edin.</p>
 							</div>
 							
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300 border border-white/20">
+							<div class="bg-white/35 backdrop-blur-md dark:bg-white/25 p-8 rounded-xl shadow-xl text-center hover:transform hover:scale-105 transition-all duration-300 border border-white/50 hover:bg-white/45">
 								<div class="text-4xl mb-4">👥</div>
-								<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 drop-shadow-md">Sosyal Özellikler</h3>
-								<p class="text-gray-600 dark:text-gray-300 drop-shadow-sm">Arkadaş ekleyin, sohbet edin ve istatistiklerinizi paylaşın.</p>
+								<h3 class="text-xl font-bold text-white mb-3 drop-shadow-md">Sosyal Özellikler</h3>
+								<p class="text-white/95 drop-shadow-sm">Arkadaş ekleyin, sohbet edin ve istatistiklerinizi paylaşın.</p>
 							</div>
 						</div>
 
 						<!-- Call to Action -->
-						<div class="max-w-4xl mx-auto bg-blue-900/90 backdrop-blur-sm dark:bg-blue-800/90 p-12 rounded-xl text-center shadow-xl border border-blue-400/40 mb-16">
+						<div class="max-w-4xl mx-auto bg-blue-900/90 backdrop-blur-md dark:bg-blue-800/90 p-12 rounded-xl text-center shadow-2xl border border-blue-400/40 mb-16">
 							<h2 class="text-3xl font-bold text-white mb-6 drop-shadow-md">Oyuna Başlamaya Hazır mısın?</h2>
 							<p class="text-blue-100 text-lg mb-8 drop-shadow-sm">Hemen kayıt ol ve Pong dünyasının bir parçası olun!</p>
 							<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -150,60 +142,60 @@ class Dashboard extends HTMLElement {
 
 						<!-- Additional Info -->
 						<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl border border-white/20 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-300">
-								<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center drop-shadow-md">
+							<div class="bg-white/35 backdrop-blur-md dark:bg-white/25 p-8 rounded-xl shadow-xl border border-white/50 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-300 hover:bg-white/45">
+								<h3 class="text-2xl font-bold text-white mb-6 flex items-center drop-shadow-md">
 									<span class="text-3xl mr-3">🏓</span>
 									Pong Deneyimi
 								</h3>
 								<div class="space-y-4">
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">⚡</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Hızlı ve akıcı oyun deneyimi</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Hızlı ve akıcı oyun deneyimi</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">🎯</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Hassas kontroller</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Hassas kontroller</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">👥</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Çoklu oyuncu desteği</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Çoklu oyuncu desteği</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">🏆</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Turnuva sistemi</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Turnuva sistemi</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">📊</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Detaylı istatistikler</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Detaylı istatistikler</span>
 									</div>
 								</div>
 							</div>
 							
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl border border-white/20 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-300">
-								<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center drop-shadow-md">
+							<div class="bg-white/35 backdrop-blur-md dark:bg-white/25 p-8 rounded-xl shadow-xl border border-white/50 hover:shadow-2xl hover:transform hover:scale-105 transition-all duration-300 hover:bg-white/45">
+								<h3 class="text-2xl font-bold text-white mb-6 flex items-center drop-shadow-md">
 									<span class="text-3xl mr-3">👥</span>
 									Sosyal Özellikler
 								</h3>
 								<div class="space-y-4">
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">💬</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Canlı sohbet sistemi</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Canlı sohbet sistemi</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">🤝</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Arkadaş sistemi</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Arkadaş sistemi</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">🎮</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Özel maçlar</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Özel maçlar</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">🏅</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Başarım rozetleri</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Başarım rozetleri</span>
 									</div>
 									<div class="flex items-center p-3 rounded-lg hover:bg-white/30 transition-colors">
 										<span class="mr-3 text-2xl">📈</span>
-										<span class="text-gray-600 dark:text-gray-300 font-medium drop-shadow-sm">Skor takibi</span>
+										<span class="text-white/95 font-medium drop-shadow-sm">Skor takibi</span>
 									</div>
 								</div>
 							</div>
