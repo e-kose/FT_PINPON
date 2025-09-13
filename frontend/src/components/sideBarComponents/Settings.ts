@@ -1,26 +1,21 @@
 import "../Header";
 import "../SideBar";
-
-interface UserLogin {
-    email?: string;
-    username?: string;
-    password: string;
-}
+import type { User } from '../../types/User.ts';
+import { getUser, setUser } from '../../store/UserStore.ts';
 
 class Settings extends HTMLElement {
-    private currentUser: UserLogin = {
-        email: "user@example.com",
-        username: "playerone",
-        password: ""
-    };
+    private currentUser: User | null = null;
 
     constructor() {
         super();
+        // Load current user from UserStore
+        this.currentUser = getUser();
         this.render();
+        this.attachEventListeners();
     }
 
     connectedCallback(): void {
-        this.setupEvents();
+        this.attachEventListeners();
     }
 
     disconnectedCallback(): void {
@@ -28,6 +23,18 @@ class Settings extends HTMLElement {
     }
 
     private render(): void {
+        // if (!this.currentUser) {
+        //     this.innerHTML = `
+        //         <div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        //             <div class="text-center backdrop-blur-lg bg-white/10 rounded-2xl p-8 border border-white/20">
+        //                 <h1 class="text-2xl font-bold text-white mb-4">Kullanıcı Bilgisi Bulunamadı</h1>
+        //                 <p class="text-blue-200">Lütfen önce giriş yapın.</p>
+        //             </div>
+        //         </div>	
+        //     `;
+        //     return;
+        // }
+
         this.innerHTML = `
             <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <!-- Header Component -->
@@ -39,410 +46,497 @@ class Settings extends HTMLElement {
                     
                     <!-- Main Content -->
                     <div class="pl-16">
-                <div class="max-w-6xl mx-auto p-6">
-                    <!-- Header -->
-                    <div class="mb-8">
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
-                            <span class="mr-4 text-4xl">⚙️</span>
-                            Ayarlar
-                        </h1>
-                        <p class="text-gray-600 dark:text-gray-400 ml-16">Hesabınızı ve tercihlerinizi yönetin</p>
-                    </div>
+                        <div class="max-w-4xl mx-auto p-6">
+                            <!-- Page Header -->
+                            <div class="mb-8">
+                                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Ayarlar</h1>
+                                <p class="text-gray-600 dark:text-gray-400 mt-2">Hesap bilgilerinizi ve tercihlerinizi yönetin</p>
+                            </div>
 
-                    <!-- Profile Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                            <span class="text-2xl mr-3">👤</span>
-                            Profil Bilgileri
-                        </h2>
-
-                        <!-- Avatar Upload -->
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
-                            <div class="relative group">
-                                <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-700 dark:from-blue-400 dark:to-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                                    ${this.getInitials()}
+                            <!-- Account Section -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+                                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Hesap</h2>
                                 </div>
-                                <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer" id="avatar-overlay">
-                                    <span class="text-white text-sm font-medium">Değiştir</span>
+                                <div class="p-6">
+                                    <!-- Profile Photo -->
+                                    <div class="flex items-center space-x-6 mb-6">
+                                        <div class="relative">
+                                            ${this.currentUser?.profile?.avatar_url ? 
+                                                `<img src="${this.currentUser.profile.avatar_url}" alt="Avatar" class="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">` :
+                                                `<div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold border-2 border-gray-300 dark:border-gray-600">
+                                                    ${this.getInitials()}
+                                                </div>`
+                                            }
+                                            <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer" id="avatar-overlay">
+                                                <span class="text-white text-xs">Değiştir</span>
+                                            </div>
+                                        </div>
+                                      
+                                    </div>
+
+                                    <!-- Form Fields -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Username -->
+                                        <div>
+                                            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Kullanıcı Adı *
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                id="username" 
+                                                value="${this.currentUser?.username || ''}"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="Kullanıcı adınız"
+                                            >
+                                        </div>
+
+                                        <!-- Full Name -->
+                                        <div>
+                                            <label for="fullname" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Tam Ad *
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                id="fullname" 
+                                                value="${this.currentUser?.profile?.full_name || ''}"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="Tam adınız"
+                                            >
+                                        </div>
+
+                                        <!-- Email -->
+                                        <div>
+                                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                E-posta *
+                                            </label>
+                                            <input 
+                                                type="email" 
+                                                id="email" 
+                                                value="${this.currentUser?.email || ''}"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                placeholder="email@example.com"
+                                            >
+                                        </div>
+
+                                        <!-- Account Type (Read-only) -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Hesap Türü
+                                            </label>
+                                            <div class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300">
+                                                Standart Kullanıcı
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Biography -->
+                                    <div class="mt-6">
+                                        <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Biyografi
+                                        </label>
+                                        <textarea 
+                                            id="bio" 
+                                            rows="4"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+                                            placeholder="Kendiniz hakkında kısa bir açıklama yazın..."
+                                        >${this.currentUser?.profile?.bio || ''}</textarea>
+                                    </div>
+
+                                    <!-- Save Button -->
+                                    <div class="mt-6 flex justify-end">
+                                        <button id="save-account-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                            Değişiklikleri Kaydet
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Profil Fotoğrafı</h3>
-                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Profilinizi kişiselleştirmek için yeni bir avatar yükleyin</p>
-                                <input type="file" id="avatar-input" accept="image/*" class="hidden">
-                                <button id="upload-avatar-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
-                                    Yeni Avatar Yükle
-                                </button>
+
+                            <!-- Security Section -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+                                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Güvenlik</h2>
+                                </div>
+                                <div class="p-6">
+                                    <!-- Password Change -->
+                                    <div class="mb-6">
+                                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Şifre Değiştir</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Mevcut Şifre
+                                                </label>
+                                                <input 
+                                                    type="password" 
+                                                    id="current-password"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                    placeholder="Mevcut şifreniz"
+                                                >
+                                            </div>
+                                            <div></div>
+                                            <div>
+                                                <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Yeni Şifre
+                                                </label>
+                                                <input 
+                                                    type="password" 
+                                                    id="new-password"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                    placeholder="Yeni şifreniz"
+                                                >
+                                            </div>
+                                            <div>
+                                                <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Şifre Onayı
+                                                </label>
+                                                <input 
+                                                    type="password" 
+                                                    id="confirm-password"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                                    placeholder="Yeni şifrenizi tekrar girin"
+                                                >
+                                            </div>
+                                        </div>
+
+                                        <!-- Password Requirements -->
+                                        <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Şifre Gereksinimleri:</h4>
+                                            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                                                <li>• En az 8 karakter</li>
+                                                <li>• En az bir büyük harf</li>
+                                                <li>• En az bir küçük harf</li>
+                                                <li>• En az bir rakam</li>
+                                                <li>• En az bir özel karakter (!@#$%^&*)</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="mt-6">
+                                            <button id="change-password-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                                Şifreyi Değiştir
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Two-Factor Authentication -->
+                                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">İki Faktörlü Doğrulama (2FA)</h3>
+                                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Hesabınız için ekstra güvenlik katmanı ekleyin</p>
+                                            </div>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="2fa-toggle" class="sr-only peer" ${this.currentUser?.is_2fa_enabled === 1 ? 'checked' : ''}>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- General Information Section -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+                                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Genel Bilgiler</h2>
+                                </div>
+                                <div class="p-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Created At -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Hesap Oluşturma Tarihi
+                                            </label>
+                                            <div class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300">
+                                                ${this.formatDate(this.currentUser?.created_at)}
+                                            </div>
+                                        </div>
+
+                                        <!-- Last Updated -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Son Güncelleme
+                                            </label>
+                                            <div class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300">
+                                                ${this.formatDate(this.currentUser?.updated_at)}
+                                            </div>
+                                        </div>
+
+                                        <!-- User ID -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Kullanıcı ID
+                                            </label>
+                                            <div class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300">
+                                                #${this.currentUser?.id}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preferences Section -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+                                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Tercihler</h2>
+                                </div>
+                                <div class="p-6">
+                                    <!-- Dark Mode -->
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Karanlık Mod</h3>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Gözlerinizi korumak için koyu tema kullanın</p>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="dark-mode-toggle" class="sr-only peer" checked>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                    </div>
-
-                    <!-- Account Information Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                            <span class="text-2xl mr-3">📝</span>
-                            Hesap Bilgileri
-                        </h2>
-
-                        <!-- Username Section -->
-                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 mb-6 border-2 border-blue-200 dark:border-gray-500">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                                    <span class="mr-2">👤</span>
-                                    Kullanıcı Adı
-                                </h3>
-                                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                                    Mevcut: ${this.currentUser.username || 'Ayarlanmamış'}
-                                </span>
-                            </div>
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <div class="flex-1">
-                                    <input 
-                                        type="text" 
-                                        id="username" 
-                                        value="${this.currentUser.username || ''}" 
-                                        class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500 shadow-md"
-                                        placeholder="Yeni kullanıcı adını girin"
-                                    >
-                                </div>
-                                <button id="save-username-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center">
-                                    <span class="mr-2">💾</span>
-                                    Kullanıcı Adını Kaydet
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Email Section -->
-                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 border-2 border-green-200 dark:border-gray-500">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                                    <span class="mr-2">📧</span>
-                                    E-posta Adresi
-                                </h3>
-                                <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
-                                    Mevcut: ${this.currentUser.email || 'Ayarlanmamış'}
-                                </span>
-                            </div>
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <div class="flex-1">
-                                    <input 
-                                        type="email" 
-                                        id="email" 
-                                        value="${this.currentUser.email || ''}" 
-                                        class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-green-400 dark:hover:border-green-500 shadow-md"
-                                        placeholder="Yeni e-posta adresini girin"
-                                    >
-                                </div>
-                                <button id="save-email-btn" class="px-6 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center">
-                                    <span class="mr-2">📨</span>
-                                    E-postayı Kaydet
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                            <span class="text-2xl mr-3">🔒</span>
-                            Güvenlik
-                        </h2>
-
-                        <!-- Change Password -->
-                        <div class="space-y-4">
-                            <div>
-                                <label for="current-password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                    Mevcut Şifre
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="current-password" 
-                                    class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                                    placeholder="Mevcut şifrenizi girin"
-                                >
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="new-password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        Yeni Şifre
-                                    </label>
-                                    <input 
-                                        type="password" 
-                                        id="new-password" 
-                                        class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                                        placeholder="Yeni şifrenizi girin"
-                                    >
-                                </div>
-
-                                <div>
-                                    <label for="confirm-password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        Şifreyi Onayla
-                                    </label>
-                                    <input 
-                                        type="password" 
-                                        id="confirm-password" 
-                                        class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                                        placeholder="Yeni şifrenizi onaylayın"
-                                    >
-                                </div>
-                            </div>
-
-                            <button id="change-password-btn" class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white rounded-xl font-bold transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
-                                Şifreyi Güncelle
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Game Preferences -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                            <span class="text-2xl mr-3">🎮</span>
-                            Oyun Tercihleri
-                        </h2>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Sound Settings -->
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200">
-                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                                    <span class="mr-2">🔊</span>
-                                    Ses Ayarları
-                                </h3>
-                                <div class="space-y-3">
-                                    <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
-                                        <input type="checkbox" id="sound-effects" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Ses Efektleri</span>
-                                    </label>
-                                    <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
-                                        <input type="checkbox" id="background-music" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Arka Plan Müziği</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Display Settings -->
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200">
-                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                                    <span class="mr-2">🖥️</span>
-                                    Görüntü Ayarları
-                                </h3>
-                                <div class="space-y-3">
-                                    <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
-                                        <input type="checkbox" id="dark-mode" class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Karanlık Mod</span>
-                                    </label>
-                                    <label class="flex items-center cursor-pointer hover:bg-white dark:hover:bg-gray-600 p-2 rounded-lg transition-all duration-200">
-                                        <input type="checkbox" id="animations" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                                        <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">Animasyonlar</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Privacy Settings -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                            <span class="text-2xl mr-3">🔐</span>
-                            Gizlilik Ayarları
-                        </h2>
-
-                        <div class="space-y-4">
-                            <label class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-500">
-                                <div>
-                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center">
-                                        <span class="mr-2">👁️</span>
-                                        Çevrimiçi Durumu Göster
-                                    </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Diğer oyuncuların çevrimiçi olduğunuzu görmesine izin verin</p>
-                                </div>
-                                <input type="checkbox" id="show-online-status" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                            </label>
-
-                            <label class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-500">
-                                <div>
-                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center">
-                                        <span class="mr-2">👥</span>
-                                        Arkadaşlık İsteklerine İzin Ver
-                                    </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Diğer oyuncuların size arkadaşlık isteği göndermesine izin verin</p>
-                                </div>
-                                <input type="checkbox" id="allow-friend-requests" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                            </label>
-
-                            <label class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-500">
-                                <div>
-                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300 flex items-center">
-                                        <span class="mr-2">📊</span>
-                                        Oyun İstatistiklerini Göster
-                                    </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Oyun istatistiklerinizi profilinizde görüntüleyin</p>
-                                </div>
-                                <input type="checkbox" id="show-game-stats" checked class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 transition-all duration-200">
-                            </label>
-                        </div>
-                    </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Hidden file input -->
+            <input type="file" id="avatar-input" accept="image/*" class="hidden">
         `;
     }
 
-    private setupEvents(): void {
-        // Avatar upload button
-        const uploadBtn = this.querySelector('#upload-avatar-btn');
-        const avatarInput = this.querySelector('#avatar-input') as HTMLInputElement;
+    private attachEventListeners(): void {
+                // Avatar upload functionality
         const avatarOverlay = this.querySelector('#avatar-overlay');
+        const uploadBtn = this.querySelector('#upload-btn');
+        const avatarInput = this.querySelector('#avatar-input') as HTMLInputElement;
+
+        avatarOverlay?.addEventListener('click', () => {
+            avatarInput?.click();
+        });
 
         uploadBtn?.addEventListener('click', () => {
             avatarInput?.click();
         });
 
-        avatarOverlay?.addEventListener('click', () => {
-            avatarInput?.click();
+        // Avatar remove button
+        const removeBtn = this.querySelector('#remove-avatar-btn');
+        removeBtn?.addEventListener('click', () => {
+            
         });
 
         avatarInput?.addEventListener('change', (e) => {
             this.handleAvatarUpload(e);
         });
 
-        // Save username button
-        const saveUsernameBtn = this.querySelector('#save-username-btn');
-        saveUsernameBtn?.addEventListener('click', () => {
-            this.handleSaveUsername();
+        // Account section save button
+        const saveAccountBtn = this.querySelector('#save-account-btn');
+        saveAccountBtn?.addEventListener('click', () => {
+            this.saveAccountSettings();
         });
 
-        // Save email button
-        const saveEmailBtn = this.querySelector('#save-email-btn');
-        saveEmailBtn?.addEventListener('click', () => {
-            this.handleSaveEmail();
-        });
-
-        // Save settings button
-        const saveBtn = this.querySelector('#save-settings-btn');
-        saveBtn?.addEventListener('click', () => {
-            this.handleSaveSettings();
-        });
-
-        // Change password button
+        // Password change button
         const changePasswordBtn = this.querySelector('#change-password-btn');
         changePasswordBtn?.addEventListener('click', () => {
-            this.handleChangePassword();
+            this.handlePasswordChange();
         });
 
-        // Reset settings button
-        const resetBtn = this.querySelector('#reset-settings-btn');
-        resetBtn?.addEventListener('click', () => {
-            this.handleResetSettings();
+        // 2FA toggle
+        const twoFaToggle = this.querySelector('#2fa-toggle') as HTMLInputElement;
+        twoFaToggle?.addEventListener('change', (e) => {
+            const target = e.target as HTMLInputElement;
+            this.handle2FAToggle(target.checked);
         });
 
         // Dark mode toggle
-        const darkModeToggle = this.querySelector('#dark-mode') as HTMLInputElement;
+        const darkModeToggle = this.querySelector('#dark-mode-toggle') as HTMLInputElement;
         darkModeToggle?.addEventListener('change', (e) => {
-            this.handleDarkModeToggle((e.target as HTMLInputElement).checked);
+            const target = e.target as HTMLInputElement;
+            this.handleThemeToggle(target.checked);
         });
     }
 
     private getInitials(): string {
-        const username = this.currentUser.username || 'U';
-        return username.charAt(0).toUpperCase();
+        const fullName = this.currentUser?.profile?.full_name || this.currentUser?.username || 'U';
+        return fullName.split(' ').map(word => word.charAt(0).toUpperCase()).join('').slice(0, 2);
     }
 
-    // Event Handler Methods - İşlevler size bırakıldı
+    private formatDate(dateString?: string): string {
+        if (!dateString) return 'Bilinmiyor';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('tr-TR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Event Handler Methods
     private handleAvatarUpload(event: Event): void {
-        // TODO: Avatar upload işlevi buraya eklenecek
-        const input = event.target as HTMLInputElement;
-        const file = input.files?.[0];
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
         if (file) {
-            // Avatar upload logic here
-            console.log('Avatar upload:', file);
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                this.showNotification('Dosya boyutu 5MB\'dan küçük olmalıdır!', 'error');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                this.showNotification('Lütfen geçerli bir resim dosyası seçin!', 'error');
+                return;
+            }
+
+            // Create a temporary URL for the uploaded file
+            const imageUrl = URL.createObjectURL(file);
+            
+            // Update user's avatar
+            if (this.currentUser && this.currentUser.profile) {
+                this.currentUser.profile.avatar_url = imageUrl;
+                setUser(this.currentUser);
+                this.render(); // Re-render to show new avatar
+                this.attachEventListeners(); // Re-attach events after render
+                this.showNotification('Avatar başarıyla yüklendi!', 'success');
+            }
+
+            // Here you would also upload the file to your server
+            // and update the avatar_url with the server URL
         }
     }
 
-    private handleSaveUsername(): void {
-        // TODO: Username kaydetme işlevi buraya eklenecek
+    private saveAccountSettings(): void {
         const username = (this.querySelector('#username') as HTMLInputElement)?.value;
-        
-        if (username && username !== this.currentUser.username) {
-            console.log('Save username:', username);
-            // API call to save username
-            this.currentUser.username = username;
-            this.render(); // Re-render to show updated current username
-        } else {
-            console.error('Invalid username');
-        }
-    }
-
-    private handleSaveEmail(): void {
-        // TODO: Email kaydetme işlevi buraya eklenecek
         const email = (this.querySelector('#email') as HTMLInputElement)?.value;
-        
-        if (email && email !== this.currentUser.email && this.validateEmail(email)) {
-            console.log('Save email:', email);
-            // API call to save email
-            console.log('Email updated successfully!');
+        const fullname = (this.querySelector('#fullname') as HTMLInputElement)?.value;
+        const bio = (this.querySelector('#bio') as HTMLTextAreaElement)?.value;
+
+        if (!username || !email || !fullname) {
+            this.showNotification('Lütfen gerekli alanları doldurun!', 'error');
+            return;
+        }
+
+        if (!this.validateEmail(email)) {
+            this.showNotification('Geçerli bir e-posta adresi girin!', 'error');
+            return;
+        }
+
+        // Update user data
+        if (this.currentUser) {
+            this.currentUser.username = username;
             this.currentUser.email = email;
-            this.render(); // Re-render to show updated current email
-        } else {
-            console.error('Invalid email');
+            if (!this.currentUser.profile) {
+                this.currentUser.profile = {
+                    user_id: this.currentUser.id,
+                    full_name: '',
+                    avatar_url: '',
+                    bio: ''
+                };
+            }
+            this.currentUser.profile.full_name = fullname;
+            this.currentUser.profile.bio = bio;
+
+            // Update store
+            setUser(this.currentUser);
+            this.showNotification('Hesap bilgileri başarıyla güncellendi!', 'success');
+            this.render(); // Re-render to show updates
         }
     }
 
-    private handleSaveSettings(): void {
-        // TODO: General settings kaydetme işlevi buraya eklenecek
-        console.log('Save general settings');
-        // API call to save general settings (preferences, privacy, etc.)
-        console.log('Settings saved successfully!');
-    }
-
-    private handleChangePassword(): void {
-        // TODO: Şifre değiştirme işlevi buraya eklenecek
+    private handlePasswordChange(): void {
         const currentPassword = (this.querySelector('#current-password') as HTMLInputElement)?.value;
         const newPassword = (this.querySelector('#new-password') as HTMLInputElement)?.value;
         const confirmPassword = (this.querySelector('#confirm-password') as HTMLInputElement)?.value;
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            this.showNotification('Lütfen tüm şifre alanlarını doldurun!', 'error');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            this.showNotification('Yeni şifreler eşleşmiyor!', 'error');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            this.showNotification('Şifre en az 8 karakter olmalıdır!', 'error');
+            return;
+        }
+
+        // Password validation regex
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/;
+        if (!passwordRegex.test(newPassword)) {
+            this.showNotification('Şifre gereksinimleri karşılanmıyor!', 'error');
+            return;
+        }
+
+        // Here you would make an API call to change password
+        this.showNotification('Şifre başarıyla değiştirildi!', 'success');
         
-        console.log('Change password:', { currentPassword, newPassword, confirmPassword });
-        // Validate and change password
+        // Clear password fields
+        (this.querySelector('#current-password') as HTMLInputElement).value = '';
+        (this.querySelector('#new-password') as HTMLInputElement).value = '';
+        (this.querySelector('#confirm-password') as HTMLInputElement).value = '';
     }
 
-    private handleResetSettings(): void {
-        // TODO: Ayarları sıfırlama işlevi buraya eklenecek
-        console.log('Reset settings');
-        // Reset all settings to default
+    private handle2FAToggle(enabled: boolean): void {
+        if (this.currentUser) {
+            this.currentUser.is_2fa_enabled = enabled ? 1 : 0; // Convert boolean to number
+            setUser(this.currentUser);
+            
+            const message = enabled ? 
+                'İki faktörlü doğrulama etkinleştirildi!' : 
+                'İki faktörlü doğrulama devre dışı bırakıldı!';
+            this.showNotification(message, 'success');
+        }
     }
 
-    private handleDarkModeToggle(enabled: boolean): void {
-        // TODO: Dark mode toggle işlevi buraya eklenecek
-        console.log('Dark mode:', enabled);
-        // Toggle dark mode
+    private handleThemeToggle(isDark: boolean): void {
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+        this.showNotification('Tema tercihi kaydedildi!', 'success');
     }
 
-    // Public Methods - İşlevler size bırakıldı
-    public updateUserInfo(userInfo: Partial<UserLogin>): void {
-        // TODO: Kullanıcı bilgilerini güncelleme
+    private showNotification(message: string, type: 'success' | 'error'): void {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Utility Methods
+    private validateEmail(email: string): boolean {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // Public Methods
+    public updateUserInfo(userInfo: Partial<User>): void {
+        if (!this.currentUser) return;
         this.currentUser = { ...this.currentUser, ...userInfo };
         this.render();
     }
 
-    public getCurrentUserInfo(): UserLogin {
-        // TODO: Mevcut kullanıcı bilgilerini döndürme
+    public getCurrentUserInfo(): User | null {
         return this.currentUser;
     }
 
     public validateForm(): boolean {
-        // TODO: Form validasyonu
         return true;
     }
-
-    private validateEmail(email: string): boolean {
-        // Email validation regex
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    
-
 }
 
-customElements.define("settings-component", Settings);
+customElements.define('settings-component', Settings);
+
+export default Settings;

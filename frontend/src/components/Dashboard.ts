@@ -3,16 +3,18 @@ import "./SideBar";
 import "./Statistics";
 import "./PlayerList";
 import "./LastGames";
-import { getUser, subscribeUser } from "../store/UserStore";
-import type { User } from "../types/User";
+import { getUser } from "../store/UserStore";
 import { router } from "../router/Router";
 
 class Dashboard extends HTMLElement {
 
-    constructor() {
-        super();
-        this.render();
-    }
+	constructor() {
+		super();
+		this.render();
+	}
+
+
+
 
     connectedCallback(): void {
         this.setupEvents();
@@ -34,9 +36,9 @@ class Dashboard extends HTMLElement {
                     <div class="ml-16 p-8 min-h-screen overflow-auto transition-all duration-300" id="mainContent" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
                         <!-- Welcome Section -->
                         <div class="mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl border border-white/20 text-center">
-                            <h2 id="welcomeMessage" class="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                                👋 Hoş geldin, Mehmet!
-                            </h2>
+                                        <h2 id="welcomeMessage" class="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                👋 Hoş geldin, ${getUser()?.profile?.full_name || getUser()?.username || 'Oyuncu'}!
+            </h2>
                             <p class="text-gray-600 dark:text-gray-300 text-lg">Hazır mısın? Hadi oyuna başlayalım!</p>
                         </div>
 
@@ -219,17 +221,12 @@ class Dashboard extends HTMLElement {
 		if (getUser()) {
 			this.innerHTML = this.loginedDashboard();
 		} else {
-			this.innerHTML = this.loggedOutDashboard();
+			setTimeout(() =>{
+				this.innerHTML = this.loggedOutDashboard();
+			}, 100)
 		}
 	}
 	private setupEvents(): void {
-
-		subscribeUser((user: User | null) => {
-			const welcomeMessage = this.querySelector('#welcomeMessage');
-			if (user && welcomeMessage) {
-				welcomeMessage.textContent = `👋 Hoş geldin, ${user.username}!`;
-			}
-		});
         // Sidebar toggle listener
         document.addEventListener('sidebar-toggle', () => {
             this.handleSidebarToggle();

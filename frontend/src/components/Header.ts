@@ -1,5 +1,6 @@
 import { router } from "../router/Router";
-import { getUser, subscribeUser } from "../store/UserStore";
+import { getUser} from "../store/UserStore";
+import { logout } from "../store/AuthService";
 
 
 class Header extends HTMLElement {
@@ -42,14 +43,14 @@ class Header extends HTMLElement {
                         <div id="userDropdownBtn" class="flex items-center gap-4 px-6 py-4 rounded-2xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-600">
                             <!-- Avatar with Status Indicator -->
                             <div class="relative">
-                                <img id="userAvatar" class="h-14 w-14 rounded-full border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-2 ring-white dark:ring-gray-800" src="${user.avatar}" alt="Avatar">
+                                <img id="userAvatar" class="h-14 w-14 rounded-full border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-2 ring-white dark:ring-gray-800" src="${user.profile?.avatar_url || '/Avatar/1.png'}" alt="Avatar">
                                 <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse shadow-lg"></div>
                             </div>
                             
                             <!-- User Info -->
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <span id="username" class="text-xl font-bold text-gray-900 dark:text-white truncate max-w-32">${user.username}</span>
+                                    <span id="username" class="text-xl font-bold text-gray-900 dark:text-white truncate max-w-32">${user.profile?.full_name || user.username}</span>
                                 </div>
                             </div>
                             
@@ -179,12 +180,11 @@ class Header extends HTMLElement {
         
         // Logout button event
         const logoutBtn = this.querySelector('#logoutBtn');
-        logoutBtn?.addEventListener('click', (e) => {
+        logoutBtn?.addEventListener('click', async (e) => {
             e.preventDefault();
-            // Çıkış yapma fonksiyonu buraya yazılacak
-            console.log('Çıkış yapılıyor...');
+            const success = await logout();
+            success ? router.navigate("/") : router.navigate("/error-500");
         });
-        // Profilimi Gör tıklanınca (şimdilik boş)
         const profileBtn = this.querySelector('#profileBtn');
         profileBtn?.addEventListener('click', (e) => {
             e.preventDefault();

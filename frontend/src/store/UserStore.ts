@@ -1,10 +1,7 @@
-import type { User } from '../types/User.ts';
-import { router } from '../router/Router.ts';
+import type { User, UserProfile } from '../types/User.ts';
 
 // Simple in-memory user store
 let currentUser: User | null = null;
-type UserListener = (user: User | null) => void;
-const listeners: UserListener[] = [];
 
 // XSS Protection - HTML sanitization
 function sanitizeString(str: string): string {
@@ -26,7 +23,6 @@ function sanitizeString(str: string): string {
 // Validate and sanitize user data from API
 function validateAndSanitizeUser(userData: any): Partial<User> | null {
   if (!userData || typeof userData !== 'object') {
-    console.warn('Invalid user data provided');
     return null;
   }
 
@@ -62,18 +58,55 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
       }
     }
 
+    // Optional fields
     if (userData.created_at) {
-      const createdAt = sanitizeString(userData.created_at.toString());
-      sanitizedUser.created_at = createdAt;
+      sanitizedUser.created_at = sanitizeString(userData.created_at.toString()).trim();
+    }
+    if (userData.updated_at) {
+      sanitizedUser.updated_at = sanitizeString(userData.updated_at.toString()).trim();
+    }
+    if (userData.token) {
+      sanitizedUser.token = sanitizeString(userData.token.toString()).trim();
     }
 
-    if (userData.updated_at) {
-      const updatedAt = sanitizeString(userData.updated_at.toString());
-      sanitizedUser.updated_at = updatedAt;
+    // Handle profile object
+    if (userData.profile && typeof userData.profile === 'object') {
+      const profile: Partial<UserProfile> = {};
+      
+      if (userData.profile.user_id) {
+        const user_id = parseInt(userData.profile.user_id);
+        if (!isNaN(user_id) && user_id > 0) {
+          profile.user_id = user_id;
+        }
+      }
+      
+      if (userData.profile.full_name) {
+        profile.full_name = sanitizeString(userData.profile.full_name.toString()).trim();
+      }
+      
+	  // Avatar pushlayana kadar boyle olacak
+    //   if (userData.profile.avatar_url) {
+    //     profile.avatar_url = sanitizeString(userData.profile.avatar_url.toString()).trim();
+    //   } else {
+        const random = Math.floor(Math.random() * 13) + 1;
+        profile.avatar_url = `/Avatar/${random}.png`;
+    //   }
+      
+      if (userData.profile.bio) {
+        profile.bio = sanitizeString(userData.profile.bio.toString()).trim();
+      }
+      
+      sanitizedUser.profile = profile as UserProfile;
+    } else {
+      // Create default profile if none provided
+      const random = Math.floor(Math.random() * 13) + 1;
+      sanitizedUser.profile = {
+        user_id: sanitizedUser.id || 0,
+        full_name: sanitizedUser.username || '',
+        avatar_url: `/Avatar/${random}.png`,
+        bio: ''
+      };
     }
-  const random = Math.floor(Math.random() * 13) + 1;
-  console.log("Random:" , random);
-  sanitizedUser.avatar = `/Avatar/${random}.png`
 
     return sanitizedUser;
   } catch (error) {
@@ -86,12 +119,16 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 export function setUser(userData: any): boolean {
   const sanitizedData = validateAndSanitizeUser(userData);
   if (!sanitizedData) {
-    router.navigate("/error");
-    console.warn('Failed to set user - invalid data');
+    console.warn('Failed to set user - invalid data:', userData);
     return false;
   }
-  currentUser ? Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;
-  notifyListeners();
+  
+  if (currentUser) {
+    Object.assign(currentUser, sanitizedData);
+  } else {
+    currentUser = sanitizedData as User;
+  }
+  
   return true;
 }
 
@@ -102,36 +139,22 @@ export function getUser(): User | null {
 
 export function clearUser(): void {
   currentUser = null;
-  notifyListeners();
 }
 
-
-export function updateUser(updates: Partial<User>): boolean {
-  if (!currentUser) {
-    router.navigate("/error");
-    return false;
-  }
-  const updatedUserData = { ...currentUser, ...updates };
-  return setUser(updatedUserData);
+// Utility functions for easier access to user data
+export function getUserAvatar(): string {
+  return currentUser?.profile?.avatar_url || '/Avatar/1.png';
 }
 
-// --- Reactivity ---
-function notifyListeners() {
-  listeners.forEach(listener => listener(getUser()));
+export function getUserFullName(): string {
+  return currentUser?.profile?.full_name || currentUser?.username || 'Kullanıcı';
 }
 
-export function subscribeUser(listener: UserListener): () => void {
-  listeners.push(listener);
-  // Hemen mevcut user ile bilgilendir
-  listener(getUser());
-  // Unsubscribe fonksiyonu döndür
-  return () => {
-    const idx = listeners.indexOf(listener);
-    if (idx !== -1) listeners.splice(idx, 1);
-  };
+export function getUserBio(): string {
+  return currentUser?.profile?.bio || '';
 }
 
 export function isAuthenticated(): boolean {
-  return currentUser !== null && currentUser.id !== undefined;
+  return currentUser !== null && !!currentUser.id;
 }
 

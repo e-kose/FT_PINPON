@@ -76,8 +76,6 @@ class LoginForm extends UserForm{
 			password: this.sanitizeInput(formData.get("password") as string || ""),
 		};
 
-		console.log("Giriş için gönderilen veri:", userData);
-
 		fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
 			method: 'POST',
 			headers: {

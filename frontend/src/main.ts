@@ -11,10 +11,13 @@ import "./components/Statistics"
 import "./components/PlayerList"
 import "./components/LastGames"
 import "./components/sideBarComponents/Settings"
+import { handleLogin } from "./store/AuthService"
 
 
 // Router'ı başlat
 initializeRouter();
 // Başlangıç sayfasına yönlendir
-router.navigate(document.location.pathname || "/");
+handleLogin().then(() => {
+	router.navigate(document.location.pathname || "/");
+});
 
