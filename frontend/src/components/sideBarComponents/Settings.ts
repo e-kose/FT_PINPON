@@ -2,9 +2,12 @@ import "../Header";
 import "../SideBar";
 import type { User } from '../../types/User.ts';
 import { getUser, setUser } from '../../store/UserStore.ts';
+import { sidebarStateManager } from "../../router/SidebarStateManager";
+import type { SidebarStateListener } from "../../router/SidebarStateManager";
 
 class Settings extends HTMLElement {
     private currentUser: User | null = null;
+    private sidebarListener: SidebarStateListener | null = null;
 
     constructor() {
         super();
@@ -16,10 +19,15 @@ class Settings extends HTMLElement {
 
     connectedCallback(): void {
         this.attachEventListeners();
+        this.setupSidebarListener();
     }
 
     disconnectedCallback(): void {
         // Event cleanup
+        if (this.sidebarListener) {
+            sidebarStateManager.removeListener(this.sidebarListener);
+            this.sidebarListener = null;
+        }
     }
 
     private render(): void {
@@ -45,7 +53,7 @@ class Settings extends HTMLElement {
                     <sidebar-component current-route="settings"></sidebar-component>
                     
                     <!-- Main Content -->
-                    <div class="pl-16">
+                    <div class="pl-16 transition-all duration-300" id="settingsMainContent">
                         <div class="max-w-4xl mx-auto p-6">
                             <!-- Page Header -->
                             <div class="mb-8">
@@ -530,6 +538,34 @@ class Settings extends HTMLElement {
 
     public getCurrentUserInfo(): User | null {
         return this.currentUser;
+    }
+
+    private setupSidebarListener(): void {
+        // State manager'dan sidebar durumunu dinle
+        this.sidebarListener = (state) => {
+            this.adjustMainContentMargin(state.isCollapsed);
+        };
+        
+        sidebarStateManager.addListener(this.sidebarListener);
+    }
+
+    private adjustMainContentMargin(isCollapsed: boolean): void {
+        const mainContent = this.querySelector('#settingsMainContent');
+        if (mainContent) {
+            // Transition sınıflarını ekle (zaten HTML'de var ama emin olmak için)
+            const transitionClasses = sidebarStateManager.getTransitionClasses();
+            mainContent.classList.add(...transitionClasses);
+            
+            if (isCollapsed) {
+                // Sidebar kapalı - margin'i azalt
+                mainContent.classList.remove('pl-72');
+                mainContent.classList.add('pl-16');
+            } else {
+                // Sidebar açık - margin'i artır
+                mainContent.classList.remove('pl-16');
+                mainContent.classList.add('pl-72');
+            }
+        }
     }
 
     public validateForm(): boolean {

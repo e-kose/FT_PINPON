@@ -135,7 +135,7 @@ class LoginForm extends UserForm{
 
 		setTimeout(() => {
 			router.navigate("/");
-		}, 1000);
+		}, 5000);
 	}
 
 	private handleNetworkError(error: any): void {

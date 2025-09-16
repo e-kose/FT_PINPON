@@ -1,9 +1,12 @@
 import { router } from "../router/Router";
 import { getUser} from "../store/UserStore";
 import { logout } from "../store/AuthService";
+import { sidebarStateManager } from "../router/SidebarStateManager";
+import type { SidebarStateListener } from "../router/SidebarStateManager";
 
 
 class Header extends HTMLElement {
+    private sidebarListener: SidebarStateListener | null = null;
 
     constructor() {
         super();
@@ -12,28 +15,24 @@ class Header extends HTMLElement {
 
     connectedCallback(): void {
         this.setupEvents();
+        this.setupSidebarListener();
     }
 
     disconnectedCallback(): void {
+        // Listener'ı temizle
+        if (this.sidebarListener) {
+            sidebarStateManager.removeListener(this.sidebarListener);
+            this.sidebarListener = null;
+        }
     }
 
     private render(): void {
         const user = getUser();
         this.innerHTML = `
             <nav class="bg-white/95 backdrop-blur-sm dark:bg-gray-800/95 shadow-xl border-b border-gray-200 dark:border-gray-700 fixed top-0 w-full z-50">
-                <div class="relative flex items-center h-24 px-0">
-                    <!-- Left Section with Hamburger - Only show when logged in -->
-                    ${user ? `
-                    <div class="flex items-center">
-                        <button id="sidebarToggle" class="p-6 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center rounded-r-2xl hover:shadow-lg">
-                            <svg class="w-8 h-8 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    ` : ''}
-                    <!-- Logo Section - Centered -->
-                    <div id="logoSection" class="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105">
+                <div class="relative flex items-center h-24 px-6">
+                    <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
+                    <div id="logoSection" class="flex items-center space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-16" >
                         <img class="w-12 h-12 drop-shadow-lg" src="/pong.png" alt="logo">
                         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-wide">Ft_Transcendance</h1>
                     </div>
@@ -135,13 +134,6 @@ class Header extends HTMLElement {
             // Profil Ayarları fonksiyonu buraya yazılacak
         });
 
-
-        // Sidebar toggle event
-        const sidebarToggle = this.querySelector('#sidebarToggle');
-        sidebarToggle?.addEventListener('click', () => {
-            this.handleSidebarToggle();
-        });
-
         // Logo click event - Ana sayfaya yönlendir
         const logoSection = this.querySelector('#logoSection');
         logoSection?.addEventListener('click', () => {
@@ -194,13 +186,35 @@ class Header extends HTMLElement {
        
     }
 
-    // Event Handler Methods - İçleri boş, sen dolduracaksın
-    private handleSidebarToggle(): void {
-        // Sidebar toggle event'ini dispatch et
-        const event = new CustomEvent('sidebar-toggle');
-        document.dispatchEvent(event);
+    private setupSidebarListener(): void {
+        // State manager'dan sidebar durumunu dinle
+        this.sidebarListener = (state) => {
+            this.adjustLogoPosition(state.isCollapsed);
+        };
+        
+        sidebarStateManager.addListener(this.sidebarListener);
     }
 
+    private adjustLogoPosition(isCollapsed: boolean): void {
+        const logoSection = this.querySelector('#logoSection');
+        if (logoSection) {
+            // Transition sınıflarını ekle
+            const transitionClasses = sidebarStateManager.getTransitionClasses();
+            logoSection.classList.add(...transitionClasses);
+            
+            if (isCollapsed) {
+                // Sidebar kapalı - margin'i azalt
+                logoSection.classList.remove('ml-72');
+                logoSection.classList.add('ml-16');
+            } else {
+                // Sidebar açık - margin'i artır
+                logoSection.classList.remove('ml-16');
+                logoSection.classList.add('ml-72');
+            }
+        }
+    }
+
+    // Event Handler Methods
     private handleLogoClick(): void {
         // Ana sayfaya yönlendir
         router.navigate("/");

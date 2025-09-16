@@ -5,8 +5,11 @@ import "./PlayerList";
 import "./LastGames";
 import { getUser } from "../store/UserStore";
 import { router } from "../router/Router";
+import { sidebarStateManager } from "../router/SidebarStateManager";
+import type { SidebarStateListener } from "../router/SidebarStateManager";
 
 class Dashboard extends HTMLElement {
+    private sidebarListener: SidebarStateListener | null = null;
 
 	constructor() {
 		super();
@@ -18,9 +21,15 @@ class Dashboard extends HTMLElement {
 
     connectedCallback(): void {
         this.setupEvents();
+        this.setupSidebarListener();
     }
 
     disconnectedCallback(): void {
+        // Listener'ı temizle
+        if (this.sidebarListener) {
+            sidebarStateManager.removeListener(this.sidebarListener);
+            this.sidebarListener = null;
+        }
     }
 	private loginedDashboard(): string {
 		return (`
@@ -33,7 +42,7 @@ class Dashboard extends HTMLElement {
                     <sidebar-component current-route="dashboard"></sidebar-component>
 
                     <!-- Main Content -->
-                    <div class="ml-0 lg:ml-16 p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300" id="mainContent" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
+                    <div class="ml-16 p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300" id="mainContent" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
                         <!-- Welcome Section -->
                         <div class="mb-6 lg:mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-4 sm:p-6 lg:p-8 rounded-lg lg:rounded-xl shadow-xl border border-white/20 text-center">
                             <h2 id="welcomeMessage" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-3">
@@ -231,11 +240,6 @@ class Dashboard extends HTMLElement {
 		}
 	}
 	private setupEvents(): void {
-        // Sidebar toggle listener
-        document.addEventListener('sidebar-toggle', () => {
-            this.handleSidebarToggle();
-        });
-
         // Action buttons for logged in users
         const playNowBtn = this.querySelector('#playNowBtn');
         const inviteFriendBtn = this.querySelector('#inviteFriendBtn');
@@ -261,16 +265,30 @@ class Dashboard extends HTMLElement {
         });
     }
 
-    private handleSidebarToggle(): void {
+    private setupSidebarListener(): void {
+        // State manager'dan sidebar durumunu dinle
+        this.sidebarListener = (state) => {
+            this.adjustMainContentMargin(state.isCollapsed);
+        };
+        
+        sidebarStateManager.addListener(this.sidebarListener);
+    }
+
+    private adjustMainContentMargin(isCollapsed: boolean): void {
         const mainContent = this.querySelector('#mainContent');
         if (mainContent) {
-            // Sidebar durumuna göre main content margin'ini ayarla
-            if (mainContent.classList.contains('ml-16')) {
-                mainContent.classList.remove('ml-16');
-                mainContent.classList.add('ml-72');
-            } else {
+            // Transition sınıflarını ekle
+            const transitionClasses = sidebarStateManager.getTransitionClasses();
+            mainContent.classList.add(...transitionClasses);
+            
+            if (isCollapsed) {
+                // Sidebar kapalı - margin'i azalt
                 mainContent.classList.remove('ml-72');
                 mainContent.classList.add('ml-16');
+            } else {
+                // Sidebar açık - margin'i artır
+                mainContent.classList.remove('ml-16');
+                mainContent.classList.add('ml-72');
             }
         }
     }
