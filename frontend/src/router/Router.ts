@@ -3,6 +3,10 @@ import "../components/forms/SignupForm";
 import "../components/forms/UserForm";
 import "../components/Dashboard";
 import "../components/sideBarComponents/Settings";
+import "../components/sideBarComponents/Play";
+import "../components/sideBarComponents/Tournament";
+import "../components/sideBarComponents/Friends";
+import "../components/sideBarComponents/Chat";
 
 class Router
 {
@@ -55,9 +59,19 @@ class Router
 		if (route) {
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
 			fillIndex(route.component, app);
+			
+			// Dispatch custom event to notify components about route change
+			window.dispatchEvent(new CustomEvent('routechange', { 
+				detail: { path, previousPath: previouesPath } 
+			}));
 		} else {
 			this.handleRoute('/error/404');
 			fillIndex('<error-page error-type="404" error-title="Sayfa Bulunamadı" error-description="Aradığınız sayfa mevcut değil veya taşınmış olabilir."></error-page>', app);
+			
+			// Dispatch event for error page too
+			window.dispatchEvent(new CustomEvent('routechange', { 
+				detail: { path: '/error/404', previousPath: previouesPath } 
+			}));
 		}
 	}
 };
@@ -91,9 +105,15 @@ addEventListener('popstate', (event) => {
 function initializeRouter(): void {
 	// Ana sayfa route'ları
 	router.addRoute('/', '<dashboard-component></dashboard-component>');
+	router.addRoute('/dashboard', '<dashboard-component></dashboard-component>');
+	router.addRoute('/play', '<div class="p-8"><h1 class="text-2xl font-bold">Oyun Oyna</h1><p>Oyun komponenti geliştiriliyor...</p></div>');
+	router.addRoute('/tournament', '<div class="p-8"><h1 class="text-2xl font-bold">Turnuva</h1><p>Turnuva komponenti geliştiriliyor...</p></div>');
+	router.addRoute('/friends', '<div class="p-8"><h1 class="text-2xl font-bold">Arkadaşlar</h1><p>Arkadaşlar komponenti geliştiriliyor...</p></div>');
+	router.addRoute('/chat', '<div class="p-8"><h1 class="text-2xl font-bold">Sohbet</h1><p>Sohbet komponenti geliştiriliyor...</p></div>');
+	router.addRoute('/settings', '<settings-component></settings-component>');
 	router.addRoute('/signup', '<signup-form></signup-form>');
 	router.addRoute('/login', '<login-form></login-form>');
-	router.addRoute('/settings', '<settings-component></settings-component>');
+	router.addRoute('/auth/google', 'http://localhost:3000/auth/google');
 	
 	// Error page route'ları
 	router.addRoute('/error/404', '<error-page error-type="404" error-title="Sayfa Bulunamadı" error-description="Aradığınız sayfa mevcut değil veya taşınmış olabilir."></error-page>');

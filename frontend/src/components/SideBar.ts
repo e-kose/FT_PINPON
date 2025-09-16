@@ -13,9 +13,25 @@ class SideBar extends HTMLElement {
     connectedCallback(): void {
         this.updateActiveRouteFromURL();
         this.setupEvents();
+        this.setupRouteListener();
     }
 
     disconnectedCallback(): void {
+        // Remove event listener when component is destroyed
+        window.removeEventListener('routechange', this.handleRouteChange);
+    }
+
+    private handleRouteChange = (): void => {
+        this.updateActiveRouteFromURL();
+        this.updateNavItemStyles();
+    }
+
+    private setupRouteListener(): void {
+        // Listen for route changes
+        window.addEventListener('routechange', this.handleRouteChange);
+        
+        // Also listen for popstate events (browser back/forward)
+        window.addEventListener('popstate', this.handleRouteChange);
     }
 
     private updateActiveRouteFromURL(): void {
@@ -125,47 +141,44 @@ class SideBar extends HTMLElement {
         });
     }
 
-    private setActiveNavItem(route: string): void {
-        // Tüm nav item'ları temizle
+    private updateNavItemStyles(): void {
+        // Update all nav items with current active state
         const navItems = this.querySelectorAll('.nav-item');
         navItems.forEach(item => {
-            // Remove active classes
-            item.classList.remove(
-                'text-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20', 
-                'dark:text-blue-400', 'font-semibold', 'border-blue-200', 'dark:border-blue-800'
-            );
-            // Add inactive classes
-            item.classList.add(
-                'text-gray-700', 'dark:text-gray-300', 'font-medium', 
-                'border-gray-200', 'dark:border-gray-600',
-                'hover:bg-gray-100', 'dark:hover:bg-gray-700', 
-                'hover:border-gray-300', 'dark:hover:border-gray-500'
-            );
+            const route = (item as HTMLElement).getAttribute('data-route');
+            if (route) {
+                // Remove all classes first
+                item.classList.remove(
+                    'text-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20', 
+                    'dark:text-blue-400', 'font-semibold', 'border-blue-200', 'dark:border-blue-800',
+                    'text-gray-700', 'dark:text-gray-300', 'font-medium', 
+                    'border-gray-200', 'dark:border-gray-600',
+                    'hover:bg-gray-100', 'dark:hover:bg-gray-700', 
+                    'hover:border-gray-300', 'dark:hover:border-gray-500'
+                );
+                
+                // Add appropriate classes based on active state
+                if (this.activeRoute === route) {
+                    item.classList.add(
+                        'text-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20', 
+                        'dark:text-blue-400', 'font-semibold', 'border-blue-200', 'dark:border-blue-800'
+                    );
+                } else {
+                    item.classList.add(
+                        'text-gray-700', 'dark:text-gray-300', 'font-medium', 
+                        'border-gray-200', 'dark:border-gray-600',
+                        'hover:bg-gray-100', 'dark:hover:bg-gray-700', 
+                        'hover:border-gray-300', 'dark:hover:border-gray-500'
+                    );
+                }
+            }
         });
-
-        // Aktif route'u ayarla
-        const activeNavItem = this.querySelector(`[data-route="${route}"]`);
-        if (activeNavItem) {
-            // Remove inactive classes
-            activeNavItem.classList.remove(
-                'text-gray-700', 'dark:text-gray-300', 'font-medium', 
-                'border-gray-200', 'dark:border-gray-600',
-                'hover:bg-gray-100', 'dark:hover:bg-gray-700', 
-                'hover:border-gray-300', 'dark:hover:border-gray-500'
-            );
-            // Add active classes
-            activeNavItem.classList.add(
-                'text-blue-900', 'bg-blue-50', 'dark:bg-blue-900/20', 
-                'dark:text-blue-400', 'font-semibold', 'border-blue-200', 'dark:border-blue-800'
-            );
-        }
     }
 
     private handleNavigation(route: string | null): void {
         if (!route) return;
         
         this.activeRoute = route;
-        this.setActiveNavItem(route);
         
         let path = '';
         switch(route) {
@@ -192,6 +205,11 @@ class SideBar extends HTMLElement {
         }
         
         router.navigate(path);
+    }
+
+    public updateActiveRoute(newRoute: string): void {
+        this.activeRoute = newRoute;
+        this.updateNavItemStyles();
     }
 
     // Sidebar Toggle Method

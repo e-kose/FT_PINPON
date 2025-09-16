@@ -1,3 +1,4 @@
+import { router } from "../../router/Router";
 import messages from "../Messages";
 
 export abstract class UserForm extends HTMLElement {
@@ -12,6 +13,32 @@ export abstract class UserForm extends HTMLElement {
     this.form = this.querySelector("form") as HTMLFormElement;
     this.setupEvents();
   }
+
+  protected async handleGoogleAuth(): Promise<void> {
+    try {
+      // Loading animasyonu göster
+      messages.showLoadingAnimation("#messageContainer");
+      
+      const params = new URLSearchParams({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
+        redirect_uri: import.meta.env.VITE_GOOGLE_CALLBACK_URI!,
+        response_type: "code",
+        scope: "openid email profile",
+        access_type: "offline", // refresh token da alabilmek için
+        prompt: "consent"
+      });
+
+      // Google OAuth sayfasına yönlendir
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+      
+    } catch (error) {
+      console.error('Google Auth setup error:', error);
+      messages.showMessage("Google Auth Hatası", "Google kimlik doğrulama başlatılamadı. Lütfen tekrar deneyin.", "error", "#messageContainer");
+      throw error;
+    }
+  }
+
+
 
   protected abstract createForm(): string;
 
@@ -36,7 +63,7 @@ export abstract class UserForm extends HTMLElement {
   // Ortak API hata işleme metodu
   protected handleApiError(status: number): void {
     const { title, message } = this.getErrorMessage(status);
-    messages.showMessage(title, message, "error", ".p-8");
+    messages.showMessage(title, message, "error", "#messageContainer");
   }
 
   // XSS güvenliği için input sanitization

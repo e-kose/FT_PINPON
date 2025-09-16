@@ -17,8 +17,8 @@ export class Messages {
 		messageDiv.setAttribute('data-message', 'true');
 		
 		const msgClass = msgType === "error" 
-			? 'mt-6 bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:from-red-900/30 dark:to-red-800/30 dark:border-red-400' 
-			: 'mt-6 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 dark:from-green-900/30 dark:to-green-800/30 dark:border-green-400';
+			? 'mt-3 bg-gradient-to-r from-red-50 to-red-100 border-l-3 border-red-500 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow duration-300 dark:from-red-900/30 dark:to-red-800/30 dark:border-red-400' 
+			: 'mt-3 bg-gradient-to-r from-green-50 to-green-100 border-l-3 border-green-500 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow duration-300 dark:from-green-900/30 dark:to-green-800/30 dark:border-green-400';
 		
 		messageDiv.className = msgClass;
 
@@ -29,12 +29,12 @@ export class Messages {
 		// SVG icon container
 		const iconContainer = document.createElement('div');
 		iconContainer.className = msgType === "error" 
-			? 'flex-shrink-0 w-10 h-10 bg-red-500 rounded-full flex items-center justify-center mr-4'
-			: 'flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mr-4';
+			? 'flex-shrink-0 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center mr-3'
+			: 'flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3';
 
 		// SVG icon
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		svg.setAttribute('class', 'w-6 h-6 text-white');
+		svg.setAttribute('class', 'w-4 h-4 text-white');
 		svg.setAttribute('fill', 'currentColor');
 		svg.setAttribute('viewBox', '0 0 20 20');
 
@@ -60,13 +60,13 @@ export class Messages {
 		// Status text
 		const statusP = document.createElement('h3');
 		const statusColor = msgType === "error" ? 'text-red-800 dark:text-red-200' : 'text-green-800 dark:text-green-200';
-		statusP.className = `${statusColor} font-bold text-lg mb-2 leading-tight`;
+		statusP.className = `${statusColor} font-semibold text-sm mb-1 leading-tight`;
 		statusP.textContent = status;
 
 		// Message text
 		const messageP = document.createElement('p');
 		const messageColor = msgType === "error" ? 'text-red-700 dark:text-red-300' : 'text-green-700 dark:text-green-300';
-		messageP.className = `${messageColor} text-sm leading-relaxed break-words`;
+		messageP.className = `${messageColor} text-xs leading-relaxed break-words`;
 		messageP.textContent = message;
 
 		// Element'leri birleştir
@@ -94,17 +94,17 @@ export class Messages {
 		// Loading container div
 		const loadingDiv = document.createElement('div');
 		loadingDiv.setAttribute('role', 'status');
-		loadingDiv.className = 'flex flex-col justify-center items-center mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-md dark:bg-blue-900/20 dark:border-blue-700';
+		loadingDiv.className = 'flex flex-col justify-center items-center mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm dark:bg-blue-900/20 dark:border-blue-700';
 		loadingDiv.setAttribute('data-loading', 'true');
 
 		// Text first for better visual hierarchy
 		const span = document.createElement('span');
-		span.className = 'mb-4 text-lg font-semibold text-blue-700 dark:text-green-300';
+		span.className = 'mb-2 text-sm font-semibold text-blue-700 dark:text-green-300';
 		span.textContent = 'Giriş yapılıyor...';
 
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.setAttribute('aria-hidden', 'true');
-		svg.setAttribute('class', 'w-12 h-12 text-blue-200 animate-spin dark:text-blue-600 fill-blue-600');
+		svg.setAttribute('class', 'w-8 h-8 text-blue-200 animate-spin dark:text-blue-600 fill-blue-600');
 		svg.setAttribute('viewBox', '0 0 100 101');
 		svg.setAttribute('fill', 'none');
 
