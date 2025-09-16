@@ -28,56 +28,60 @@ class Dashboard extends HTMLElement {
                 <!-- Header Component -->
                 <header-component></header-component>
                 
-                <div class="pt-20">
+                <div class="pt-16 md:pt-20 lg:pt-24">
                     <!-- Sidebar Component -->
                     <sidebar-component current-route="dashboard"></sidebar-component>
 
                     <!-- Main Content -->
-                    <div class="ml-16 p-8 min-h-screen overflow-auto transition-all duration-300" id="mainContent" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
+                    <div class="ml-0 lg:ml-16 p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300" id="mainContent" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
                         <!-- Welcome Section -->
-                        <div class="mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-8 rounded-xl shadow-xl border border-white/20 text-center">
-                                        <h2 id="welcomeMessage" class="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                👋 Hoş geldin, ${getUser()?.profile?.full_name || getUser()?.username || 'Oyuncu'}!
-            </h2>
-                            <p class="text-gray-600 dark:text-gray-300 text-lg">Hazır mısın? Hadi oyuna başlayalım!</p>
+                        <div class="mb-6 lg:mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-4 sm:p-6 lg:p-8 rounded-lg lg:rounded-xl shadow-xl border border-white/20 text-center">
+                            <h2 id="welcomeMessage" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-3">
+                                👋 Hoş geldin, ${getUser()?.profile?.full_name || getUser()?.username || 'Oyuncu'}!
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm sm:text-base lg:text-lg">Hazır mısın? Hadi oyuna başlayalım!</p>
                         </div>
 
                         <!-- Quick Actions -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <button id="playNowBtn" class="group bg-blue-900 hover:bg-blue-800 dark:bg-blue-800 dark:hover:bg-blue-700 text-white font-semibold py-6 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
-                                <div class="flex items-center justify-center space-x-3">
-                                    <span class="text-2xl">🎮</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                            <button id="playNowBtn" class="group bg-blue-900 hover:bg-blue-800 dark:bg-blue-800 dark:hover:bg-blue-700 text-white font-semibold py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 rounded-lg lg:rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
+                                <div class="flex items-center justify-center space-x-2 lg:space-x-3">
+                                    <span class="text-xl lg:text-2xl">🎮</span>
                                     <div class="text-left">
-                                        <div class="text-xl font-bold">Hızlı Oyun</div>
-                                        <div class="text-blue-200 text-sm">Anında rakip bul</div>
+                                        <div class="text-lg lg:text-xl font-bold">Hızlı Oyun</div>
+                                        <div class="text-blue-200 text-xs lg:text-sm">Anında rakip bul</div>
                                     </div>
                                 </div>
                             </button>
                             
-                            <button id="inviteFriendBtn" class="group bg-green-700 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-white font-semibold py-6 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
-                                <div class="flex items-center justify-center space-x-3">
-                                    <span class="text-2xl">👥</span>
+                            <button id="inviteFriendBtn" class="group bg-green-700 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-white font-semibold py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 rounded-lg lg:rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
+                                <div class="flex items-center justify-center space-x-2 lg:space-x-3">
+                                    <span class="text-xl lg:text-2xl">👥</span>
                                     <div class="text-left">
-                                        <div class="text-xl font-bold">Arkadaş Davet Et</div>
-                                        <div class="text-green-200 text-sm">Özel maç oluştur</div>
+                                        <div class="text-lg lg:text-xl font-bold">Arkadaş Davet Et</div>
+                                        <div class="text-green-200 text-xs lg:text-sm">Özel maç oluştur</div>
                                     </div>
                                 </div>
                             </button>
                         </div>
 
-                        <!-- Stats and Leaderboard Grid - 50/50 Layout -->
-                        <div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-6 rounded-xl shadow-xl border border-white/20 mb-8">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Stats and Leaderboard Grid - Responsive Layout -->
+                        <div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-4 sm:p-6 rounded-lg lg:rounded-xl shadow-xl border border-white/20 mb-6 lg:mb-8">
+                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
                                 <!-- Statistics Component -->
-                                <statistics-component></statistics-component>
+                                <div class="w-full">
+                                    <statistics-component></statistics-component>
+                                </div>
 
                                 <!-- Player List Component -->
-                                <player-list-component></player-list-component>
+                                <div class="w-full">
+                                    <player-list-component></player-list-component>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Last Games Component -->
-                        <div class="bg-white/40 backdrop-blur-sm dark:bg-gray-800/20 p-6 rounded-xl shadow-xl border border-white/20">
+                        <div class="bg-white/40 backdrop-blur-sm dark:bg-gray-800/20 p-4 sm:p-6 rounded-lg lg:rounded-xl shadow-xl border border-white/20">
                             <last-games-component></last-games-component>
                         </div>
                     </div>
@@ -91,25 +95,25 @@ class Dashboard extends HTMLElement {
 				<!-- Header Component -->
 				<header-component></header-component>
 				
-				<div class="pt-20">
+				<div class="pt-16 md:pt-20 lg:pt-24">
 					<!-- Main Content for Not Logged In Users -->
-					<div class="px-8 py-16 min-h-screen" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5))">
+					<div class="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 min-h-screen" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5))">
 						<!-- Hero Section -->
-						<div class="max-w-6xl mx-auto text-center mb-16">
-							<div class="mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-2xl p-12 border border-white/20 shadow-xl">
+						<div class="max-w-6xl mx-auto text-center mb-8 sm:mb-12 lg:mb-16">
+							<div class="mb-6 lg:mb-8 bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-xl lg:rounded-2xl p-6 sm:p-8 lg:p-12 border border-white/20 shadow-xl">
 								<!-- Logo ve Ana Başlık -->
-								<div class="flex flex-col items-center mb-8">
-									<div class="flex items-center mb-6">
-										<img class="w-24 h-24 mr-6 drop-shadow-2xl" src="/pong.png" alt="Ft_Transcendance Logo">
-										<h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white drop-shadow-2xl tracking-wide">
+								<div class="flex flex-col items-center mb-6 lg:mb-8">
+									<div class="flex flex-col sm:flex-row items-center mb-4 lg:mb-6">
+										<img class="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mb-4 sm:mb-0 sm:mr-4 lg:mr-6 drop-shadow-2xl" src="/pong.png" alt="Ft_Transcendance Logo">
+										<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 dark:text-white drop-shadow-2xl tracking-wide text-center sm:text-left">
 											Ft_Transcendance
 										</h1>
 									</div>
-									<h2 class="text-3xl md:text-4xl font-semibold text-gray-700 dark:text-gray-300 mb-6 drop-shadow-lg">
+									<h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-700 dark:text-gray-300 mb-4 lg:mb-6 drop-shadow-lg">
 										🎮 Hoş Geldiniz
 									</h2>
 								</div>
-								<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto drop-shadow-md leading-relaxed">
+								<p class="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto drop-shadow-md leading-relaxed">
 									En eski ve en sevilen oyunlardan biri olan Pong'u modern bir yaklaşımla yeniden keşfedin. 
 									Arkadaşlarınızla oynayın, turnuvalara katılın ve liderlik tablosunda zirvede yer alın!
 								</p>

@@ -53,6 +53,12 @@ class LoginForm extends UserForm{
 			e.preventDefault();
 			router.navigate("/signup");
 		});
+
+		const headerSection = this.querySelector("#headerSection") as HTMLDivElement;
+		headerSection?.addEventListener("click", (e) => {
+			e.preventDefault();
+			router.navigate("/");
+		});
 		
 	}
 	protected async handleSubmit(e: Event): Promise<void> {
@@ -152,51 +158,51 @@ class LoginForm extends UserForm{
 	protected createForm(): string {
 		return(`
 			<section class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
-				<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))">
+				<div class="flex flex-col items-center justify-center px-4 py-6 mx-auto min-h-screen" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))">
 					<!-- Logo ve Başlık Bölümü -->
-					<div class="flex flex-col items-center mb-8 text-center">
-						<div class="flex items-center mb-4">
-							<img class="w-16 h-16 mr-4 drop-shadow-2xl" src="/pong.png" alt="logo">
-							<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-2xl tracking-wide">
+					<div id="headerSection" class="flex flex-col items-center mb-6 md:mb-8 text-center cursor-pointer hover:scale-105 transition-transform duration-300">
+						<div class="flex items-center mb-3 md:mb-4">
+							<img class="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mr-3 md:mr-4 drop-shadow-2xl" src="/pong.png" alt="logo">
+							<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-2xl tracking-wide">
 								Ft_Transcendance
 							</h1>
 						</div>
-						<p class="text-lg md:text-xl text-white/90 drop-shadow-lg font-light max-w-md">
+						<p class="text-sm sm:text-base md:text-lg text-white/90 drop-shadow-lg font-light max-w-sm md:max-w-md">
 							Efsanevi Pong oyununa hoş geldiniz
 						</p>
 					</div>
-					<div class="w-full bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-xl shadow-xl border border-white/20 md:mt-0 sm:max-w-xl lg:max-w-2xl xl:p-0">
-						<div class="p-10 space-y-6 md:space-y-8 sm:p-12 lg:p-14">
-							<h2 class="text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl lg:text-3xl text-center mb-8">
+					<div class="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-lg shadow-xl border border-white/20">
+						<div class="p-6 sm:p-7 md:p-8 space-y-4 sm:space-y-5 md:space-y-6">
+							<h2 class="text-lg sm:text-xl md:text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white text-center">
 								Hesabınıza Giriş Yapın
 							</h2>
-							<form class="space-y-8 md:space-y-10" action="#">
+							<form class="space-y-4 sm:space-y-5 md:space-y-6" action="#">
 								<div>
-									<label for="emailOrUsername" class="block mb-3 text-base font-medium text-gray-900 dark:text-white">E-posta veya Kullanıcı Adı</label>
-									<input type="text" name="emailOrUsername" id="emailOrUsername" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-4 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" placeholder="E-posta veya Kullanıcı Adı" required>
+									<label for="emailOrUsername" class="block mb-2 text-sm sm:text-base font-medium text-gray-900 dark:text-white">E-posta veya Kullanıcı Adı</label>
+									<input type="text" name="emailOrUsername" id="emailOrUsername" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-sm sm:text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 sm:p-3.5 md:p-4 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" placeholder="E-posta veya Kullanıcı Adı" required>
 								</div>
 								<div>
-									<label for="password" class="block mb-3 text-base font-medium text-gray-900 dark:text-white">Şifre</label>
-									<input type="password" name="password" id="password" placeholder="••••••••" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-4 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" required="">
+									<label for="password" class="block mb-2 text-sm sm:text-base font-medium text-gray-900 dark:text-white">Şifre</label>
+									<input type="password" name="password" id="password" placeholder="••••••••" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-sm sm:text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 sm:p-3.5 md:p-4 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" required="">
 								</div>
 								<div class="flex items-center justify-between">
 									<div class="flex items-start">
 										<div class="flex items-center h-5">
 											<input id="remember" name="remember" aria-describedby="remember" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-white/50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700/70 dark:border-gray-600 dark:focus:ring-blue-600">
 										</div>
-										<div class="ml-3 text-base">
+										<div class="ml-3 text-sm sm:text-base">
 											<label for="remember" class="text-gray-700 dark:text-gray-300">Beni Hatırla</label>
 										</div>
 									</div>
 								</div>
-								<button type="submit" class="w-full text-white bg-blue-900 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base px-6 py-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">Giriş Yap</button>
+								<button type="submit" class="w-full text-white bg-blue-900 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:text-base px-5 py-3 sm:py-3.5 md:py-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">Giriş Yap</button>
 								
 								<!-- Google Sign In Button -->
 								<button 
 									type="button"
 									id="googleButton" 
-									class="w-full text-gray-900 dark:text-white bg-white/70 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 hover:bg-white/90 dark:hover:bg-gray-600/80 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-base px-6 py-4 text-center inline-flex items-center justify-center backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-									<svg class="w-6 h-6 mr-3" viewBox="0 0 24 24">
+									class="w-full text-gray-900 dark:text-white bg-white/70 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 hover:bg-white/90 dark:hover:bg-gray-600/80 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm sm:text-base px-5 py-3 sm:py-3.5 md:py-4 text-center inline-flex items-center justify-center backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+									<svg class="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" viewBox="0 0 24 24">
 										<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
 										<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
 										<path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -205,12 +211,12 @@ class LoginForm extends UserForm{
 									Google ile Giriş Yap
 								</button>
 								
-								<p class="text-base font-light text-gray-600 dark:text-gray-300 text-center">
+								<p class="text-sm sm:text-base font-light text-gray-600 dark:text-gray-300 text-center">
 									Henüz hesabınız yok mu? 
 									<a
 										id="signupLink"
 										href="/signup" 
-										class="font-medium text-white bg-blue-900 hover:bg-blue-800 px-4 py-2 rounded-lg hover:underline transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 inline-block">Kayıt Ol</a>
+										class="font-medium text-white bg-blue-900 hover:bg-blue-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:underline transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 inline-block text-sm sm:text-base">Kayıt Ol</a>
 								</p>
 							</form>
 						</div>
