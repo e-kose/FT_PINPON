@@ -180,7 +180,7 @@ class Header extends HTMLElement {
         const profileBtn = this.querySelector('#profileBtn');
         profileBtn?.addEventListener('click', (e) => {
             e.preventDefault();
-            // Profilimi Gör fonksiyonu buraya yazılacak
+            router.navigate("/profile");
         });
 
        

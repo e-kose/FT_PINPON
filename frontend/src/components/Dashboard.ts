@@ -1,7 +1,6 @@
 import "./Header";
 import "./SideBar";
 import "./Statistics";
-import "./PlayerList";
 import "./LastGames";
 import { getUser } from "../store/UserStore";
 import { router } from "../router/Router";
@@ -74,19 +73,9 @@ class Dashboard extends HTMLElement {
                             </button>
                         </div>
 
-                        <!-- Stats and Leaderboard Grid - Responsive Layout -->
+                        <!-- Statistics Section -->
                         <div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-4 sm:p-6 rounded-lg lg:rounded-xl shadow-xl border border-white/20 mb-6 lg:mb-8">
-                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
-                                <!-- Statistics Component -->
-                                <div class="w-full">
-                                    <statistics-component></statistics-component>
-                                </div>
-
-                                <!-- Player List Component -->
-                                <div class="w-full">
-                                    <player-list-component></player-list-component>
-                                </div>
-                            </div>
+                            <statistics-component></statistics-component>
                         </div>
 
                         <!-- Last Games Component -->

@@ -14,30 +14,9 @@ export abstract class UserForm extends HTMLElement {
     this.setupEvents();
   }
 
-  protected async handleGoogleAuth(): Promise<void> {
-    try {
-      // Loading animasyonu göster
-      messages.showLoadingAnimation("#messageContainer");
-      
-      const params = new URLSearchParams({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
-        redirect_uri: import.meta.env.VITE_GOOGLE_CALLBACK_URI!,
-        response_type: "code",
-        scope: "openid email profile",
-        access_type: "offline", // refresh token da alabilmek için
-        prompt: "consent"
-      });
-
-      // Google OAuth sayfasına yönlendir
-      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-      
-    } catch (error) {
-      console.error('Google Auth setup error:', error);
-      messages.showMessage("Google Auth Hatası", "Google kimlik doğrulama başlatılamadı. Lütfen tekrar deneyin.", "error", "#messageContainer");
-      throw error;
-    }
+  protected  handleGoogleAuth(): void {
+	window.location.href = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT;
   }
-
 
 
   protected abstract createForm(): string;

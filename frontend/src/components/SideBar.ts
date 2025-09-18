@@ -43,6 +43,9 @@ class SideBar extends HTMLElement {
             case "/dashboard":
                 route = "dashboard";
                 break;
+            case "/profile":
+                route = "profile";
+                break;
             case "/play":
                 route = "play";
                 break;
@@ -87,13 +90,17 @@ class SideBar extends HTMLElement {
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'} transition-all duration-300">🏠</span>
                             <span class="nav-text ${this.isCollapsed ? 'opacity-0 scale-0 w-0 overflow-hidden' : 'opacity-100 scale-100'} transition-all duration-300 ease-out">Ana Sayfa</span>
                         </a>
+                        <a href="/profile" data-route="profile" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 ${this.getNavItemClasses('profile')} rounded-xl transition-all duration-200 border-2 shadow-sm hover:shadow-md" title="Profilim">
+                            <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'} transition-all duration-300">👤</span>
+                            <span class="nav-text ${this.isCollapsed ? 'opacity-0 scale-0 w-0 overflow-hidden' : 'opacity-100 scale-100'} transition-all duration-300 ease-out">Profilim</span>
+                        </a>
                         <a href="/play" data-route="play" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 ${this.getNavItemClasses('play')} rounded-xl transition-all duration-200 border-2 shadow-sm hover:shadow-md" title="Oyun Oyna">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'} transition-all duration-300">🎮</span>
                             <span class="nav-text ${this.isCollapsed ? 'opacity-0 scale-0 w-0 overflow-hidden' : 'opacity-100 scale-100'} transition-all duration-300 ease-out">Oyun Oyna</span>
                         </a>
                         <a href="/tournament" data-route="tournament" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 ${this.getNavItemClasses('tournament')} rounded-xl transition-all duration-200 border-2 shadow-sm hover:shadow-md" title="Turnuva">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'} transition-all duration-300">🏆</span>
-                            <span class="nav-text ${this.isCollapsed ? 'opacity-0 scale-0 w-0 overflow-hidden' : 'opacity-100 scale-100'} transition-all duration-300 ease-out">Turnuva</span>
+                            <span class="nav-text ${this.isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 scale-100'} transition-all duration-300 ease-out">Turnuva</span>
                         </a>
                         <a href="/friends" data-route="friends" class="nav-item flex items-center ${this.isCollapsed ? 'justify-center px-2' : 'px-4'} py-4 mb-2 ${this.getNavItemClasses('friends')} rounded-xl transition-all duration-200 border-2 shadow-sm hover:shadow-md" title="Arkadaşlar">
                             <span class="text-2xl ${this.isCollapsed ? '' : 'mr-4'} transition-all duration-300">👥</span>
