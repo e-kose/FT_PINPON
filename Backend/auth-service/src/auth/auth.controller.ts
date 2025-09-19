@@ -151,7 +151,7 @@ export async function googleAuth(req: FastifyRequest, reply: FastifyReply) {
       req
     );
     reply.setRefreshTokenCookie(refreshtoken);
-	return reply.redirect("http://localhost:5173/");
+   	return reply.redirect("http://localhost:5173/");
   } catch (error) {
     logError(req.server, req, error);
     return reply.internalServerError("Google Auth error");
