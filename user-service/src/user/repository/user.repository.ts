@@ -64,7 +64,7 @@ export class UserRepository {
 
     const setClause = keys.map((key) => `${key} = ?`).join(", ");
     const values = keys.map((key) => data[key]);
-
+    
     const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereColumn} = ?`;
     const stmt = this.db.prepare(sql);
     return stmt.run(...values, id);
@@ -140,7 +140,15 @@ export class UserRepository {
   }
 
   updateUser(id: number, data: Record<string, any>) {
-    return this.updateTable("users", id, data, "id");
+    let profileRes, userRes;
+    const {profile, ...userFields} = data;
+    if (profile && Object.keys(profile).length > 0) {
+      profileRes =  this.updateTable("user_profiles", id, profile, "user_id");
+    }
+    if (userFields && Object.keys(userFields).length > 0){
+      userRes = this.updateTable("users", id, userFields, "id");
+    }
+    return {userRes, profileRes};
   }
 
   getUserAll(id: number) {

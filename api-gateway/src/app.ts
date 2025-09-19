@@ -1,9 +1,10 @@
 import Fastify from "fastify";
 import * as dotenv from "dotenv";
-import proxy from "@fastify/http-proxy";
 import jwtPlugin from "./plugins/jwt.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
 import { startLogError } from "./utils/log.utils.js";
+import proxyPlugin from "./plugins/proxy.plugin.js";
+import wsProxy from "./plugins/ws-proxy.js";
 
 dotenv.config();
 
@@ -11,47 +12,27 @@ const app = Fastify({ logger: true });
 const port: number = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
 
-app.register(jwtPlugin);
-app.register(loggerPlugin);
-app.register(proxy, {
-  upstream: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
-  prefix: "/auth",
-  rewritePrefix: "/auth",
-  preHandler: async (req, reply) => {
-    if (
-      req.url.startsWith("/auth/2fa/setup") ||
-      req.url.startsWith("/auth/2fa/enable") ||
-      req.url.startsWith("/auth/2fa/disable") ||
-      req.url.startsWith("/auth/me")
-    ) {
-      await app.jwtAuth(req, reply);
-      if (req.user) {
-        req.headers["x-user-id"] = (req.user as any).id;
-        req.headers["x-user-email"] = (req.user as any).email;
-      }
-    }
-  },
+app.register(import('@fastify/cors'), {
+  origin: [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Kendi portun
+    'http://127.0.0.1:5173', // Alternatif localhost
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 });
 
-app.register(proxy, {
-  upstream: process.env.USER_SERVICE_URL || "http://localhost:3002",
-  prefix: "/user",
-  rewritePrefix: "/user",
-  preHandler: async (req, reply) => {
-    if (req.url.startsWith("/user") && !req.url.startsWith("/user/docs")) {
-      await app.jwtAuth(req, reply);
-      if (req.user) {
-        req.headers["x-user-id"] = (req.user as any).id;
-        req.headers["x-user-email"] = (req.user as any).email;
-      }
-    }
-  },
-});
+app.register(jwtPlugin);
+app.register(loggerPlugin);
+app.register(proxyPlugin);
+app.register(wsProxy);
 
 const start = async () => {
   try {
-    await app.listen({ port, host});
-    app.logger.info(`The api gateway has been started on port ${host}:${port}.`);
+    await app.listen({ port, host });
+    app.logger.info(
+      `The api gateway has been started on port ${host}:${port}.`
+    );
   } catch (error: any) {
     console.log({
       message: "An issue occurred while running the API gateway server:",

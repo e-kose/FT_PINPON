@@ -12,6 +12,7 @@
     "start": "node dist/app.js"
   },
   "devDependencies": {
+    "@types/http-proxy": "^1.17.16",
     "@types/node": "^24.3.0",
     "fastify-plugin": "^5.0.1",
     "nodemon": "^3.1.10",
@@ -20,10 +21,12 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
     "@fastify/http-proxy": "^11.3.0",
     "@fastify/jwt": "^10.0.0",
     "dotenv": "^17.2.1",
     "fastify": "^5.4.0",
+    "http-proxy": "^1.18.1",
     "pino-socket": "^7.4.0",
     "ts-node-dev": "^2.0.0"
   }

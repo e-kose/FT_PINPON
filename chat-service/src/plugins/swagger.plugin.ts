@@ -1,17 +1,14 @@
+import fp from "fastify-plugin";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
-import { FastifyInstance } from "fastify";
-import fp from "fastify-plugin";
-import * as dotenv from "dotenv";
-
-dotenv.config();
+import type { FastifyInstance } from "fastify";
 
 export default fp(async (app: FastifyInstance) => {
-  await app.register(fastifySwagger, {
+  app.register(fastifySwagger, {
     openapi: {
       info: {
-        title: "Auth API",
-        description: "Kullanıcı servisinin dökümantasyonu",
+        title: "Chat api",
+        description: "Chat servisinin dökümantasyonu",
         version: "1.0.0",
       },
       servers: [
@@ -33,7 +30,7 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   await app.register(fastifySwaggerUi, {
-    routePrefix: "/user/docs",
+    routePrefix: "/chat/docs",
     uiConfig: {
       docExpansion: "full",
       deepLinking: false,

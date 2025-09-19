@@ -20,6 +20,7 @@ services:
   #   container_name: caddy
   #   ports:
   #     - "443:443"
+  #     - "80:80"
   #   volumes:
   #     - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
   #     - caddy_data:/data
@@ -112,7 +113,7 @@ services:
     env_file:
       - ./elastic-search/.env
     volumes:
-    - /home/ekose/Desktop/FT_PINPON/elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     networks:
       - internal-network
     depends_on:
@@ -145,10 +146,21 @@ services:
     mem_limit: 2g
     restart: always
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - internal-network
+
 volumes:
   es_data:
   caddy_data:
   caddy_config:
+  redis-data:
 
 networks:
   internal-network:

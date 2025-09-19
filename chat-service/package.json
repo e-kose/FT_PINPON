@@ -13,15 +13,22 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@fastify/error": "^4.2.0",
     "@fastify/sensible": "^6.0.3",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
+    "@fastify/websocket": "^11.2.0",
     "@types/better-sqlite3": "^7.6.13",
+    "axios": "^1.11.0",
     "better-sqlite3": "^12.2.0",
     "dotenv": "^17.2.1",
     "fastify": "^5.5.0",
     "fastify-plugin": "^5.0.1",
+    "ioredis": "^5.7.0",
     "nodemon": "^3.1.10",
     "pino": "^9.9.0",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
