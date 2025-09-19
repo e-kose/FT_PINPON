@@ -82,3 +82,24 @@ export async function logout(): Promise<boolean> {
   return false;
 
 }
+
+// export async function set2FA(enabled: boolean): Promise<boolean> {
+// 	let endpoint2FA;
+// 	enabled ? endpoint2FA = "enable" : endpoint2FA = "disable";
+// 	const res = await fetch(`${import.meta.env.BASE_URL}/auth/2fa/${endpoint2FA}`, {
+// 		method: "POST",
+// 		credentials: "include",
+// 		headers: {
+// 			"Content-Type": "application/json"
+// 		},
+// 		body 
+// 	});
+
+// 	if (res.ok) {
+// 		const data = await res.json();
+// 		if (data.success) {
+// 			return true;
+// 		}
+// 	}
+// 	return false;
+// }

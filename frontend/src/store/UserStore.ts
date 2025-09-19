@@ -128,7 +128,7 @@ export function setUser(userData: any): boolean {
   } else {
     currentUser = sanitizedData as User;
   }
-  
+  console.log('User set successfully:', currentUser);
   return true;
 }
 
