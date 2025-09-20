@@ -83,6 +83,7 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 
 
 export function setUser(userData: any, token: string): boolean {
+	console.log('Setting user with data:', userData, 'and token:', token);
 	const sanitizedData = validateAndSanitizeUser(userData);
 	if (!sanitizedData) {
 		console.warn('Failed to set user - invalid data:', userData);

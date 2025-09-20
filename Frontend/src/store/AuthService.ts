@@ -3,7 +3,7 @@ import { router } from "../router/Router";
 import type { User } from "../types/User";
 
 export async function fetchUser(token: string): Promise<boolean> {
-
+	console.log("-------------------------- Fetch USER -------------------------- ");
 	const res = await fetch("http://localhost:3000/auth/me", {
 		method: "GET",
 		headers: {
@@ -27,6 +27,7 @@ export async function fetchUser(token: string): Promise<boolean> {
 }
 
 export async function refreshToken(): Promise<string | null> {
+	console.log("--------------------------- Refresh TOKEN -------------------------- ");
 	const res = await fetch("http://localhost:3000/auth/refresh-token", {
 		method: "POST",
 		credentials: "include",
@@ -48,6 +49,7 @@ export async function refreshToken(): Promise<string | null> {
 
 
 export async function handleLogin(): Promise<boolean> {
+	console.log("--------------------------- HANDLE LOGIN -------------------------- ");
 	const user = getUser();
 
 	if (user && user.accesstoken) {
@@ -92,6 +94,7 @@ export async function checkAndGetAccessToken(): Promise<string | null> {
 
 export async function set2FA(): Promise<string | null> {
 
+	console.log("--------------------------- SET 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
 		return null;
@@ -115,6 +118,7 @@ export async function set2FA(): Promise<string | null> {
 }
 
 export async function enable2Fa(code: string): Promise<boolean> {
+	console.log("--------------------------- ENABLE 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
 		console.log("Acces token yok");
@@ -138,12 +142,34 @@ export async function enable2Fa(code: string): Promise<boolean> {
 	if (res.ok) {
 		const data = await res.json();
 		if (data.success) {
-			// 2FA başarıyla etkinleştirildi, kullanıcı bilgilerini güncelle
-			const user = getUser();
-			if (user) {
-				user.is_2fa_enabled = 1; 
-				setUser(user, accessToken);
-			}
+			handleLogin();
+			console.log("2FA enabled successfully-------------------:", getUser()?.is_2fa_enabled);
+			return data.success;
+		}
+	}
+	return false;
+}
+
+export async function disable2FA(): Promise<boolean> {
+	console.log("--------------------------- DISABLE 2FA -------------------------- ");
+	const accessToken = await checkAndGetAccessToken();
+	if (!accessToken) {
+		return false;
+	}
+	console.log("Disabling 2FA with token: ", accessToken);
+	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/disable`, {
+		method: "POST",
+		credentials: "include",
+		headers: {
+			"Authorization": `Bearer ${accessToken}`
+		},
+	});
+
+	if (res.ok) {
+		const data = await res.json();
+		if (data.success) {
+			handleLogin();
+			console.log("2FA disabled successfully:", getUser()?.is_2fa_enabled);
 			return data.success;
 		}
 	}

@@ -9,7 +9,7 @@ export type User = {
   id: number;
   email: string;
   username: string;
-  is_2fa_enabled: number; // backend 0/1 döndürüyor
+  is_2fa_enabled: number; 
   created_at: string;
   updated_at: string;
   profile: UserProfile;

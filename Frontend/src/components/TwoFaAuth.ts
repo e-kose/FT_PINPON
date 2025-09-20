@@ -4,7 +4,7 @@ import { getUser } from '../store/UserStore';
 import { sidebarStateManager } from '../router/SidebarStateManager';
 import type { SidebarStateListener } from '../router/SidebarStateManager';
 import { router } from '../router/Router';
-import { enable2Fa, set2FA } from '../store/AuthService';
+import { disable2FA, enable2Fa, set2FA } from '../store/AuthService';
 
 class TwoFaAuth extends HTMLElement {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -65,7 +65,8 @@ class TwoFaAuth extends HTMLElement {
         // Kullanıcı store güncellendi, local UI'yi yenile
         this.qrData = null; // QR artık gerekmez
         this.render();
-        this.attachEvents();
+        this.attachEvents(); // duzgun mesajlar verilecek
+
       } else {
         alert('Doğrulama başarısız. Tekrar deneyin.');
       }
@@ -73,7 +74,16 @@ class TwoFaAuth extends HTMLElement {
   }
 
 	private handleDisable() {
-		// TODO: 2FA disable endpoint çağır ve state'i güncelle.
+		disable2FA().then(res => {
+			if (res) {
+				this.qrData = null; // QR artık gerekmez
+				this.render();
+				this.attachEvents();
+				alert('2FA başarıyla devre dışı bırakıldı.'); // duzgun mesaj
+			} else {
+				alert('Devre dışı bırakma başarısız. Tekrar deneyin.');
+			}
+		});
 	}
 
   private submitCodeIfValid() {
