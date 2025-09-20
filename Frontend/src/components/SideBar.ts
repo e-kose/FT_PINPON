@@ -192,6 +192,9 @@ class SideBar extends HTMLElement {
             case 'dashboard':
                 path = '/';
                 break;
+            case 'profile':
+                path = '/profile';
+                break;
             case 'play':
                 path = '/play';
                 break;

@@ -399,7 +399,7 @@ class Settings extends HTMLElement {
             // Update user's avatar
             if (this.currentUser && this.currentUser.profile) {
                 this.currentUser.profile.avatar_url = imageUrl;
-                setUser(this.currentUser);
+                setUser(this.currentUser, "TOKEN GİRİLECEK");
                 this.render(); // Re-render to show new avatar
                 this.attachEventListeners(); // Re-attach events after render
                 this.showNotification('Avatar başarıyla yüklendi!', 'success');
@@ -442,7 +442,7 @@ class Settings extends HTMLElement {
             this.currentUser.profile.bio = bio;
 
             // Update store
-            setUser(this.currentUser);
+            setUser(this.currentUser, "TOKEN GİRİLECEK");
             this.showNotification('Hesap bilgileri başarıyla güncellendi!', 'success');
             this.render(); // Re-render to show updates
         }
@@ -487,7 +487,7 @@ class Settings extends HTMLElement {
     private handle2FAToggle(enabled: boolean): void {
         if (this.currentUser) {
             this.currentUser.is_2fa_enabled = enabled ? 1 : 0; // Convert boolean to number
-            setUser(this.currentUser);
+            setUser(this.currentUser,"Token Gİrilecek");
             
             const message = enabled ? 
                 'İki faktörlü doğrulama etkinleştirildi!' : 

@@ -13,10 +13,7 @@ export type User = {
   created_at: string;
   updated_at: string;
   profile: UserProfile;
-  token?: string; // token frontend'de eklenir, backend'den gelmez
+  accesstoken?: string; 
 }
 
-export type ApiUserResponse = {
-  success: boolean;
-  user: Omit<User, 'token'>; // API response'unda token yok
-}
+

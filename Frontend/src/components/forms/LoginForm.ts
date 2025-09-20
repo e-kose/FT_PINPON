@@ -128,7 +128,7 @@ class LoginForm extends UserForm{
 
 		messages.showLoadingAnimation("#messageContainer");
 		
-		const userSetSuccess = setUser(data.user);
+		const userSetSuccess = setUser(data.user, data.token);
 		if (!userSetSuccess) {
 			messages.showMessage("Hata", "Kullanıcı verisi işlenirken hata oluştu.", "error", "#messageContainer");
 			return;
@@ -136,7 +136,7 @@ class LoginForm extends UserForm{
 
 		setTimeout(() => {
 			router.navigate("/");
-		}, 5000);
+		}, 2000);
 	}
 
 	private handleNetworkError(error: any): void {

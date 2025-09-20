@@ -3,6 +3,7 @@ import "../components/forms/SignupForm";
 import "../components/forms/UserForm";
 import "../components/Dashboard";
 import "../components/MyProfile";
+import "../components/TwoFaAuth";
 import "../components/sideBarComponents/Settings";
 import "../components/sideBarComponents/Play";
 import "../components/sideBarComponents/Tournament";
@@ -109,6 +110,7 @@ function initializeRouter(): void {
 	router.addRoute('/', '<dashboard-component></dashboard-component>');
 	router.addRoute('/dashboard', '<dashboard-component></dashboard-component>');
 	router.addRoute('/profile', '<my-profile></my-profile>');
+	router.addRoute('/2fa', '<twofa-auth></twofa-auth>');
 	router.addRoute('/play', '<div class="p-8"><h1 class="text-2xl font-bold">Oyun Oyna</h1><p>Oyun komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/tournament', '<div class="p-8"><h1 class="text-2xl font-bold">Turnuva</h1><p>Turnuva komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/friends', '<div class="p-8"><h1 class="text-2xl font-bold">Arkadaşlar</h1><p>Arkadaşlar komponenti geliştiriliyor...</p></div>');

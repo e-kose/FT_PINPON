@@ -1,4 +1,3 @@
-import { router } from "../../router/Router";
 import messages from "../Messages";
 
 export abstract class UserForm extends HTMLElement {

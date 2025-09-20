@@ -2,7 +2,6 @@ import { UserForm } from "./UserForm"
 import { router } from "../../router/Router";
 import messages from "../Messages";
 import "./LoginForm";
-import { setUser } from "../../store/UserStore";
 
 interface UserSignup {
 	email: string;
@@ -113,11 +112,10 @@ export default class SignupForm extends UserForm
 			messages.showMessage("Kayıt Başarısız", errorMessage, "error", "#messageContainer");
 			return;
 		}
-		setUser(data.user);
 		messages.showMessage("Başarılı", "Kayıt işleminiz başarıyla tamamlandı. Giriş Ekranına Yönlendiriliyorsunuz...", "success", "#messageContainer");
 		setTimeout(() => {
 			router.navigate("/login");
-		}, 5000);
+		}, 2000);
 	}
 
 	private handleNetworkError(error: any): void {

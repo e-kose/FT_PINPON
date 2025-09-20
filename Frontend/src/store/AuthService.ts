@@ -1,105 +1,151 @@
 import { setUser, clearUser, getUser } from "./UserStore";
 import { router } from "../router/Router";
+import type { User } from "../types/User";
 
 export async function fetchUser(token: string): Promise<boolean> {
-  
+
 	const res = await fetch("http://localhost:3000/auth/me", {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${token}`
-    },
-    credentials: "include",
-  });
+		method: "GET",
+		headers: {
+			"Authorization": `Bearer ${token}`
+		},
+		credentials: "include",
+	});
 
-  if (!res.ok) {
-    return false;
-  }
+	if (!res.ok) {
+		return false;
+	}
 
-  const data = await res.json();
-  
-  if (data.success) {
-    setUser(data.user);
-    return true;
-  }
-  return false;
+	const data = await res.json();
+
+	if (data.success) {
+		setUser(data.user, token);
+	console.log("DData->>>>", data);
+		return true;
+	}
+	return false;
 }
 
-export async function refreshToken(): Promise<boolean> {
-  const res = await fetch("http://localhost:3000/auth/refresh-token", {
-    method: "POST",
-    credentials: "include",
-  });
+export async function refreshToken(): Promise<string | null> {
+	const res = await fetch("http://localhost:3000/auth/refresh-token", {
+		method: "POST",
+		credentials: "include",
+	});
 
-  if (!res.ok) {
-    clearUser();
-    return false;
-  }
-  
-  const data = await res.json();
-  
-  if (data.success && data.accesstoken) {
-    const userFetched = await fetchUser(data.accesstoken);
-    if (userFetched) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-  return false;
+	if (!res.ok) {
+		clearUser();
+		return null;
+	}
+
+	const data = await res.json();
+
+	if (data.success && data.accesstoken) {
+		const userFetched = await fetchUser(data.accesstoken);
+		if (userFetched) return data.accesstoken;
+	}
+	return null;
 }
+
 
 export async function handleLogin(): Promise<boolean> {
-  const user = getUser();
+	const user = getUser();
 
-  if (user && user.token) {
-    const valid = await fetchUser(user.token);
-    if (valid) return true;
-  }
+	if (user && user.accesstoken) {
+		const valid = await fetchUser(user.accesstoken);
+		if (valid) return true;
+	}
 
-  const refreshed = await refreshToken();
-  if (!refreshed) {
-    router.navigate('/');
-    return false;
-  }
-  return true;
+	const refreshed = await refreshToken();
+	if (!refreshed) {
+		router.navigate('/');
+		return false;
+	}
+	return true;
 }
 
 export async function logout(): Promise<boolean> {
-  try {
-    const res = await fetch("http://localhost:3000/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+	try {
+		const res = await fetch("http://localhost:3000/auth/logout", {
+			method: "POST",
+			credentials: "include",
+		});
 
-	if (res.ok) {
-		clearUser();
-  		router.navigate('/');
-  		return true;
+		if (res.ok) {
+			clearUser();
+			router.navigate('/');
+			return true;
+		}
+	} catch (error) {
+		router.navigate('/error');
 	}
-  } catch (error) {
-    router.navigate('/error');
-  }
-  return false;
+	return false;
 
 }
 
-// export async function set2FA(enabled: boolean): Promise<boolean> {
-// 	let endpoint2FA;
-// 	enabled ? endpoint2FA = "enable" : endpoint2FA = "disable";
-// 	const res = await fetch(`${import.meta.env.BASE_URL}/auth/2fa/${endpoint2FA}`, {
-// 		method: "POST",
-// 		credentials: "include",
-// 		headers: {
-// 			"Content-Type": "application/json"
-// 		},
-// 		body 
-// 	});
+export async function checkAndGetAccessToken(): Promise<string | null> {
+	let accessToken = getUser()?.accesstoken || null;
+	if (!accessToken) {
+		accessToken = await refreshToken();
+	}
+	return accessToken;
+}
 
-// 	if (res.ok) {
-// 		const data = await res.json();
-// 		if (data.success) {
-// 			return true;
-// 		}
-// 	}
-// 	return false;
-// }
+export async function set2FA(): Promise<string | null> {
+
+	const accessToken = await checkAndGetAccessToken();
+	if (!accessToken) {
+		return null;
+	}
+	console.log("Setting 2FA to: ", accessToken);
+	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/setup`, {
+		method: "POST",
+		credentials: "include",
+		headers: {
+			"Authorization": `Bearer ${accessToken}`
+		},
+	});
+
+	if (res.ok) {
+		const data = await res.json();
+		if (data.success) {
+			return data.qr;
+		}
+	}
+	return null;
+}
+
+export async function enable2Fa(code: string): Promise<boolean> {
+	const accessToken = await checkAndGetAccessToken();
+	if (!accessToken) {
+		console.log("Acces token yok");
+		return false;
+	}
+	console.log("Access token_Enable: ", accessToken);
+	console.log("Enabling 2FA with code: ", code);
+	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/enable`, {
+		method: "POST",
+		credentials: "include",
+		headers: {
+			accept: "application/json",
+			"Authorization": `Bearer ${accessToken}`,
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+			"token": code
+		})
+	});
+
+	if (res.ok) {
+		const data = await res.json();
+		if (data.success) {
+			// 2FA başarıyla etkinleştirildi, kullanıcı bilgilerini güncelle
+			const user = getUser();
+			if (user) {
+				user.is_2fa_enabled = 1; 
+				setUser(user, accessToken);
+			}
+			return data.success;
+		}
+	}
+	return false;
+}

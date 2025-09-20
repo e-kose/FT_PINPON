@@ -5,73 +5,82 @@ import { sidebarStateManager } from "../router/SidebarStateManager";
 import type { SidebarStateListener } from "../router/SidebarStateManager";
 
 class MyProfile extends HTMLElement {
-    private sidebarListener: SidebarStateListener | null = null;
+	private sidebarListener: SidebarStateListener | null = null;
 
-    constructor() {
-        super();
-        this.render();
-    }
+	constructor() {
+		super();
+		this.render();
+	}
 
-    connectedCallback(): void {
-        this.setupEvents();
-        this.setupSidebarListener();
-    }
+	connectedCallback(): void {
+		this.setupEvents();
+		this.setupSidebarListener();
+	}
 
-    disconnectedCallback(): void {
-        // Listener'ı temizle
-        if (this.sidebarListener) {
-            sidebarStateManager.removeListener(this.sidebarListener);
-            this.sidebarListener = null;
-        }
-    }
+	disconnectedCallback(): void {
+		// Listener'ı temizle
+		if (this.sidebarListener) {
+			sidebarStateManager.removeListener(this.sidebarListener);
+			this.sidebarListener = null;
+		}
+	}
 
-    private setupSidebarListener(): void {
-        this.sidebarListener = (state) => {
-            this.updateMainContentMargin(state.isCollapsed);
-        };
-        sidebarStateManager.addListener(this.sidebarListener);
-    }
+	private setupSidebarListener(): void {
+		this.sidebarListener = (state) => {
+			this.updateMainContentMargin(state.isCollapsed);
+		};
+		sidebarStateManager.addListener(this.sidebarListener);
+	}
 
-    private updateMainContentMargin(isCollapsed: boolean): void {
-        const mainContent = this.querySelector('.main-content');
-        if (mainContent) {
-            if (isCollapsed) {
-                mainContent.classList.remove('ml-72');
-                mainContent.classList.add('ml-16');
-            } else {
-                mainContent.classList.remove('ml-16');
-                mainContent.classList.add('ml-72');
-            }
-        }
-    }
+	private updateMainContentMargin(isCollapsed: boolean): void {
+		const mainContent = this.querySelector('.main-content');
+		if (mainContent) {
+			if (isCollapsed) {
+				mainContent.classList.remove('ml-72');
+				mainContent.classList.add('ml-16');
+			} else {
+				mainContent.classList.remove('ml-16');
+				mainContent.classList.add('ml-72');
+			}
+		}
+	}
 
-    private setupEvents(): void {
-        // Edit profile button
-        this.addEventListener('click', (e) => {
-            const target = e.target as HTMLElement;
-            if (target.closest('.edit-profile-btn')) {
-                this.toggleEditMode();
-            }
-            
-            // Save profile changes
-            if (target.closest('.save-profile-btn')) {
-                this.saveProfile();
-            }
-            
-            // Cancel edit mode
-            if (target.closest('.cancel-edit-btn')) {
-                this.render(); // Re-render to reset changes
-            }
-        });
-    }
+	private setupEvents(): void {
+		// Edit profile button
+		this.addEventListener('click', (e) => {
+			const target = e.target as HTMLElement;
+			if (target.closest('.edit-profile-btn')) {
+				this.toggleEditMode();
+			}
 
-    private toggleEditMode(): void {
-        const profileContent = this.querySelector('.profile-content');
-        const user = getUser();
-        
-        if (!user || !profileContent) return;
+			// Save profile changes
+			if (target.closest('.save-profile-btn')) {
+				this.saveProfile();
+			}
 
-        profileContent.innerHTML = `
+			// Cancel edit mode
+			if (target.closest('.cancel-edit-btn')) {
+				this.render(); // Re-render to reset changes
+			}
+		});
+
+		// Navigate to 2FA management page
+		this.addEventListener('click', (e) => {
+			const target = e.target as HTMLElement;
+			if (target.closest('[data-goto-2fa]')) {
+				// simple navigate using router if available
+				(window as any).router ? (window as any).router.navigate('/2fa') : window.location.pathname = '/2fa';
+			}
+		});
+	}
+
+	private toggleEditMode(): void {
+		const profileContent = this.querySelector('.profile-content');
+		const user = getUser();
+
+		if (!user || !profileContent) return;
+
+		profileContent.innerHTML = `
             <div class="space-y-8">
                 <!-- Avatar Section -->
                 <div class="flex flex-col items-center space-y-6">
@@ -126,6 +135,24 @@ class MyProfile extends HTMLElement {
                                 placeholder="E-mail adresinizi girin"
                             >
                         </div>
+                        
+                                                <!-- 2FA Management Redirect -->
+                                                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-xl border-2 border-blue-200/50 dark:border-blue-700/50">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="flex items-center space-x-4">
+                                                            <div class="w-12 h-12 bg-gradient-to-r ${user.is_2fa_enabled ? 'from-green-500 to-emerald-600' : 'from-gray-400 to-gray-500'} rounded-lg flex items-center justify-center transition-all duration-300">
+                                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">İki Faktörlü Doğrulama (2FA)</h4>
+                                                                <p class="text-sm text-gray-600 dark:text-gray-400">Durum: <span class="font-semibold ${user.is_2fa_enabled ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${user.is_2fa_enabled ? 'Aktif' : 'Pasif'}</span></p>
+                                                            </div>
+                                                        </div>
+                                                        <button type="button" data-goto-2fa class="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-medium shadow transition">Yönet</button>
+                                                    </div>
+                                                </div>
                     </div>
                     
                     <div>
@@ -160,28 +187,28 @@ class MyProfile extends HTMLElement {
                 </div>
             </div>
         `;
-    }
+	}
 
-    private saveProfile(): void {
-        const fullName = (this.querySelector('#editFullName') as HTMLInputElement)?.value;
-        const username = (this.querySelector('#editUsername') as HTMLInputElement)?.value;
-        const email = (this.querySelector('#editEmail') as HTMLInputElement)?.value;
-        const bio = (this.querySelector('#editBio') as HTMLTextAreaElement)?.value;
+	private saveProfile(): void {
+		const fullName = (this.querySelector('#editFullName') as HTMLInputElement)?.value;
+		const username = (this.querySelector('#editUsername') as HTMLInputElement)?.value;
+		const email = (this.querySelector('#editEmail') as HTMLInputElement)?.value;
+		const bio = (this.querySelector('#editBio') as HTMLTextAreaElement)?.value;
 
-        // Here you would typically make an API call to save the profile
-        console.log('Saving profile:', { fullName, username, email, bio });
-        
-        // For now, just show a success message and re-render
-        this.showSuccessMessage();
-        setTimeout(() => {
-            this.render();
-        }, 2000);
-    }
+		// Here you would typically make an API call to save the profile
+		console.log('Saving profile:', { fullName, username, email, bio });
 
-    private showSuccessMessage(): void {
-        const content = this.querySelector('.profile-content');
-        if (content) {
-            content.innerHTML = `
+		// For now, just show a success message and re-render
+		this.showSuccessMessage();
+		setTimeout(() => {
+			this.render();
+		}, 2000);
+	}
+
+	private showSuccessMessage(): void {
+		const content = this.querySelector('.profile-content');
+		if (content) {
+			content.innerHTML = `
                 <div class="text-center py-16">
                     <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,23 +220,24 @@ class MyProfile extends HTMLElement {
                     <div class="w-16 h-1 bg-gradient-to-r from-green-400 to-emerald-500 mx-auto rounded-full"></div>
                 </div>
             `;
-        }
-    }
+		}
+	}
 
-    private formatDate(dateString: string): string {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('tr-TR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
 
-    private render(): void {
-        const user = getUser();
-        
-        if (!user) {
-            this.innerHTML = `
+	private formatDate(dateString: string): string {
+		const date = new Date(dateString);
+		return date.toLocaleDateString('tr-TR', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
+
+	private render(): void {
+		const user = getUser();
+
+		if (!user) {
+			this.innerHTML = `
                 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Oturum Açmalısınız</h2>
@@ -220,14 +248,14 @@ class MyProfile extends HTMLElement {
                     </div>
                 </div>
             `;
-            return;
-        }
+			return;
+		}
 
-        // Sidebar durumunu al ve doğru margin class'ını belirle
-        const sidebarState = sidebarStateManager.getState();
-        const marginClass = sidebarState.isCollapsed ? 'ml-16' : 'ml-72';
+		// Sidebar durumunu al ve doğru margin class'ını belirle
+		const sidebarState = sidebarStateManager.getState();
+		const marginClass = sidebarState.isCollapsed ? 'ml-16' : 'ml-72';
 
-        this.innerHTML = `
+		this.innerHTML = `
             <div class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
                 <!-- Header Component -->
                 <header-component></header-component>
@@ -252,7 +280,7 @@ class MyProfile extends HTMLElement {
                                     <div class="relative z-10 flex flex-col lg:flex-row items-center lg:items-end space-y-6 lg:space-y-0 lg:space-x-8">
                                         <div class="relative">
                                             <img 
-                                                src="${user.profile?.avatar_url || '/Avatar/1.png'}" 
+                                                src="${user.profile?.avatar_url}" 
                                                 alt="Profil Resmi" 
                                                 class="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-white/30 shadow-2xl ring-4 ring-white/20"
                                             >
@@ -404,7 +432,7 @@ class MyProfile extends HTMLElement {
                 </div>
             </div>
         `;
-    }
+	}
 }
 
 customElements.define('my-profile', MyProfile);
