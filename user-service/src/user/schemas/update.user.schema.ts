@@ -12,6 +12,8 @@ export const updateUserSchema = {
     properties: {
       email: { type: "string", format: "email" },
       name: { type: "string" },
+      username: {type: "string"},
+      is_2fa_enabled: {type: "boolean"},
       profile: {
         type: "object",
         properties: {

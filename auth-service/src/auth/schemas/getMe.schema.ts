@@ -12,7 +12,7 @@ export const getMeSchema = {
             id: { type: "number", example: 1 },
             email: { type: "string", example: "john@example.com" },
             username: { type: "string", example: "john_doe" },
-            is_2fa_enabled: { type: "number", example: 0 },
+            is_2fa_enabled: { type: "string", example: "0" },
             created_at: {
               type: "string",
               format: "date-time",

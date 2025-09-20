@@ -143,7 +143,6 @@ export async function updateUserHandler(
     const data = req.body;
     const userRepo = req.server.userRepo as UserRepository;
     const result = userRepo.updateUser(id, data);
-    console.log(result);
     if (result) {
       return reply.send({ success: true, message: "User updated" });
     } else {

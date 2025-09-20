@@ -63,11 +63,21 @@ export class UserRepository {
     if (keys.length === 0) return 0;
 
     const setClause = keys.map((key) => `${key} = ?`).join(", ");
-    const values = keys.map((key) => data[key]);
-    
+    const values = keys.map((key) => {
+      const value = data[key];
+      if (typeof value === "boolean") {
+        return value ? 1 : 0;
+      }
+      return value;
+    });
+
     const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereColumn} = ?`;
     const stmt = this.db.prepare(sql);
-    return stmt.run(...values, id);
+    try {
+      return stmt.run(...values, id);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   /**
@@ -130,7 +140,9 @@ export class UserRepository {
   }
 
   getProfileById(id: number) {
-    const stmt = this.db.prepare("SELECT * FROM user_profiles WHERE user_id = ?");
+    const stmt = this.db.prepare(
+      "SELECT * FROM user_profiles WHERE user_id = ?"
+    );
     return stmt.get(id);
   }
 
@@ -141,14 +153,14 @@ export class UserRepository {
 
   updateUser(id: number, data: Record<string, any>) {
     let profileRes, userRes;
-    const {profile, ...userFields} = data;
+    const { profile, ...userFields } = data;
     if (profile && Object.keys(profile).length > 0) {
-      profileRes =  this.updateTable("user_profiles", id, profile, "user_id");
+      profileRes = this.updateTable("user_profiles", id, profile, "user_id");
     }
-    if (userFields && Object.keys(userFields).length > 0){
+    if (userFields && Object.keys(userFields).length > 0) {
       userRes = this.updateTable("users", id, userFields, "id");
     }
-    return {userRes, profileRes};
+    return { userRes, profileRes };
   }
 
   getUserAll(id: number) {

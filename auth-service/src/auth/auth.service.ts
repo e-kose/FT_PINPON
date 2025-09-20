@@ -16,7 +16,11 @@ import {
 import { payload } from "./types/payload.js";
 import * as dotenv from "dotenv";
 import axios from "axios";
-import { checkUserExist, userServicePost } from "./utils/axios.js";
+import {
+  checkUserExist,
+  userServicePatch,
+  userServicePost,
+} from "./utils/axios.js";
 
 dotenv.config();
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
@@ -25,7 +29,6 @@ const headers = {
     "X-Internal-Secret": process.env.INTERNAL_API_KEY,
   },
 };
-
 
 export async function loginUserService(response: any, req: FastifyRequest) {
   const body = req.body as loginUserBody;
@@ -92,8 +95,9 @@ export async function logoutService(req: FastifyRequest) {
 }
 
 export async function getMeService(req: FastifyRequest) {
-  const userId = req.headers['x-user-id'];
+  const userId = req.headers["x-user-id"];
   const user = await checkUserExist(userService + `/user/id/${userId}`);
+  console.log(user);
   return user;
 }
 
@@ -112,14 +116,17 @@ export async function googleAuthService(
       },
     }
   ).then((res) => res.json());
-  const emailIsExist = await checkUserExist(userService + `/user/email/${googleUser.email}`);
-  if (emailIsExist.user){
+  const emailIsExist = await checkUserExist(
+    userService + `/user/email/${googleUser.email}`
+  );
+  if (emailIsExist.user) {
     return OAuthLoginService(app, emailIsExist.user!);
-  }
-  else {
+  } else {
     let userName = googleUser.email.split("@")[0];
     while (true) {
-      let isExist = await checkUserExist(userService + `/user/username/${userName}`);
+      let isExist = await checkUserExist(
+        userService + `/user/username/${userName}`
+      );
       if (!isExist.data.succes) break;
       else userName = userName + generateRandom4Digit();
     }
@@ -172,9 +179,9 @@ export async function OAuthRegister(
     username: userName,
     email: user.email,
     password: null,
-    profile : {
-      avatar_url: user.picture
-    }
+    profile: {
+      avatar_url: user.picture,
+    },
   });
   app.db
     .prepare("INSERT INTO auth_table (user_id, oauth_id) VALUES(?,?)")
@@ -184,8 +191,8 @@ export async function OAuthRegister(
 }
 
 export async function twoFactorSetupService(req: FastifyRequest) {
-  const id = req.headers['x-user-id'];
-  const email =  req.headers['x-user-email'];
+  const id = req.headers["x-user-id"];
+  const email = req.headers["x-user-email"];
   const db = req.server.db;
   const secret = speakeasy.generateSecret({
     name: `FtTranscendence:${email}`,
@@ -210,7 +217,7 @@ export async function twoFactorSetupService(req: FastifyRequest) {
 }
 
 export async function twoFactorEnableService(req: FastifyRequest) {
-  const id = req.headers['x-user-id'];
+  const id = req.headers["x-user-id"];
   const db = req.server.db;
   const { token } = req.body as { token: string };
   const row = db
@@ -225,7 +232,11 @@ export async function twoFactorEnableService(req: FastifyRequest) {
   });
   if (!verified) throw new InvalidToken();
 
-  //->>>>>>>>>>>>>>>>>>MESAJ BROKER EKLE>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  await axios.patch(
+    userService + "/user",
+    { is_2fa_enabled: true },
+    { headers: { "x-user-id": id } }
+  );
   db.prepare("UPDATE auth_table SET twofa_enable = 1 WHERE user_id = ?").run(
     id
   );
@@ -234,7 +245,13 @@ export async function twoFactorEnableService(req: FastifyRequest) {
 
 export async function twoFactorDisableService(req: FastifyRequest) {
   const db = req.server.db;
-  const id = req.headers['x-user-id'];
+  const id = req.headers["x-user-id"];
+  console.log(id);
+  await axios.patch(
+    userService + "/user",
+    { is_2fa_enabled: false },
+    { headers: { "x-user-id": id } }
+  );
   db.prepare(
     "UPDATE auth_table SET twofa_enable = 0, twofa_secret = NULL WHERE user_id = ?"
   ).run(id);
