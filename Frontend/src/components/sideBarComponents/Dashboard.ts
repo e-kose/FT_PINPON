@@ -1,14 +1,15 @@
-import "./Header";
-import "./SideBar";
-import "./Statistics";
-import "./LastGames";
-import { getUser } from "../store/UserStore";
-import { router } from "../router/Router";
-import { sidebarStateManager } from "../router/SidebarStateManager";
-import type { SidebarStateListener } from "../router/SidebarStateManager";
+import "../utils/Header";
+import "../utils/SideBar";
+import "../utils/Statistics";
+import "../utils/LastGames";
+import { getUser } from "../../store/UserStore";
+import { router } from "../../router/Router";
+import { sidebarStateManager } from "../../router/SidebarStateManager";
+import type { SidebarStateListener } from "../../router/SidebarStateManager";
 
 class Dashboard extends HTMLElement {
     private sidebarListener: SidebarStateListener | null = null;
+	private eventsInitialized = false;
 
 	constructor() {
 		super();
@@ -19,8 +20,8 @@ class Dashboard extends HTMLElement {
 
 
     connectedCallback(): void {
-        this.setupEvents();
-        this.setupSidebarListener();
+		// Eventler artık render içinde bağlanıyor; sadece sidebar dinleyicisini kur
+		this.setupSidebarListener();
     }
 
     disconnectedCallback(): void {
@@ -219,16 +220,17 @@ class Dashboard extends HTMLElement {
 		`);
 	}
 	private render(): void {
-		
 		if (getUser()) {
 			this.innerHTML = this.loginedDashboard();
 		} else {
-			setTimeout(() =>{
-				this.innerHTML = this.loggedOutDashboard();
-			}, 100)
+			// setTimeout gerek yok; içerik senkron oluşturuluyor
+			this.innerHTML = this.loggedOutDashboard();
 		}
+		// Render sonrası butonlar DOM'da; eventleri şimdi bağla
+		this.setupEvents();
 	}
 	private setupEvents(): void {
+		if (this.eventsInitialized) return; // Yinelenen bağları engelle
         // Action buttons for logged in users
         const playNowBtn = this.querySelector('#playNowBtn');
         const inviteFriendBtn = this.querySelector('#inviteFriendBtn');
@@ -252,6 +254,7 @@ class Dashboard extends HTMLElement {
         ctaLoginBtn?.addEventListener('click', () => {
             this.handleCtaLogin();
         });
+		this.eventsInitialized = true;
     }
 
     private setupSidebarListener(): void {
@@ -295,6 +298,7 @@ class Dashboard extends HTMLElement {
     }
 
     private handleCtaLogin(): void {
+		console.log("Navigating to login page");
         router.navigate('/login');
     }
 }

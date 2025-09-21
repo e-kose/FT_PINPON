@@ -1,4 +1,4 @@
-import messages from "../Messages";
+import messages from "../utils/Messages";
 
 export abstract class UserForm extends HTMLElement {
 

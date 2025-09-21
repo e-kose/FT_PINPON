@@ -1,6 +1,6 @@
 import { UserForm } from "./UserForm";
 import { router } from "../../router/Router";
-import messages from "../Messages";
+import messages from "../utils/Messages";
 import { setUser } from "../../store/UserStore";
 
 type UserLogin = {
@@ -102,6 +102,7 @@ class LoginForm extends UserForm{
 
 				this.handleSuccessfulLogin(data);
 			} else {
+				console.log('API error response:', data);
 				this.handleApiError(status);
 			}
 		})

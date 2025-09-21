@@ -127,7 +127,113 @@ export class Messages {
 	public hideLoadingAnimation(parentSelector: string): void {
 		this.clearMessages(parentSelector);
 	}
+
+	public twoFaMessage (status:string, success:boolean) {
+		// status: 'enable' | 'disable'
+		// Placement rules:
+		// - enable false (doğrulama hatası): inline QR kartı altında (#twofa-inline-message)
+		// - diğer tüm durumlar: ana kart altı (#twofa-global-message) sayfanın ortasında
+		let host: HTMLElement | null = null;
+		if (status === 'enable' && !success) {
+			host = document.querySelector('#twofa-inline-message') as HTMLElement | null;
+			if (!host) {
+				host = document.createElement('div');
+				host.id = 'twofa-inline-message';
+				host.className = 'mt-3';
+				const qrCard = document.querySelector('[data-action="verify"]')?.closest('div');
+				qrCard?.appendChild(host);
+			}
+		} else {
+			host = document.querySelector('#twofa-global-message') as HTMLElement | null;
+			if (!host) {
+				host = document.createElement('div');
+				host.id = 'twofa-global-message';
+				host.className = 'mt-4 flex justify-center w-full';
+				document.body.appendChild(host);
+			}
+		}
+		// Öncekini temizle
+		while (host.firstChild) host.removeChild(host.firstChild);
+
+		const wrapper = document.createElement('div');
+		wrapper.setAttribute('data-message', 'true');
+		wrapper.className = 'relative group rounded-lg px-5 py-4 flex flex-row items-start md:items-center gap-3 shadow-md border w-full max-w-xl overflow-hidden transition-all duration-300 justify-center text-center mx-auto';
+
+		let icon = '';
+		let title = '';
+		let desc = '';
+		let theme = '';
+
+		if (status === 'enable') {
+			if (success) {
+				icon = '✅';
+				title = '2FA Aktifleştirildi';
+				desc = 'Hesabınız artık ek bir güvenlik katmanıyla korunuyor.';
+				theme = 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200';
+			} else {
+				icon = '⚠️';
+				title = 'Doğrulama Başarısız';
+				desc = 'Kod geçersiz veya süresi dolmuş olabilir. Tekrar deneyiniz.';
+				theme = 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-800 dark:text-red-200';
+			}
+		} else { // disable
+			if (success) {
+				icon = '🛑';
+				title = '2FA Devre Dışı Bırakıldı';
+				desc = 'Artık yalnızca şifre ile giriş yapılacak.';
+				theme = 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-600 text-amber-800 dark:text-amber-200';
+			} else {
+				icon = '❌';
+				title = 'İşlem Başarısız';
+				desc = 'Devre dışı bırakma gerçekleşmedi. Lütfen tekrar deneyin.';
+				theme = 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-800 dark:text-red-200';
+			}
+		}
+		wrapper.className += ' ' + theme;
+
+		// Icon
+		const iconDiv = document.createElement('div');
+		iconDiv.className = 'text-xl leading-none pt-0.5';
+		iconDiv.textContent = icon;
+
+		// Content
+		const content = document.createElement('div');
+		content.className = 'flex-1';
+		const h = document.createElement('p');
+		h.className = 'font-semibold mb-0.5 text-sm';
+		h.textContent = title;
+		const p = document.createElement('p');
+		p.className = 'text-xs opacity-90 leading-snug';
+		p.textContent = desc;
+		content.appendChild(h);
+		content.appendChild(p);
+
+		// Close btn
+		const closeBtn = document.createElement('button');
+		closeBtn.type = 'button';
+		closeBtn.setAttribute('aria-label', 'Kapat');
+		closeBtn.className = 'text-xs px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition';
+		closeBtn.textContent = '✕';
+		closeBtn.addEventListener('click', () => {
+			wrapper.classList.add('opacity-0', 'scale-95');
+			setTimeout(() => wrapper.remove(), 250);
+		});
+
+		wrapper.appendChild(iconDiv);
+		wrapper.appendChild(content);
+		wrapper.appendChild(closeBtn);
+		host.appendChild(wrapper);
+
+		// Otomatik kaldırma (başarı 6sn, hata 8sn)
+		const timeout = success ? 6000 : 8000;
+		setTimeout(() => {
+			if (!wrapper.isConnected) return;
+			wrapper.classList.add('opacity-0', 'scale-95');
+			setTimeout(() => wrapper.remove(), 300);
+		}, timeout);
+	}
 }
+
 
 const messages = new Messages();
 

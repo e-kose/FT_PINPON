@@ -1,8 +1,8 @@
 import "./Header";
 import "./SideBar";
-import { getUser } from "../store/UserStore";
-import { sidebarStateManager } from "../router/SidebarStateManager";
-import type { SidebarStateListener } from "../router/SidebarStateManager";
+import { getUser } from "../../store/UserStore";
+import { sidebarStateManager } from "../../router/SidebarStateManager";
+import type { SidebarStateListener } from "../../router/SidebarStateManager";
 
 class MyProfile extends HTMLElement {
 	private sidebarListener: SidebarStateListener | null = null;

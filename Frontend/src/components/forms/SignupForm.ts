@@ -1,6 +1,6 @@
 import { UserForm } from "./UserForm"
 import { router } from "../../router/Router";
-import messages from "../Messages";
+import messages from "../utils/Messages";
 import "./LoginForm";
 
 interface UserSignup {

@@ -1,5 +1,5 @@
-import { router } from "../router/Router";
-import { sidebarStateManager } from "../router/SidebarStateManager";
+import { router } from "../../router/Router";
+import { sidebarStateManager } from "../../router/SidebarStateManager";
 
 class SideBar extends HTMLElement {
     private activeRoute: string = "dashboard";

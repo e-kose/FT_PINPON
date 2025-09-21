@@ -1,5 +1,5 @@
-import "../Header";
-import "../SideBar";
+import "../utils/Header.ts";
+import "../utils/SideBar.ts";
 import type { User } from '../../types/User.ts';
 import { getUser, setUser } from '../../store/UserStore.ts';
 import { sidebarStateManager } from "../../router/SidebarStateManager";

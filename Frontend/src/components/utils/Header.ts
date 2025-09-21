@@ -1,8 +1,8 @@
-import { router } from "../router/Router";
-import { getUser} from "../store/UserStore";
-import { logout } from "../store/AuthService";
-import { sidebarStateManager } from "../router/SidebarStateManager";
-import type { SidebarStateListener } from "../router/SidebarStateManager";
+import { router } from "../../router/Router";
+import { getUser} from "../../store/UserStore";
+import { logout } from "../../store/AuthService";
+import { sidebarStateManager } from "../../router/SidebarStateManager";
+import type { SidebarStateListener } from "../../router/SidebarStateManager";
 
 
 class Header extends HTMLElement {

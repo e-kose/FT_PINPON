@@ -1,9 +1,9 @@
 import "../components/errors/ErrorPages";
 import "../components/forms/SignupForm";
 import "../components/forms/UserForm";
-import "../components/Dashboard";
-import "../components/MyProfile";
-import "../components/TwoFaAuth";
+import "../components/sideBarComponents/Dashboard";
+import "../components/utils/MyProfile";
+import "../components/utils/TwoFaAuth";
 import "../components/sideBarComponents/Settings";
 import "../components/sideBarComponents/Play";
 import "../components/sideBarComponents/Tournament";
