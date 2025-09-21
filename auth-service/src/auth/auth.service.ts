@@ -11,16 +11,14 @@ import { auth_tableDb } from "./types/authDb.js";
 import {
   InvalidCredentials,
   InvalidToken,
+  InvalidTwaFacToken,
+  RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
 import { payload } from "./types/payload.js";
 import * as dotenv from "dotenv";
 import axios from "axios";
-import {
-  checkUserExist,
-  userServicePatch,
-  userServicePost,
-} from "./utils/axios.js";
+import { checkUserExist, userServicePost } from "./utils/axios.js";
 
 dotenv.config();
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
@@ -36,7 +34,7 @@ export async function loginUserService(response: any, req: FastifyRequest) {
   const authValues = getAuthTable(db, response.data.id);
 
   if (authValues && authValues.twofa_enable) {
-    if (!body.token) throw new InvalidCredentials();
+    if (!body.token) throw new RequiredToken();
     const speakeasy = (await import("speakeasy")).default;
     const verified = speakeasy.totp.verify({
       secret: authValues.twofa_secret,
@@ -44,7 +42,7 @@ export async function loginUserService(response: any, req: FastifyRequest) {
       token: body.token,
       window: 1,
     });
-    if (!verified) throw new InvalidToken();
+    if (!verified) throw new InvalidTwaFacToken();
   }
   const payload: payload = {
     id: response.data.id,

@@ -12,12 +12,23 @@ export const InvalidToken = createError(
   401
 );
 
+export const InvalidTwaFacToken = createError(
+  'INVALID_2FA_TOKEN',
+  '2FA_Token is invalid',
+  401
+);
+
 export const twoFacNotInit= createError(
   '2FA not initialized',
   '2FA not initialized',
   400
 );
 
+export const RequiredToken = createError(
+   'REQUIRED_2FA_TOKEN',
+  '2FA token is required',
+  401
+);
 
 export const Forbidden = createError (
   'FORBIDDEN',
