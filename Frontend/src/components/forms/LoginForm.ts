@@ -1,13 +1,10 @@
 import { UserForm } from "./UserForm";
 import { router } from "../../router/Router";
 import messages from "../utils/Messages";
-import { setUser } from "../../store/UserStore";
+import { setUser, setUserLoginData } from "../../store/UserStore";
+import type { User, UserLogin } from "../../types/User";
+import { loginValidation } from "../../store/AuthService";
 
-type UserLogin = {
-	email?: string;
-	username?: string;
-	password: string;
-}
 
 class LoginForm extends UserForm{
 
@@ -31,13 +28,7 @@ class LoginForm extends UserForm{
 		}
 	};
 
-	// private handleGoogleLogin(): void {
-	// 	// Google OAuth işlemi burada yapılacak
-	// 	// Örneğin: window.location.href = "http://localhost:3000/auth/google"
-	// 	console.log("Google OAuth işlemi başlatılıyor...");
-	// 	// veya
-	// 	// window.open("http://localhost:3000/auth/google", "_self");
-	// }
+	
 
 	protected setupEvents(): void {
 		super.setupEvents(); 
@@ -81,82 +72,10 @@ class LoginForm extends UserForm{
 			username: emailOrUsername.includes('@') ? undefined : emailOrUsername,
 			password: this.sanitizeInput(formData.get("password") as string || ""),
 		};
-
-		fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(userData),
-			credentials: 'include' 
-		})
-		.then(response => {
-			return response.text().then(text => ({
-				status: response.status,
-				ok: response.ok,
-				data: text ? JSON.parse(text) : {}
-			}));
-		})
-		.then(({ status, ok, data }) => {
-			if (ok) {
-
-				this.handleSuccessfulLogin(data);
-			} else {
-				console.log('API error response:', data);
-				this.handleApiError(status);
-			}
-		})
-		.catch(error => {
-			console.error('Network error:', error);
-			this.handleNetworkError(error);
-		});
+		setUserLoginData(userData);
 	}
 
-	private handleSuccessfulLogin(data: any): void {
-		if (!data.success) {
-			const errorMessage = typeof data.message === 'string' 
-				? data.message.slice(0, 200) 
-				: "Giriş işlemi başarısız. Bilgilerinizi kontrol edin.";
-			
-			messages.showMessage("Giriş Başarısız", errorMessage, "error", "#messageContainer");
-			return;
-		}
 
-		if (!data.user || typeof data.user !== 'object') {
-			messages.showMessage("Hata", "Kullanıcı bilgileri alınamadı. Lütfen tekrar deneyin.", "error", "#messageContainer");
-			return;
-		}
-
-		messages.showLoadingAnimation("#messageContainer");
-		
-		const userSetSuccess = setUser(data.user, data.token);
-		if (!userSetSuccess) {
-			messages.showMessage("Hata", "Kullanıcı verisi işlenirken hata oluştu.", "error", "#messageContainer");
-			return;
-		}
-
-		setTimeout(() => {
-			router.navigate("/");
-		}, 2000);
-	}
-
-	private handleNetworkError(error: any): void {
-		let userMessage = "Bilinmeyen bir hata oluştu.";
-		
-		if (error instanceof TypeError && error.message.includes('fetch')) {
-			userMessage = "İnternet bağlantınızı kontrol edin ve tekrar deneyin.";
-		} else if (error instanceof Error) {
-			if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-				userMessage = "Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edin.";
-			} else if (error.message.includes('timeout')) {
-				userMessage = "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.";
-			} else {
-				userMessage = "Bağlantı hatası oluştu. Lütfen tekrar deneyin.";
-			}
-		}
-		
-		messages.showMessage("Bağlantı Hatası", userMessage, "error", "#messageContainer");
-	}
 	protected createForm(): string {
 		return(`
 			<section class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">

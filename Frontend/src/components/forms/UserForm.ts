@@ -1,3 +1,5 @@
+import { router } from "../../router/Router";
+import { setUser } from "../../store/UserStore";
 import messages from "../utils/Messages";
 
 export abstract class UserForm extends HTMLElement {
@@ -39,9 +41,9 @@ export abstract class UserForm extends HTMLElement {
   }
 
   // Ortak API hata işleme metodu
-  protected handleApiError(status: number): void {
+  protected handleApiError(status: number, messageContainer: string): void {
     const { title, message } = this.getErrorMessage(status);
-    messages.showMessage(title, message, "error", "#messageContainer");
+    messages.showMessage(title, message, "error", messageContainer);
   }
 
   // XSS güvenliği için input sanitization
@@ -71,5 +73,46 @@ export abstract class UserForm extends HTMLElement {
 			}
 			return true;
 		}
+	protected handleNetworkError(error: any, messageContainer: string): void {
+	let userMessage = "Bilinmeyen bir hata oluştu.";
+
+	if (error instanceof TypeError && error.message.includes('fetch')) {
+		userMessage = "İnternet bağlantınızı kontrol edin ve tekrar deneyin.";
+	} else if (error instanceof Error) {
+		if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+			userMessage = "Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edin.";
+		} else if (error.message.includes('timeout')) {
+			userMessage = "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.";
+		} else {
+			userMessage = "Bağlantı hatası oluştu. Lütfen tekrar deneyin.";
+		}
+	}
+	messages.showMessage("Bağlantı Hatası", userMessage, "error", messageContainer);
+}
+protected loginCheck(data: any, messageContainer: string): void {
+	if (!data.success) {
+		const errorMessage = typeof data.message === 'string'
+			? data.message.slice(0, 200)
+			: "Giriş işlemi başarısız. Bilgilerinizi kontrol edin.";
+
+		messages.showMessage("Giriş Başarısız", errorMessage, "error", messageContainer);
+		return;
+	}
+
+	if (!data.user || typeof data.user !== 'object') {
+		messages.showMessage("Hata", "Kullanıcı bilgileri alınamadı. Lütfen tekrar deneyin.", "error", messageContainer);
+		return;
+	}
+
+	messages.showLoadingAnimation(messageContainer);
+	const userSetSuccess = setUser(data.user, data.token);
+	if (!userSetSuccess) {
+		messages.showMessage("Hata", "Kullanıcı verisi işlenirken hata oluştu.", "error", messageContainer);
+		return;
+	}
+	setTimeout(() => {
+		router.navigate("/");
+	}, 2000);
+}
   protected abstract handleSubmit(e: Event): void;
 }

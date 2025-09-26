@@ -4,6 +4,7 @@ import "../components/forms/UserForm";
 import "../components/sideBarComponents/Dashboard";
 import "../components/utils/MyProfile";
 import "../components/utils/TwoFaAuth";
+import "../components/forms/twoFaLogin";
 import "../components/sideBarComponents/Settings";
 import "../components/sideBarComponents/Play";
 import "../components/sideBarComponents/Tournament";
@@ -60,10 +61,9 @@ class Router
 		const route = this.routes.find(r => r.path === path);
 		console.log("Navigating to:", path);
 		if (route) {
+			console.log("Route found:", route);
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
 			fillIndex(route.component, app);
-			
-			// Dispatch custom event to notify components about route change
 			window.dispatchEvent(new CustomEvent('routechange', { 
 				detail: { path, previousPath: previouesPath } 
 			}));
@@ -111,6 +111,7 @@ function initializeRouter(): void {
 	router.addRoute('/dashboard', '<dashboard-component></dashboard-component>');
 	router.addRoute('/profile', '<my-profile></my-profile>');
 	router.addRoute('/2fa', '<twofa-auth></twofa-auth>');
+	router.addRoute('/2fa-login', '<twofa-login></twofa-login>');
 	router.addRoute('/play', '<div class="p-8"><h1 class="text-2xl font-bold">Oyun Oyna</h1><p>Oyun komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/tournament', '<div class="p-8"><h1 class="text-2xl font-bold">Turnuva</h1><p>Turnuva komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/friends', '<div class="p-8"><h1 class="text-2xl font-bold">Arkadaşlar</h1><p>Arkadaşlar komponenti geliştiriliyor...</p></div>');

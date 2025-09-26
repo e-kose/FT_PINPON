@@ -2,6 +2,7 @@
 import { router } from "../../router/Router";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
+import messages from "../utils/Messages";
 
 class ErrorPages extends HTMLElement {
 	private errorType: string = '404';

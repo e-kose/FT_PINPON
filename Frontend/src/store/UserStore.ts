@@ -1,7 +1,8 @@
-import type { User, UserProfile } from '../types/User.ts';
+import type { User, UserLogin, UserProfile } from '../types/User.ts';
 
 // Simple in-memory user store
 let currentUser: User | null = null;
+let userLoginData: UserLogin | null = null;
 // XSS Protection - HTML sanitization
 function sanitizeString(str: string): string {
 	if (typeof str !== 'string') return '';
@@ -129,3 +130,20 @@ export function setAccessToken(token: string): void {
 export function getAccessToken(): string | null {
 	return currentUser?.accesstoken || null;
 }
+
+export function submitCodeIfValid(callBack?: any, twoFaCode?: HTMLInputElement | null) {
+		if (!twoFaCode) return;
+		const code = (twoFaCode.value || '').trim();
+		if (!/^[0-9]{6}$/.test(code)) {
+			alert('Lütfen 6 haneli sayısal kodu girin');
+			twoFaCode.focus();
+			return;
+		}
+		callBack(code);
+}
+export function setUserLoginData(UserLoginData: UserLogin): void {
+	userLoginData = UserLoginData;
+}
+export function getUserLoginData(): UserLogin | null {
+	return userLoginData;
+}	

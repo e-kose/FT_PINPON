@@ -37,11 +37,10 @@ class TwoFaAuth extends HTMLElement {
 		sidebarStateManager.addListener(this.sidebarListener);
 	}
 
-	// Yükleniyor durumunu UI'da göstermek için (gerçek çağrıları sen ekle)
+	// Yükleniyor durumunu UI'da göstermek için (gerçek çağrıları ekleyeceğim)
 	// setLoading(val:boolean) { ... }  // TODO: Yükleniyor overlay kontrolü burada olabilir.
 
-	// ---- Aşağıdaki methodlar PLACEHOLDER ----
-	// Backend entegrasyonunu sen yazacaksın. İmzalara dokunma istersen.
+	
 	private async startSetup() {
 		// Eğer tekrar tıklanırsa önceki state'i koru
 		if (this.qrData) return; // zaten alınmış
@@ -72,7 +71,6 @@ class TwoFaAuth extends HTMLElement {
 				messages.twoFaMessage('enable', true);
 			} else {
         this.render();
-        // Yeniden render sonrası event'leri tekrar bağla ki kullanıcı tekrar denediğinde çalışsın
         this.attachEvents();
         messages.twoFaMessage('enable', false);
 			}
@@ -106,25 +104,21 @@ class TwoFaAuth extends HTMLElement {
 		this.handleVerify(code);
 	}
 
-
-	// showMessage(msg:string, type:'success'|'error') { ... } // TODO: Mesaj gösterimi
-
 	private attachEvents() {
 		this.querySelector('[data-action="begin"]')?.addEventListener('click', () => this.startSetup());
 		this.querySelector('[data-action="verify"]')?.addEventListener('click', () => this.submitCodeIfValid());
 
 		this.querySelector('[data-action="disable"]')?.addEventListener('click', () => this.handleDisable());
 		this.querySelector('[data-back]')?.addEventListener('click', () => router.navigate('/profile'));
-		// QR iptal butonu
+		
 		this.querySelector('[data-action="cancel-qr"]')?.addEventListener('click', () => {
-			this.qrData = null; // QR verisini temizle
+			this.qrData = null; 
 			this.render();
 			this.attachEvents();
 		});
 
 		const codeInput = this.querySelector<HTMLInputElement>('#twofa-code');
 		if (codeInput) {
-			// Sadece rakam girilsin
 			codeInput.addEventListener('input', () => {
 				codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 6);
 			});

@@ -94,12 +94,12 @@ export default class SignupForm extends UserForm
 			if (ok) {
 				this.handleSuccessfulRegistration(data);
 			} else {
-				this.handleApiError(status);
+				this.handleApiError(status, "#messageContainer");
 			}
 		})
 		.catch(error => {
 			console.error('Registration error:', error);
-			this.handleNetworkError(error);
+			this.handleNetworkError(error, "#messageContainer");
 		});
 	}
 
@@ -118,23 +118,7 @@ export default class SignupForm extends UserForm
 		}, 2000);
 	}
 
-	private handleNetworkError(error: any): void {
-		let userMessage = "Bilinmeyen bir hata oluştu.";
-		
-		if (error instanceof TypeError && error.message.includes('fetch')) {
-			userMessage = "İnternet bağlantınızı kontrol edin ve tekrar deneyin.";
-		} else if (error instanceof Error) {
-			if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-				userMessage = "Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edin.";
-			} else if (error.message.includes('timeout')) {
-				userMessage = "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.";
-			} else {
-				userMessage = "Bağlantı hatası oluştu. Lütfen tekrar deneyin.";
-			}
-		}
-		
-		messages.showMessage("Bağlantı Hatası", userMessage, "error", "#messageContainer");
-	}
+
 	
 	protected createForm(): string {
 		return (`

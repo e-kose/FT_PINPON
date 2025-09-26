@@ -4,7 +4,12 @@ export type UserProfile = {
   avatar_url: string;
   bio: string;
 }
-
+export type UserLogin = {
+  email?: string;
+  username?: string;
+  password: string;
+  token?: string; 
+}
 export type User = {
   id: number;
   email: string;
