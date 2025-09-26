@@ -21,6 +21,8 @@ import {
   Forbidden,
   InvalidCredentials,
   InvalidToken,
+  InvalidTwaFacToken,
+  RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
 import { registerUserBody } from "./types/register.userBody.js";
@@ -35,7 +37,10 @@ const headers = {
   },
 };
 
-export async function register(req: FastifyRequest<{Body : registerUserBody}>, reply: FastifyReply) {
+export async function register(
+  req: FastifyRequest<{ Body: registerUserBody }>,
+  reply: FastifyReply
+) {
   try {
     if (!req.body.profile) req.body.profile = { avatar_url: DEFAULT_AVATAR };
     else req.body.profile.avatar_url = DEFAULT_AVATAR;
@@ -77,7 +82,9 @@ export async function login(
     if (
       error instanceof InvalidToken ||
       error instanceof InvalidCredentials ||
-      error instanceof Forbidden
+      error instanceof Forbidden ||
+      error instanceof InvalidTwaFacToken ||
+      error instanceof RequiredToken
     )
       return reply
         .code(error.statusCode)
@@ -151,7 +158,7 @@ export async function googleAuth(req: FastifyRequest, reply: FastifyReply) {
       req
     );
     reply.setRefreshTokenCookie(refreshtoken);
-	return reply.redirect("http://localhost:5173/");
+    return reply.redirect("http://localhost:5173/");
   } catch (error) {
     logError(req.server, req, error);
     return reply.internalServerError("Google Auth error");
