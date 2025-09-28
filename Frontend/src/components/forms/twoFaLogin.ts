@@ -23,7 +23,7 @@ class TwoFaLogin extends UserForm {
 		console.log("TwoFaLogin connectedCallback");
 		this.innerHTML = this.createForm();
 		this.form = this.querySelector('form') as HTMLFormElement;
-		this.setupEvents(); // adds submit listener
+		this.setupEvents();
 	}
 	protected handleSubmit(e: Event): void {
 		e.preventDefault();
@@ -51,8 +51,6 @@ class TwoFaLogin extends UserForm {
 		const loginData = getUserLoginData();
 		if (loginData) {
 			const updated = { ...loginData, token: code };
-			// email keyini kaldır
-			delete updated.email;
 			setUserLoginData(updated);
 			console.log("User Dataa 2FA----->", getUserLoginData());
 			loginAuth(updated).then(({ status, ok, data }) => {
@@ -67,7 +65,6 @@ class TwoFaLogin extends UserForm {
 						this.handleApiError(500, '#inline-msg');
 				} else 
 					this.handleApiError(status, '#inline-msg');
-				// Başarılı veya hatalı durumda ikinci istekleri engellemek için kilidi aç
 				this.isSubmitting = false;
 			}).catch((error) => {
 				console.error("2FA Login error:", error);
@@ -107,7 +104,6 @@ class TwoFaLogin extends UserForm {
 	}
 	
 }
-
 customElements.define('twofa-login', TwoFaLogin);
 export default TwoFaLogin;
 

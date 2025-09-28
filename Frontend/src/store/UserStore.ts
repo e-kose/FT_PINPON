@@ -83,6 +83,14 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 }
 
 
+function removeUndefinedKey(data:any): void {
+	Object.keys(data).forEach(key => {
+		if (data[key] && typeof data[key] === 'object') 
+			removeUndefinedKey(data[key]);
+		else if (data[key] === undefined) 
+			delete data[key];
+	});
+}
 export function setUser(userData: any, token: string): boolean {
 	console.log('Setting user with data:', userData, 'and token:', token);
 	const sanitizedData = validateAndSanitizeUser(userData);
@@ -100,12 +108,10 @@ export function getUser(): User | null {
 	return currentUser ? { ...currentUser } : null;
 }
 
-
 export function clearUser(): void {
 	currentUser = null;
 }
 
-// Utility functions for easier access to user data
 export function getUserAvatar(): string {
 	return currentUser?.profile?.avatar_url || "Null";
 }
@@ -142,6 +148,7 @@ export function submitCodeIfValid(callBack?: any, twoFaCode?: HTMLInputElement |
 		callBack(code);
 }
 export function setUserLoginData(UserLoginData: UserLogin): void {
+	removeUndefinedKey(UserLoginData);
 	userLoginData = UserLoginData;
 }
 export function getUserLoginData(): UserLogin | null {
