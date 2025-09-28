@@ -1,29 +1,11 @@
 import { setUser, clearUser, getUser } from "./UserStore";
 import { router } from "../router/Router";
-import type { User, UserLogin } from "../types/User";
-import messages from "../components/utils/Messages";
-import { handleNetworkError, loginCheck } from "../components/utils/NotifyUi";
+import type { UserLogin } from "../types/User";
 
 
-export async function loginValidation(userData: UserLogin, messageContainer: string)
-{
-	try {
-			const response = await loginAuth(userData);
-			if (response && response.ok)
-				loginCheck(response.data, messageContainer);
-			else if (response) {
-				if (response.status === 401  && response.data?.message === "2FA token is required") {
-					messages.showLoadingAnimation(messageContainer);
-					setTimeout(()=> router.navigate('/2fa-login'), 400);
-					return;
-				}
-				handleApiError(response.status, messageContainer);
-			}
-		} catch (error) {
-			handleNetworkError(error, messageContainer);
-		}
-}
+
 export async function loginAuth(userLoginData: UserLogin): Promise<{ status: number; ok: boolean; data: any }> {
+	console.log("Login Auth: userLoginData->", userLoginData);
 	return fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
 		method: 'POST',
 		headers: {
@@ -42,6 +24,7 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 			throw error;
 		})
 }
+
 export async function fetchUser(token: string): Promise<boolean> {
 	console.log("-------------------------- Fetch USER -------------------------- ");
 	const res = await fetch("http://localhost:3000/auth/me", {

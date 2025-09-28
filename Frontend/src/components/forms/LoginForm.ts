@@ -1,9 +1,8 @@
 import { UserForm } from "./UserForm";
 import { router } from "../../router/Router";
 import messages from "../utils/Messages";
-import { setUser, setUserLoginData } from "../../store/UserStore";
-import type { User, UserLogin } from "../../types/User";
-import { loginValidation } from "../../store/AuthService";
+import { setUserLoginData } from "../../store/UserStore";
+import type { UserLogin } from "../../types/User";
 
 
 class LoginForm extends UserForm{
@@ -73,6 +72,7 @@ class LoginForm extends UserForm{
 			password: this.sanitizeInput(formData.get("password") as string || ""),
 		};
 		setUserLoginData(userData);
+		await this.loginValidation(userData, "#messageContainer");
 	}
 
 

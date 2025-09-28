@@ -1,5 +1,7 @@
 import { router } from "../../router/Router";
+import { loginAuth } from "../../store/AuthService";
 import { setUser } from "../../store/UserStore";
+import type { UserLogin } from "../../types/User";
 import messages from "../utils/Messages";
 
 export abstract class UserForm extends HTMLElement {
@@ -16,9 +18,9 @@ export abstract class UserForm extends HTMLElement {
   }
 
   protected  handleGoogleAuth(): void {
+	//SPA YAOILMASI LAZIM BUNU KESİNLİKLE ATLAMAYALIM.  DIKKATTTTTT !!!!
 	window.location.href = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT;
   }
-
 
   protected abstract createForm(): string;
 
@@ -26,7 +28,6 @@ export abstract class UserForm extends HTMLElement {
     this.form?.addEventListener("submit", this.handleSubmit.bind(this));
   }
 
-  // Ortak hata yönetim metodu
   protected getErrorMessage(status: number): { title: string, message: string } {
     const errorInfo = this.errorMappings[status];
     
@@ -36,22 +37,20 @@ export abstract class UserForm extends HTMLElement {
         message: "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin."
       };
     }
-
     return errorInfo;
   }
 
-  // Ortak API hata işleme metodu
   protected handleApiError(status: number, messageContainer: string): void {
     const { title, message } = this.getErrorMessage(status);
     messages.showMessage(title, message, "error", messageContainer);
   }
 
-  // XSS güvenliği için input sanitization
+
   protected sanitizeInput(input: string): string {
     return input.trim()
-      .replace(/[<>]/g, '') // Remove < and > characters
-      .replace(/javascript:/gi, '') // Remove javascript: protocol
-      .replace(/on\w+=/gi, ''); // Remove event handlers like onclick=
+      .replace(/[<>]/g, '') 
+      .replace(/javascript:/gi, '') 
+      .replace(/on\w+=/gi, ''); 
   }
 
   protected checkInput = (rule : RegExp, inputElement:string, labelElement: string, labelText: string): boolean =>{
@@ -113,6 +112,26 @@ protected loginCheck(data: any, messageContainer: string): void {
 	setTimeout(() => {
 		router.navigate("/");
 	}, 2000);
+}
+
+ protected async  loginValidation(userData: UserLogin, messageContainer: string)
+{
+	try {
+			const response = await loginAuth(userData);
+			console.log("Login response:::::", response);
+			if (response && response.ok)
+				this.loginCheck(response.data, messageContainer);
+			else if (response) {
+				if (response.status === 401  && response.data?.message === "2FA token is required") {
+					messages.showLoadingAnimation(messageContainer);
+					setTimeout(()=> router.navigate('/2fa-login'), 400);
+					return;
+				}
+				this.handleApiError(response.status, messageContainer);
+			}
+		} catch (error) {
+			this.handleNetworkError(error, messageContainer);
+		}
 }
   protected abstract handleSubmit(e: Event): void;
 }
