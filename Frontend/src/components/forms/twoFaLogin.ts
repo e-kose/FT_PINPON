@@ -1,5 +1,5 @@
 import { router } from '../../router/Router';
-import { loginAuth } from '../../store/AuthService';
+import { loginAuth } from '../../services/AuthService';
 import { getUserLoginData, submitCodeIfValid, setUserLoginData, setUser } from '../../store/UserStore';
 import messages from '../utils/Messages';
 import { UserForm } from './UserForm';

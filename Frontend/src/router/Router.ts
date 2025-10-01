@@ -61,7 +61,6 @@ class Router
 		const route = this.routes.find(r => r.path === path);
 		console.log("Navigating to:", path);
 		if (route) {
-			console.log("Route found:", route);
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
 			fillIndex(route.component, app);
 			window.dispatchEvent(new CustomEvent('routechange', { 

@@ -10,7 +10,7 @@ import "./components/utils/SideBar"
 import "./components/utils/Statistics"
 import "./components/utils/LastGames"
 import "./components/sideBarComponents/Settings"
-import { handleLogin } from "./store/AuthService"
+import { handleLogin } from "./services/AuthService"
 
 
 // Router'ı başlat

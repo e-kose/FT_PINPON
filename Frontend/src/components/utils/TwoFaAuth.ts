@@ -4,7 +4,7 @@ import { getUser } from '../../store/UserStore';
 import { sidebarStateManager } from '../../router/SidebarStateManager';
 import type { SidebarStateListener } from '../../router/SidebarStateManager';
 import { router } from '../../router/Router';
-import { disable2FA, enable2Fa, set2FA } from '../../store/AuthService';
+import { disable2FA, enable2Fa, set2FA } from '../../services/AuthService';
 import messages from './Messages';
 
 class TwoFaAuth extends HTMLElement {

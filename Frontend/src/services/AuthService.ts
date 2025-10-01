@@ -1,6 +1,6 @@
-import { setUser, clearUser, getUser } from "./UserStore";
+import { setUser, clearUser, getUser } from "../store/UserStore";
 import { router } from "../router/Router";
-import type { UserLogin } from "../types/User";
+import type { UserLogin } from "../types/AuthType";
 
 
 
@@ -14,18 +14,31 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 		body: JSON.stringify(userLoginData),
 		credentials: 'include'
 	})
-		.then(response => {
-			return response.text().then(text => ({
+		.then(async response => {
+			const responseData = await response.text().then(text => ({
 				status: response.status,
 				ok: response.ok,
 				data: text ? JSON.parse(text) : {}
 			}));
+			
+			
+			if (responseData.ok && responseData.data.success && responseData.data.token) {
+				const fetchSuccess = await fetchUser(responseData.data.token);
+				if (fetchSuccess) {
+					const currentUser = getUser();
+					if (currentUser) {
+						responseData.data.user = currentUser;
+					}
+				}
+			}
+			
+			return responseData;
 		}).catch((error) => {
 			throw error;
 		})
 }
 
-export async function fetchUser(token: string): Promise<boolean> {
+export async function 	fetchUser(token: string): Promise<boolean> {
 	console.log("-------------------------- Fetch USER -------------------------- ");
 	const res = await fetch("http://localhost:3000/auth/me", {
 		method: "GET",
@@ -43,7 +56,6 @@ export async function fetchUser(token: string): Promise<boolean> {
 
 	if (data.success) {
 		setUser(data.user, token);
-		console.log("DData->>>>", data);
 		return true;
 	}
 	return false;
@@ -197,4 +209,13 @@ export async function disable2FA(): Promise<boolean> {
 		}
 	}
 	return false;
+}
+
+export function removeUndefinedKey(data:any): void {
+	Object.keys(data).forEach(key => {
+		if (data[key] && typeof data[key] === 'object') 
+			removeUndefinedKey(data[key]);
+		else if (data[key] === undefined) 
+			delete data[key];
+	});
 }

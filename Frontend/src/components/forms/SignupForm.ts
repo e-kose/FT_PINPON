@@ -49,13 +49,6 @@ export default class SignupForm extends UserForm
 		});
 	}
 
-	// private handleGoogleLogin(): void {
-	// 	// Google OAuth işlemi burada yapılacak
-	// 	// Örneğin: window.location.href = "http://localhost:3000/auth/google"
-	// 	console.log("Google OAuth işlemi başlatılıyor...");
-	// 	// veya
-	// 	// window.open("http://localhost:3000/auth/google", "_self");
-	// }
 
 	protected handleSubmit(e: Event): void {
 		e.preventDefault();

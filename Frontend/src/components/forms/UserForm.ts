@@ -1,7 +1,7 @@
 import { router } from "../../router/Router";
-import { loginAuth } from "../../store/AuthService";
+import { loginAuth } from "../../services/AuthService";
 import { setUser } from "../../store/UserStore";
-import type { UserLogin } from "../../types/User";
+import type { UserLogin } from "../../types/AuthType";
 import messages from "../utils/Messages";
 
 export abstract class UserForm extends HTMLElement {

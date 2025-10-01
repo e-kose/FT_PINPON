@@ -1,4 +1,5 @@
-import type { User, UserLogin, UserProfile } from '../types/User.ts';
+import { removeUndefinedKey } from '../services/AuthService.ts';
+import type { User, UserLogin, UserProfile } from '../types/AuthType.ts';
 
 // Simple in-memory user store
 let currentUser: User | null = null;
@@ -66,12 +67,20 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			if (userData.profile.full_name)
 				profile.full_name = sanitizeString(userData.profile.full_name.toString()).trim();
 
+			if (userData.profile.bio)
+				profile.bio = sanitizeString(userData.profile.bio.toString()).trim();
+
 			if (userData.profile.avatar_url && userData.profile.avatar_url != "https://pub-421db7f681a74de4ac9f7d9889a7719f.r2.dev/default-profile.png")
 				profile.avatar_url = (userData.profile.avatar_url.toString()).trim();
 			else {
 				console.log("Rastgele avatarr")
 				const random = Math.floor(Math.random() * 13) + 1;
 				profile.avatar_url = `/Avatar/${random}.png`;
+			}
+
+			// Profile objesini sanitizedUser'a ata (sadece gerekli alanlar varsa)
+			if (Object.keys(profile).length > 0) {
+				sanitizedUser.profile = profile as UserProfile;
 			}
 		}
 
@@ -83,15 +92,9 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 }
 
 
-function removeUndefinedKey(data:any): void {
-	Object.keys(data).forEach(key => {
-		if (data[key] && typeof data[key] === 'object') 
-			removeUndefinedKey(data[key]);
-		else if (data[key] === undefined) 
-			delete data[key];
-	});
-}
-export function setUser(userData: any, token: string): boolean {
+
+export function setUser(userData: any, token: string): boolean 
+{
 	console.log('Setting user with data:', userData, 'and token:', token);
 	const sanitizedData = validateAndSanitizeUser(userData);
 	if (!sanitizedData) {
@@ -147,9 +150,9 @@ export function submitCodeIfValid(callBack?: any, twoFaCode?: HTMLInputElement |
 		}
 		callBack(code);
 }
-export function setUserLoginData(UserLoginData: UserLogin): void {
-	removeUndefinedKey(UserLoginData);
-	userLoginData = UserLoginData;
+export function setUserLoginData(UserLogin: UserLogin): void {
+	removeUndefinedKey(UserLogin);
+	userLoginData = UserLogin;
 }
 export function getUserLoginData(): UserLogin | null {
 	return userLoginData;

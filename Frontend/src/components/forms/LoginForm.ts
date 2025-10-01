@@ -2,7 +2,7 @@ import { UserForm } from "./UserForm";
 import { router } from "../../router/Router";
 import messages from "../utils/Messages";
 import { setUserLoginData } from "../../store/UserStore";
-import type { UserLogin } from "../../types/User";
+import type { UserLogin } from "../../types/AuthType";
 
 
 class LoginForm extends UserForm{
@@ -71,6 +71,7 @@ class LoginForm extends UserForm{
 			username: emailOrUsername.includes('@') ? undefined : emailOrUsername,
 			password: this.sanitizeInput(formData.get("password") as string || ""),
 		};
+		console.log("Login data to submit:", userData);
 		setUserLoginData(userData);
 		await this.loginValidation(userData, "#messageContainer");
 	}

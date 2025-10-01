@@ -3,10 +3,28 @@ import "../utils/SideBar";
 import { getUser } from "../../store/UserStore";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
+import { updateUser } from "../../services/SettingsService";
+import type { UserCredentialsUpdate } from "../../types/SettingsType";
+import messages from "../utils/Messages";
+import { validateFullProfile } from "../utils/Validation";
+import { handleLogin, removeUndefinedKey } from "../../services/AuthService";
 
 class SettingsComponent extends HTMLElement {
+
 	private sidebarListener: SidebarStateListener | null = null;
 	private currentTab: string = 'profile';
+
+	// Error mappings for different status codes
+	private userResponseMappings: Record<number, { title: string; message: string; }> = {
+		0: { title: 'Bağlantı Hatası', message: 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.' },
+		400: { title: 'Geçersiz Veri', message: 'Gönderilen bilgiler geçersiz. Lütfen kontrol edin.' },
+		401: { title: 'Yetkilendirme Hatası', message: 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.' },
+		403: { title: 'Erişim Engellendi', message: 'Bu işlemi gerçekleştirmek için yetkiniz bulunmuyor.' },
+		404: { title: 'Kullanıcı Bulunamadı', message: 'Kullanıcı bilgileri bulunamadı.' },
+		409: { title: 'Çakışma Hatası', message: 'Kullanıcı zaten mevcut veya çakışan bir bilgi var.' },
+		429: { title: 'Çok Fazla İstek', message: 'Çok fazla istek gönderdiniz. Lütfen bekleyip tekrar deneyin.' },
+		500: { title: 'Sunucu Hatası', message: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.' }
+	};
 
 	constructor() {
 		super();
@@ -19,7 +37,6 @@ class SettingsComponent extends HTMLElement {
 	}
 
 	disconnectedCallback(): void {
-		// Listener'ı temizle
 		if (this.sidebarListener) {
 			sidebarStateManager.removeListener(this.sidebarListener);
 			this.sidebarListener = null;
@@ -46,6 +63,32 @@ class SettingsComponent extends HTMLElement {
 		}
 	}
 
+	// Error handling methods
+	private getUserResponseMessage(status: number): { title: string; message: string; } {
+		const errorInfo = this.userResponseMappings[status];
+
+		if (!errorInfo) {
+			return {
+				title: "Beklenmeyen Hata",
+				message: "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin."
+			};
+		}
+		return errorInfo;
+	}
+
+	private handleApiResponse(status: number, messageContainer: string = '.tab-content'): void {
+		const { title, message } = this.getUserResponseMessage(status);
+		messages.showMessage(title, message, "error", messageContainer);
+	}
+
+	private handleUpdateResponse(response: { success: boolean; message: string; status: number }, messageContainer: string = '.tab-content'): void {
+		if (response.success) {
+			messages.showMessage("Başarılı", response.message || "Bilgileriniz başarıyla güncellendi.", "success", messageContainer);
+		} else {
+			this.handleApiResponse(response.status, messageContainer);
+		}
+	}
+
 	private setupEvents(): void {
 		// Tab switching
 		this.addEventListener('click', (e) => {
@@ -58,8 +101,6 @@ class SettingsComponent extends HTMLElement {
 					this.switchTab(tabName);
 				}
 			}
-
-			// Profile settings save
 			if (target.closest('.save-profile-btn')) {
 				this.saveProfileSettings();
 			}
@@ -134,15 +175,61 @@ class SettingsComponent extends HTMLElement {
 		});
 	}
 
-	private saveProfileSettings(): void {
-		// Profil ayarlarını kaydetme işlevi
-		console.log('Saving profile settings...');
+	private async saveProfileSettings(): Promise<void> {
+		// Form verilerini topla
+		const fullNameInput = this.querySelector('#settingsFullName') as HTMLInputElement;
+		const usernameInput = this.querySelector('#settingsUsername') as HTMLInputElement;
+		const emailInput = this.querySelector('#settingsEmail') as HTMLInputElement;
+		const bioInput = this.querySelector('#settingsBio') as HTMLTextAreaElement;
+
+		const userInfo: UserCredentialsUpdate = {
+			email: emailInput.value,
+			username: usernameInput.value,
+			profile: {
+				full_name: fullNameInput.value,
+				bio: bioInput.value
+			}
+		};
+
+		removeUndefinedKey(userInfo);
+		const validation = validateFullProfile(userInfo);
+		
+		if (!validation.isValid) {
+			let errorMessage = 'Lütfen aşağıdaki hataları düzeltin:\n';
+			Object.values(validation.errors).forEach(error => {
+				errorMessage += `• ${error}\n`;
+			});
+			messages.showMessage("Yanlış Format", errorMessage, "error", ".tab-content");
+			return;
+		}
+		else
+		{
+			try {
+				const response = await updateUser(userInfo);
+				this.handleUpdateResponse(response);
+				if (response.success) {
+					handleLogin().then(() => {
+						this.renderTabContent();
+					}).catch(() => {
+						messages.showMessage("Hata", "Oturum açma sırasında bir hata oluştu.", "error", ".tab-content");
+					});
+				}
+			} catch (error) {
+				console.error('Profile update error:', error);
+				messages.showMessage("Hata", "Profil güncelleme sırasında bir hata oluştu.", "error", ".tab-content");
+			}
+		}
 	}
 
+
+
 	private changePassword(): void {
-		// Şifre değiştirme işlevi
+		// Şifre değiştirme işlevi - henüz implement edilmedi
 		console.log('Changing password...');
+		messages.showMessage("Bilgi", "Şifre değiştirme özelliği yakında eklenecek.", "info", ".tab-content");
 	}
+
+
 
 	private toggle2FA(): void {
 		// 2FA açma/kapama işlevi
@@ -176,9 +263,12 @@ class SettingsComponent extends HTMLElement {
 	}
 
 	private uploadAvatar(): void {
-		// Avatar yükleme işlevi
+		// Avatar yükleme işlevi - henüz implement edilmedi
 		console.log('Uploading avatar...');
+		messages.showMessage("Bilgi", "Avatar yükleme özelliği yakında eklenecek.", "info", ".tab-content");
 	}
+
+
 
 	private renderTabContent(): void {
 		const tabContent = this.querySelector('.tab-content');
@@ -259,7 +349,7 @@ class SettingsComponent extends HTMLElement {
 							<input 
 								type="text" 
 								id="settingsUsername"
-								value="${user.username}"
+								value="${user.username}"	
 								class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 								placeholder="Kullanıcı adınızı girin"
 							>
