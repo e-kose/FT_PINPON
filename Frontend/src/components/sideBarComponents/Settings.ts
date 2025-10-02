@@ -8,6 +8,7 @@ import type { UserCredentialsUpdate } from "../../types/SettingsType";
 import messages from "../utils/Messages";
 import { validateFullProfile } from "../utils/Validation";
 import { handleLogin, removeUndefinedKey } from "../../services/AuthService";
+import { router } from "../../router/Router";
 
 class SettingsComponent extends HTMLElement {
 
@@ -28,12 +29,15 @@ class SettingsComponent extends HTMLElement {
 
 	constructor() {
 		super();
+		// URL'den tab bilgisini al
+		this.initializeTabFromURL();
 		this.render();
 	}
 
 	connectedCallback(): void {
 		this.setupEvents();
 		this.setupSidebarListener();
+		// Router zaten popstate'i handle ediyor, ayrıca listener eklemiyoruz
 	}
 
 	disconnectedCallback(): void {
@@ -63,6 +67,23 @@ class SettingsComponent extends HTMLElement {
 		}
 	}
 
+	// URL'den tab bilgisini al ve ayarla
+	private initializeTabFromURL(): void {
+		const path = window.location.pathname;
+		const validTabs = ['profile', 'security', 'appearance', 'account'];
+		
+		if (path.startsWith('/settings/')) {
+			const tabFromURL = path.split('/settings/')[1];
+			if (validTabs.includes(tabFromURL)) {
+				this.currentTab = tabFromURL;
+			}
+		} else if (path === '/settings') {
+			this.currentTab = 'profile';
+		}
+	}
+
+
+
 	// Error handling methods
 	private getUserResponseMessage(status: number): { title: string; message: string; } {
 		const errorInfo = this.userResponseMappings[status];
@@ -76,17 +97,198 @@ class SettingsComponent extends HTMLElement {
 		return errorInfo;
 	}
 
-	private handleApiResponse(status: number, messageContainer: string = '.tab-content'): void {
+	private handleApiResponse(status: number, messageContainer?: string): void {
 		const { title, message } = this.getUserResponseMessage(status);
-		messages.showMessage(title, message, "error", messageContainer);
+		const container = messageContainer || this.getCurrentTabMessageContainer();
+		messages.showMessage(title, message, "error", container);
+		// 7 saniye sonra mesajı temizle
+		this.scheduleMessageCleanup(container);
 	}
 
-	private handleUpdateResponse(response: { success: boolean; message: string; status: number }, messageContainer: string = '.tab-content'): void {
+	private handleUpdateResponse(response: { success: boolean; message: string; status: number }, messageContainer?: string): void {
+		const container = messageContainer || this.getCurrentTabMessageContainer();
 		if (response.success) {
-			messages.showMessage("Başarılı", response.message || "Bilgileriniz başarıyla güncellendi.", "success", messageContainer);
+			messages.showMessage("Başarılı", response.message || "Bilgileriniz başarıyla güncellendi.", "success", container);
+			// Başarı durumunda cleanup'ı burada değil, handleLogin sonrası yapacağız
 		} else {
-			this.handleApiResponse(response.status, messageContainer);
+			this.handleApiResponse(response.status, container);
 		}
+	}
+
+	// Mesajları belirli süre sonra temizleme
+	private scheduleMessageCleanup(container: string): void {
+		setTimeout(() => {
+			messages.clearMessages(container);
+		}, 7000); // 7 saniye
+	}
+
+	// Aktif tab'a göre mesaj container'ını belirle
+	private getCurrentTabMessageContainer(): string {
+		return `.${this.currentTab}-message-container`;
+	}
+
+	// Validation hatalarını güzel bir şekilde göster
+	private showValidationErrors(errors: Record<string, string>): void {
+		const container = document.querySelector('.profile-message-container');
+		if (!container) return;
+
+		// Mevcut mesajları temizle
+		messages.clearMessages('.profile-message-container');
+
+		// Hata container'ı oluştur
+		const errorDiv = document.createElement('div');
+		errorDiv.setAttribute('data-message', 'true');
+		errorDiv.className = 'mt-6 bg-gradient-to-br from-red-50 via-red-100 to-pink-50 dark:from-red-900/20 dark:via-red-800/30 dark:to-pink-900/20 border-2 border-red-300 dark:border-red-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm';
+
+		// Ana başlık
+		const headerDiv = document.createElement('div');
+		headerDiv.className = 'flex items-center mb-4';
+		
+		const iconDiv = document.createElement('div');
+		iconDiv.className = 'w-10 h-10 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center mr-3 shadow-md';
+		iconDiv.innerHTML = `
+			<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+			</svg>
+		`;
+
+		const titleDiv = document.createElement('div');
+		titleDiv.innerHTML = `
+			<h3 class="text-red-800 dark:text-red-200 font-bold text-lg">⚠️ Form Eksikleri</h3>
+			<p class="text-red-600 dark:text-red-300 text-sm">Formu tamamlamak için aşağıdaki alanları kontrol edin</p>
+		`;
+
+		headerDiv.appendChild(iconDiv);
+		headerDiv.appendChild(titleDiv);
+
+		// Hata listesi
+		const errorsList = document.createElement('div');
+		errorsList.className = 'space-y-3 mt-4';
+
+		Object.values(errors).forEach((error, index) => {
+			const errorItem = document.createElement('div');
+			errorItem.className = 'flex items-start p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-red-200 dark:border-red-600/30 hover:bg-white/90 dark:hover:bg-gray-700/50 transition-colors duration-200 shadow-sm';
+			
+			errorItem.innerHTML = `
+				<div class="w-6 h-6 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+					<span class="text-red-600 dark:text-red-400 text-xs font-bold">${index + 1}</span>
+				</div>
+				<div class="flex-1">
+					<p class="text-red-800 dark:text-red-200 text-sm font-medium leading-relaxed">${error}</p>
+				</div>
+			`;
+			
+			errorsList.appendChild(errorItem);
+		});
+
+		// Alt bilgi
+		const footerDiv = document.createElement('div');
+		footerDiv.className = 'mt-4 p-3 bg-red-100/50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-600/30';
+		footerDiv.innerHTML = `
+			<p class="text-red-700 dark:text-red-300 text-xs flex items-center">
+				<svg class="w-4 h-4 mr-2 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+				</svg>
+				Bu alanları düzelttikten sonra tekrar kaydetmeyi deneyin.
+			</p>
+		`;
+
+		// Element'leri birleştir
+		errorDiv.appendChild(headerDiv);
+		errorDiv.appendChild(errorsList);
+		errorDiv.appendChild(footerDiv);
+		container.appendChild(errorDiv);
+
+		// 8 saniye sonra temizle
+		setTimeout(() => {
+			if (errorDiv && errorDiv.parentNode) {
+				errorDiv.remove();
+			}
+		}, 8000);
+	}
+
+	// Başarı mesajını güzel bir şekilde göster
+	private showSuccessMessage(title: string, message: string): void {
+		const container = document.querySelector('.profile-message-container');
+		if (!container) return;
+
+		// Mevcut mesajları temizle
+		messages.clearMessages('.profile-message-container');
+
+		// Başarı container'ı oluştur
+		const successDiv = document.createElement('div');
+		successDiv.setAttribute('data-message', 'true');
+		successDiv.className = 'mt-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/30 dark:via-emerald-900/30 dark:to-teal-900/30 border-2 border-green-300 dark:border-green-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300';
+
+		successDiv.innerHTML = `
+			<div class="flex items-center">
+				<div class="w-12 h-12 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center mr-4 shadow-lg">
+					<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+					</svg>
+				</div>
+				<div class="flex-1">
+					<h3 class="text-green-800 dark:text-green-200 font-bold text-lg mb-1">${title}</h3>
+					<p class="text-green-700 dark:text-green-300 text-sm leading-relaxed">${message}</p>
+				</div>
+				<div class="ml-4">
+					<div class="w-8 h-8 bg-green-100 dark:bg-green-800/50 rounded-full flex items-center justify-center">
+						<span class="text-green-600 dark:text-green-400 text-lg">✓</span>
+					</div>
+				</div>
+			</div>
+		`;
+
+		container.appendChild(successDiv);
+
+		// 6 saniye sonra temizle
+		setTimeout(() => {
+			if (successDiv && successDiv.parentNode) {
+				successDiv.remove();
+			}
+		}, 6000);
+	}
+
+	// Hata mesajını güzel bir şekilde göster
+	private showErrorMessage(title: string, message: string): void {
+		const container = document.querySelector('.profile-message-container');
+		if (!container) return;
+
+		// Mevcut mesajları temizle
+		messages.clearMessages('.profile-message-container');
+
+		// Hata container'ı oluştur
+		const errorDiv = document.createElement('div');
+		errorDiv.setAttribute('data-message', 'true');
+		errorDiv.className = 'mt-4 bg-gradient-to-br from-red-50 via-red-100 to-pink-50 dark:from-red-900/30 dark:via-red-800/30 dark:to-pink-900/30 border-2 border-red-300 dark:border-red-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300';
+
+		errorDiv.innerHTML = `
+			<div class="flex items-center">
+				<div class="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center mr-4 shadow-lg">
+					<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</div>
+				<div class="flex-1">
+					<h3 class="text-red-800 dark:text-red-200 font-bold text-lg mb-1">${title}</h3>
+					<p class="text-red-700 dark:text-red-300 text-sm leading-relaxed">${message}</p>
+				</div>
+				<div class="ml-4">
+					<div class="w-8 h-8 bg-red-100 dark:bg-red-800/50 rounded-full flex items-center justify-center">
+						<span class="text-red-600 dark:text-red-400 text-lg">!</span>
+					</div>
+				</div>
+			</div>
+		`;
+
+		container.appendChild(errorDiv);
+
+		// 7 saniye sonra temizle
+		setTimeout(() => {
+			if (errorDiv && errorDiv.parentNode) {
+				errorDiv.remove();
+			}
+		}, 7000);
 	}
 
 	private setupEvents(): void {
@@ -152,6 +354,8 @@ class SettingsComponent extends HTMLElement {
 
 	private switchTab(tabName: string): void {
 		this.currentTab = tabName;
+		// Router ile URL'yi güncelle
+		router.navigate(`/settings/${tabName}`);
 		this.renderTabContent();
 		this.updateTabItemStyles();
 	}
@@ -195,11 +399,8 @@ class SettingsComponent extends HTMLElement {
 		const validation = validateFullProfile(userInfo);
 		
 		if (!validation.isValid) {
-			let errorMessage = 'Lütfen aşağıdaki hataları düzeltin:\n';
-			Object.values(validation.errors).forEach(error => {
-				errorMessage += `• ${error}\n`;
-			});
-			messages.showMessage("Yanlış Format", errorMessage, "error", ".tab-content");
+			// Hataları daha güzel bir formatta göster
+			this.showValidationErrors(validation.errors);
 			return;
 		}
 		else
@@ -210,13 +411,15 @@ class SettingsComponent extends HTMLElement {
 				if (response.success) {
 					handleLogin().then(() => {
 						this.renderTabContent();
+						// Başarı mesajını güzel bir şekilde göster
+						this.showSuccessMessage("🎉 Profil Güncellendi!", "Profil bilgileriniz başarıyla kaydedildi. Değişiklikler anında aktif oldu.");
 					}).catch(() => {
-						messages.showMessage("Hata", "Oturum açma sırasında bir hata oluştu.", "error", ".tab-content");
+						this.showErrorMessage("❌ Oturum Hatası", "Profil güncellendi ancak oturum yenileme sırasında bir sorun oluştu. Lütfen sayfayı yenileyin.");
 					});
 				}
 			} catch (error) {
 				console.error('Profile update error:', error);
-				messages.showMessage("Hata", "Profil güncelleme sırasında bir hata oluştu.", "error", ".tab-content");
+				this.showErrorMessage("💥 Bağlantı Sorunu", "Profil güncellenirken bir sorun oluştu. İnternet bağlantınızı kontrol edip tekrar deneyin.");
 			}
 		}
 	}
@@ -226,14 +429,15 @@ class SettingsComponent extends HTMLElement {
 	private changePassword(): void {
 		// Şifre değiştirme işlevi - henüz implement edilmedi
 		console.log('Changing password...');
-		messages.showMessage("Bilgi", "Şifre değiştirme özelliği yakında eklenecek.", "info", ".tab-content");
+		messages.showMessage("🔧 Geliştirme Aşamasında", "Şifre değiştirme özelliği yakında kullanıma sunulacak. Şimdilik mevcut şifrenizi kullanmaya devam edin.", "info", ".security-message-container");
+		// 7 saniye sonra mesajı temizle
+		this.scheduleMessageCleanup(".security-message-container");
 	}
 
 
 
 	private toggle2FA(): void {
-		// 2FA açma/kapama işlevi
-		console.log('Toggling 2FA...');
+		router.navigate('/2fa');
 	}
 
 	private changeTheme(theme: string): void {
@@ -265,7 +469,9 @@ class SettingsComponent extends HTMLElement {
 	private uploadAvatar(): void {
 		// Avatar yükleme işlevi - henüz implement edilmedi
 		console.log('Uploading avatar...');
-		messages.showMessage("Bilgi", "Avatar yükleme özelliği yakında eklenecek.", "info", ".tab-content");
+		messages.showMessage("📸 Fotoğraf Yükleme", "Profil fotoğrafı yükleme özelliği geliştirme aşamasında. Şu anda varsayılan avatar'ı kullanabilirsiniz.", "info", ".profile-message-container");
+		// 7 saniye sonra mesajı temizle
+		this.scheduleMessageCleanup(".profile-message-container");
 	}
 
 
@@ -309,6 +515,8 @@ class SettingsComponent extends HTMLElement {
 					</div>
 					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Profil Ayarları</h2>
 				</div>
+
+
 
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 					<!-- Avatar Section -->
@@ -383,6 +591,9 @@ class SettingsComponent extends HTMLElement {
 						Değişiklikleri Kaydet
 					</button>
 				</div>
+
+				<!-- Profil Tab Mesaj Container - En altta -->
+				<div class="profile-message-container mt-6"></div>
 			</div>
 		`;
 	}
@@ -398,6 +609,8 @@ class SettingsComponent extends HTMLElement {
 					</div>
 					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Güvenlik Ayarları</h2>
 				</div>
+
+
 
 				<!-- Password Change -->
 				<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-6 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
@@ -455,6 +668,9 @@ class SettingsComponent extends HTMLElement {
 					</button>
 				</div>
 				</div>
+
+				<!-- Güvenlik Tab Mesaj Container - En altta -->
+				<div class="security-message-container mt-6"></div>
 			</div>
 		`;
 	}
@@ -470,6 +686,8 @@ class SettingsComponent extends HTMLElement {
 					</div>
 					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Görünüm Ayarları</h2>
 				</div>
+
+
 
 				<div class="space-y-6">
 					<!-- Theme Selection -->
@@ -522,6 +740,9 @@ class SettingsComponent extends HTMLElement {
 						</div>
 					</div>
 				</div>
+
+				<!-- Görünüm Tab Mesaj Container - En altta -->
+				<div class="appearance-message-container mt-6"></div>
 			</div>
 		`;
 	}
@@ -538,6 +759,8 @@ class SettingsComponent extends HTMLElement {
 					</div>
 					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Hesap Ayarları</h2>
 				</div>
+
+
 
 				<!-- Account Information -->
 				<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-6 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
@@ -601,6 +824,9 @@ class SettingsComponent extends HTMLElement {
 						</div>
 					</div>
 				</div>
+
+				<!-- Hesap Tab Mesaj Container - En altta -->
+				<div class="account-message-container mt-6"></div>
 			</div>
 		`;
 	}
@@ -628,7 +854,7 @@ class SettingsComponent extends HTMLElement {
 		const marginClass = sidebarState.isCollapsed ? 'ml-16' : 'ml-72';
 
 		this.innerHTML = `
-			<div class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+			<div class="min-h-screen bg-gray-50 dark:bg-gray-900 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed">
 				<!-- Header Component -->
 				<header-component></header-component>
 				
@@ -637,7 +863,7 @@ class SettingsComponent extends HTMLElement {
 					<sidebar-component current-route="settings"></sidebar-component>
 
 					<!-- Main Content -->
-					<div class="main-content ${marginClass} p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
+					<div class="main-content ${marginClass} p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300 bg-black/30">
 						<div class="w-full">
 							<!-- Settings Header -->
 							<div class="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-xl shadow-xl border border-white/30 overflow-hidden mb-6">

@@ -66,7 +66,7 @@ class TwoFaAuth extends HTMLElement {
 				this.render();
 				this.attachEvents();
 				setTimeout(() => {
-					router.navigate('/profile');
+					router.navigate('/settings/security');
 				}, 2000);
 				messages.twoFaMessage('enable', true);
 			} else {
@@ -84,7 +84,7 @@ class TwoFaAuth extends HTMLElement {
 				this.attachEvents();
 				messages.twoFaMessage('disable', true);
 				setTimeout(() => {
-					router.navigate('/profile');
+					router.navigate('/settings/security');
 				}, 2000);
 			} else {
 				messages.twoFaMessage('disable', false);

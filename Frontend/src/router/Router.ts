@@ -116,6 +116,10 @@ function initializeRouter(): void {
 	router.addRoute('/friends', '<div class="p-8"><h1 class="text-2xl font-bold">Arkadaşlar</h1><p>Arkadaşlar komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/chat', '<div class="p-8"><h1 class="text-2xl font-bold">Sohbet</h1><p>Sohbet komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/settings', '<settings-component></settings-component>');
+	router.addRoute('/settings/profile', '<settings-component></settings-component>');
+	router.addRoute('/settings/security', '<settings-component></settings-component>');
+	router.addRoute('/settings/appearance', '<settings-component></settings-component>');
+	router.addRoute('/settings/account', '<settings-component></settings-component>');
 	router.addRoute('/signup', '<signup-form></signup-form>');
 	router.addRoute('/login', '<login-form></login-form>');
 	router.addRoute('/auth/google', 'http://localhost:3000/auth/google');

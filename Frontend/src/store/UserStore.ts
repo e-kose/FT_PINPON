@@ -47,11 +47,22 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 				sanitizedUser.email = email;
 			}
 		}
-
 		if (userData.is_2fa_enabled !== undefined) {
 			const is_2fa_enabled = parseInt(userData.is_2fa_enabled);
 			if (!isNaN(is_2fa_enabled) && (is_2fa_enabled === 0 || is_2fa_enabled === 1)) {
 				sanitizedUser.is_2fa_enabled = is_2fa_enabled;
+			}
+		}
+		if (userData.created_at) {
+			const createdAt = new Date(userData.created_at);
+			if (!isNaN(createdAt.getTime())) {
+				sanitizedUser.created_at = createdAt.toISOString();
+			}
+		}
+		if (userData.updated_at) {
+			const updatedAt = new Date(userData.updated_at);
+			if (!isNaN(updatedAt.getTime())) {
+				sanitizedUser.updated_at = updatedAt.toISOString();
 			}
 		}
 		// Handle profile object
@@ -70,7 +81,7 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			if (userData.profile.bio)
 				profile.bio = sanitizeString(userData.profile.bio.toString()).trim();
 
-			if (userData.profile.avatar_url && userData.profile.avatar_url != "https://pub-421db7f681a74de4ac9f7d9889a7719f.r2.dev/default-profile.png")
+			if (userData.profile.avatar_url && userData.profile.avatar_url.toString().trim() !== '')
 				profile.avatar_url = (userData.profile.avatar_url.toString()).trim();
 			else {
 				console.log("Rastgele avatarr")

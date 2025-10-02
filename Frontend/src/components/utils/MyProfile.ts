@@ -3,6 +3,7 @@ import "./SideBar";
 import { getUser } from "../../store/UserStore";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
+import { router } from "../../router/Router";
 
 class MyProfile extends HTMLElement {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -46,182 +47,16 @@ class MyProfile extends HTMLElement {
 	}
 
 	private setupEvents(): void {
-		// Edit profile button
+		// Profili Düzenle button - Settings/Profile sayfasına yönlendir
 		this.addEventListener('click', (e) => {
 			const target = e.target as HTMLElement;
 			if (target.closest('.edit-profile-btn')) {
-				this.toggleEditMode();
-			}
-
-			// Save profile changes
-			if (target.closest('.save-profile-btn')) {
-				this.saveProfile();
-			}
-
-			// Cancel edit mode
-			if (target.closest('.cancel-edit-btn')) {
-				this.render(); // Re-render to reset changes
-			}
-		});
-
-		// Navigate to 2FA management page
-		this.addEventListener('click', (e) => {
-			const target = e.target as HTMLElement;
-			if (target.closest('[data-goto-2fa]')) {
-				// simple navigate using router if available
-				(window as any).router ? (window as any).router.navigate('/2fa') : window.location.pathname = '/2fa';
+				router.navigate('/settings/profile');
 			}
 		});
 	}
 
-	private toggleEditMode(): void {
-		const profileContent = this.querySelector('.profile-content');
-		const user = getUser();
 
-		if (!user || !profileContent) return;
-
-		profileContent.innerHTML = `
-            <div class="space-y-8">
-                <!-- Avatar Section -->
-                <div class="flex flex-col items-center space-y-6">
-                    <div class="relative">
-                        <img 
-                            src="${user.profile?.avatar_url || '/Avatar/1.png'}" 
-                            alt="Profil Resmi" 
-                            class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl ring-4 ring-blue-200/50"
-                        >
-                        <button class="absolute bottom-2 right-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Profili Düzenle</h2>
-                </div>
-
-                <!-- Edit Form -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Ad Soyad</label>
-                            <input 
-                                type="text" 
-                                id="editFullName"
-                                value="${user.profile?.full_name || ''}"
-                                class="w-full px-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300 text-lg"
-                                placeholder="Ad ve soyadınızı girin"
-                            >
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Kullanıcı Adı</label>
-                            <input 
-                                type="text" 
-                                id="editUsername"
-                                value="${user.username}"
-                                class="w-full px-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300 text-lg"
-                                placeholder="Kullanıcı adınızı girin"
-                            >
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">E-mail</label>
-                            <input 
-                                type="email" 
-                                id="editEmail"
-                                value="${user.email}"
-                                class="w-full px-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300 text-lg"
-                                placeholder="E-mail adresinizi girin"
-                            >
-                        </div>
-                        
-                                                <!-- 2FA Management Redirect -->
-                                                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-xl border-2 border-blue-200/50 dark:border-blue-700/50">
-                                                    <div class="flex items-center justify-between">
-                                                        <div class="flex items-center space-x-4">
-                                                            <div class="w-12 h-12 bg-gradient-to-r ${user.is_2fa_enabled ? 'from-green-500 to-emerald-600' : 'from-gray-400 to-gray-500'} rounded-lg flex items-center justify-center transition-all duration-300">
-                                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                                                </svg>
-                                                            </div>
-                                                            <div>
-                                                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">İki Faktörlü Doğrulama (2FA)</h4>
-                                                                <p class="text-sm text-gray-600 dark:text-gray-400">Durum: <span class="font-semibold ${user.is_2fa_enabled ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${user.is_2fa_enabled ? 'Aktif' : 'Pasif'}</span></p>
-                                                            </div>
-                                                        </div>
-                                                        <button type="button" data-goto-2fa class="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-medium shadow transition">Yönet</button>
-                                                    </div>
-                                                </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Hakkımda</label>
-                        <textarea 
-                            id="editBio"
-                            rows="10"
-                            class="w-full px-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300 text-lg"
-                            placeholder="Kendiniz hakkında birkaç kelime yazın..."
-                        >${user.profile?.bio || ''}</textarea>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-200 dark:border-gray-600">
-                    <button class="save-profile-btn flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                        <span class="flex items-center justify-center space-x-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span>Değişiklikleri Kaydet</span>
-                        </span>
-                    </button>
-                    <button class="cancel-edit-btn flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                        <span class="flex items-center justify-center space-x-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <span>İptal Et</span>
-                        </span>
-                    </button>
-                </div>
-            </div>
-        `;
-	}
-
-	private saveProfile(): void {
-		const fullName = (this.querySelector('#editFullName') as HTMLInputElement)?.value;
-		const username = (this.querySelector('#editUsername') as HTMLInputElement)?.value;
-		const email = (this.querySelector('#editEmail') as HTMLInputElement)?.value;
-		const bio = (this.querySelector('#editBio') as HTMLTextAreaElement)?.value;
-
-		// Here you would typically make an API call to save the profile
-		console.log('Saving profile:', { fullName, username, email, bio });
-
-		// For now, just show a success message and re-render
-		this.showSuccessMessage();
-		setTimeout(() => {
-			this.render();
-		}, 2000);
-	}
-
-	private showSuccessMessage(): void {
-		const content = this.querySelector('.profile-content');
-		if (content) {
-			content.innerHTML = `
-                <div class="text-center py-16">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Profil Başarıyla Güncellendi! 🎉</h3>
-                    <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">Değişiklikleriniz kaydedildi ve profiliniz güncellendi.</p>
-                    <div class="w-16 h-1 bg-gradient-to-r from-green-400 to-emerald-500 mx-auto rounded-full"></div>
-                </div>
-            `;
-		}
-	}
 
 
 	private formatDate(dateString: string): string {
