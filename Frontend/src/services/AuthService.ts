@@ -20,8 +20,6 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 				ok: response.ok,
 				data: text ? JSON.parse(text) : {}
 			}));
-			
-			
 			if (responseData.ok && responseData.data.success && responseData.data.token) {
 				const fetchSuccess = await fetchUser(responseData.data.token);
 				if (fetchSuccess) {
@@ -51,9 +49,7 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	if (!res.ok) {
 		return false;
 	}
-
 	const data = await res.json();
-
 	if (data.success) {
 		setUser(data.user, token);
 		return true;

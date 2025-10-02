@@ -101,6 +101,7 @@ export function setUser(userData: any, token: string): boolean
 		console.warn('Failed to set user - invalid data:', userData);
 		return false;
 	}
+	console.log("User_Token ----->", token);
 	currentUser ? Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;
 	setAccessToken(token);
 	console.log('User set successfully:', currentUser.accesstoken);
@@ -119,7 +120,7 @@ export function getUserAvatar(): string {
 	return currentUser?.profile?.avatar_url || "Null";
 }
 
-export function getUserFullName(): string {
+export function getUserFuallNme(): string {
 	return currentUser?.profile?.full_name || currentUser?.username || 'Kullanıcı';
 }
 

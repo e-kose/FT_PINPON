@@ -1,5 +1,5 @@
 import { router } from "../../router/Router";
-import { loginAuth } from "../../services/AuthService";
+import { fetchUser, handleLogin, loginAuth } from "../../services/AuthService";
 import { setUser } from "../../store/UserStore";
 import type { UserLogin } from "../../types/AuthType";
 import messages from "../utils/Messages";
@@ -88,33 +88,37 @@ export abstract class UserForm extends HTMLElement {
 	}
 	messages.showMessage("Bağlantı Hatası", userMessage, "error", messageContainer);
 }
-protected loginCheck(data: any, messageContainer: string): void {
+protected async loginCheck(data: any, messageContainer: string): Promise<void> {
 	if (!data.success) {
 		const errorMessage = typeof data.message === 'string'
 			? data.message.slice(0, 200)
 			: "Giriş işlemi başarısız. Bilgilerinizi kontrol edin.";
-
 		messages.showMessage("Giriş Başarısız", errorMessage, "error", messageContainer);
 		return;
 	}
-
 	if (!data.user || typeof data.user !== 'object') {
 		messages.showMessage("Hata", "Kullanıcı bilgileri alınamadı. Lütfen tekrar deneyin.", "error", messageContainer);
 		return;
 	}
 
+	// fetchUser işlemi başlamadan önce loading animasyonu göster
 	messages.showLoadingAnimation(messageContainer);
-	const userSetSuccess = setUser(data.user, data.token);
-	if (!userSetSuccess) {
-		messages.showMessage("Hata", "Kullanıcı verisi işlenirken hata oluştu.", "error", messageContainer);
-		return;
-	}
-	setTimeout(() => {
-		router.navigate("/");
-	}, 2000);
+	
+	fetchUser(data.accesstoken).then((valid) => {
+		if (valid) {
+			// Loading animasyonunun 3 saniye görünmesi için gecikme ekle
+			setTimeout(() => {
+				router.navigate('/');
+			}, 3000);
+		} else {
+			messages.showMessage("Hata", "Kullanıcı doğrulaması başarısız. Lütfen tekrar deneyin.", "error", messageContainer);
+		}
+	}).catch((error) => {
+		this.handleNetworkError(error, messageContainer);
+	});
 }
 
- protected async  loginValidation(userData: UserLogin, messageContainer: string)
+protected async  loginValidation(userData: UserLogin, messageContainer: string)
 {
 	try {
 			const response = await loginAuth(userData);
