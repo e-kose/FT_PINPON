@@ -1,0 +1,9 @@
+http.host: "0.0.0.0"
+
+# Monitoring Configuration
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+xpack.monitoring.elasticsearch.username: "${ELASTIC_USERNAME}"
+xpack.monitoring.elasticsearch.password: "${ELASTIC_PASSWORD}"
+xpack.monitoring.collection.interval: 10s
+

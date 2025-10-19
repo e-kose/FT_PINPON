@@ -22,17 +22,17 @@ curl -u elastic:${ELASTIC_PASSWORD} -X POST "http://localhost:9200/_security/use
 }
 '
 
-curl -u elastic:${ELASTIC_PASSWORD} -X POST "http://localhost:9200/_security/user/logstash_writer_user" -H 'Content-Type: application/json' -d'
+curl -u elastic:${ELASTIC_PASSWORD} -X PUT "http://localhost:9200/_security/user/logstash_writer_user" -H 'Content-Type: application/json' -d'
 {
-  "password": "${LOGSTASH_WRITER_PASSWORD}",
+  "password": "'"${LOGSTASH_WRITER_PASSWORD}"'",
   "roles": ["logstash_writer"],
   "full_name": "Logstash Writer"
 }
 '
 
-curl -u elastic:elastic_pass -X POST "http://localhost:9200/_security/user/logstash_writer_user/_password" -H 'Content-Type: application/json' -d'
+curl -u elastic:${ELASTIC_PASSWORD} -X POST "http://localhost:9200/_security/user/kibana_system/_password" -H 'Content-Type: application/json' -d'
 {
-  "password": "'"${LOGSTASH_WRITER_PASSWORD}"'"
+  "password": "'"${KIBANA_PASSWORD}"'"
 }
 '
 

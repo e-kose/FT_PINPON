@@ -94,6 +94,12 @@ services:
     networks:
       - internal-network
     mem_limit: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     command: >
       bash -c "
       /usr/local/bin/docker-entrypoint.sh &
@@ -110,14 +116,20 @@ services:
       - "5044:5044"
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - LOGSTASH_WRITER_USER=${LOGSTASH_WRITER_USER}
+      - LOGSTASH_WRITER_PASSWORD=${LOGSTASH_WRITER_PASSWORD}
     env_file:
       - ./elastic-search/.env
     volumes:
     - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
     networks:
       - internal-network
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9600"]
       interval: 30s
@@ -134,13 +146,13 @@ services:
       - "5601:5601"
     environment:
       - XPACK_SECURITY_ENABLED=true
-      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
     env_file:
       - ./elastic-search/.env
-
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     networks:
       - internal-network
     mem_limit: 2g
