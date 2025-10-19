@@ -19,7 +19,7 @@ app.register(import('@fastify/cors'), {
     'http://127.0.0.1:5173', // Alternatif localhost
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
 });
 
 app.register(jwtPlugin);
