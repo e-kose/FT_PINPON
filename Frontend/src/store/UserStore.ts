@@ -23,6 +23,7 @@ function sanitizeString(str: string): string {
 
 // Validate and sanitize user data from API
 function validateAndSanitizeUser(userData: any): Partial<User> | null {
+	console.log('??????????????? Validating user data:', userData);
 	if (!userData || typeof userData !== 'object')
 		return null;
 	try {
@@ -88,8 +89,6 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 				const random = Math.floor(Math.random() * 13) + 1;
 				profile.avatar_url = `/Avatar/${random}.png`;
 			}
-
-			// Profile objesini sanitizedUser'a ata (sadece gerekli alanlar varsa)
 			if (Object.keys(profile).length > 0) {
 				sanitizedUser.profile = profile as UserProfile;
 			}
@@ -112,6 +111,8 @@ export function setUser(userData: any, token: string): boolean
 		console.warn('Failed to set user - invalid data:', userData);
 		return false;
 	}
+	console.log("===============================================");
+	console.log("----------------------> Sanitized User Data ----->", sanitizedData);
 	console.log("User_Token ----->", token);
 	currentUser ? Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;
 	setAccessToken(token);

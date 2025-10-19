@@ -1,4 +1,4 @@
-	import { getUser, setUser, getAccessToken } from "../store/UserStore";
+import { getUser } from "../store/UserStore";
 import type { UserCredentialsUpdate } from "../types/SettingsType";
 import { checkAndGetAccessToken, removeUndefinedKey } from "./AuthService";
 
@@ -38,3 +38,36 @@ export async function updateUser(userData: UserCredentialsUpdate): Promise<{ suc
 	}
 }
 
+export async function updateAvatar(formData: FormData): Promise<{success: boolean; avatar_url?: string; error?: string; status: number}> {
+	const accessToken = await checkAndGetAccessToken();
+		
+	if (!accessToken) {
+		return { success: false, error: "Access token not available", status: 401 };
+	}	
+	try {
+		const uri = `${import.meta.env.VITE_API_BASE_URL}/user/avatar`;
+		console.log("Avatar update URL: ", uri);
+		const response = await fetch(uri, {
+			method: 'PATCH',
+			headers: {
+				"Authorization": `Bearer ${accessToken}`,
+			},
+			body: formData
+		});
+
+		const data = await response.json();
+		console.log("Avatar update response: ", data);
+		return {
+			success: data.success,
+			avatar_url: data.data?.avatar_url,
+			error: data.error,
+			status: response.status
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: "Network error",
+			status: 0
+		};
+	}
+}

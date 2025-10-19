@@ -1,9 +1,9 @@
 import "../utils/Header"
 import "../utils/SideBar";
-import { getUser } from "../../store/UserStore";
+import { getUser, setUser, getAccessToken } from "../../store/UserStore";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
-import { updateUser } from "../../services/SettingsService";
+import { updateUser, updateAvatar } from "../../services/SettingsService";
 import type { UserCredentialsUpdate } from "../../types/SettingsType";
 import messages from "../utils/Messages";
 import { validateFullProfile } from "../utils/Validation";
@@ -342,7 +342,17 @@ class SettingsComponent extends HTMLElement {
 
 			// Avatar upload
 			if (target.closest('.upload-avatar-btn')) {
-				this.uploadAvatar();
+				const input = this.querySelector('#avatarInput') as HTMLInputElement;
+				input.click();
+			}
+		});
+
+		// Avatar input change
+		this.addEventListener('change', (e) => {
+			const target = e.target as HTMLElement;
+			const avatarInput = target.closest('#avatarInput') as HTMLInputElement;
+			if (avatarInput) {
+				this.uploadAvatar(avatarInput.files);
 			}
 		});
 
@@ -466,14 +476,79 @@ class SettingsComponent extends HTMLElement {
 		console.log('Deleting account...');
 	}
 
-	private uploadAvatar(): void {
-		// Avatar yükleme işlevi - henüz implement edilmedi
-		console.log('Uploading avatar...');
-		messages.showMessage("📸 Fotoğraf Yükleme", "Profil fotoğrafı yükleme özelliği geliştirme aşamasında. Şu anda varsayılan avatar'ı kullanabilirsiniz.", "info", ".profile-message-container");
-		// 7 saniye sonra mesajı temizle
-		this.scheduleMessageCleanup(".profile-message-container");
+	private uploadAvatar(files: FileList | null): void {
+		const errors: Record<string, string> = {};
+		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+		const maxSize = 2 * 1024 * 1024; // 2MB
+
+		if (!files || files.length === 0) {
+			errors.file = "Lütfen bir dosya seçin.";
+		} else {
+			const file = files[0];
+
+			if (!allowedTypes.includes(file.type)) {
+				errors.type = "Geçersiz dosya tipi. Sadece JPG, PNG veya GIF dosyaları kabul edilir.";
+			}
+
+			if (file.size > maxSize) {
+				errors.size = "Dosya boyutu 2MB'dan büyük olamaz.";
+			}
+		}
+
+		if (Object.keys(errors).length > 0) {
+			this.showValidationErrors(errors);
+		} else {
+			const file = files?.item(0);
+			if (!file) {
+				this.showValidationErrors({ file: "Lütfen bir dosya seçin." });
+				return;
+			}
+			const formData = new FormData();
+			formData.append('avatar', file);
+
+			// Upload işlemini başlat
+			console.log('Uploading avatar...');
+			this.performAvatarUpload(formData);
+		}
 	}
 
+	private async performAvatarUpload(formData: FormData): Promise<void> {
+		try {
+			const response = await updateAvatar(formData);
+			this.handleAvatarUploadResponse(response);
+		} catch (error) {
+			console.error('Avatar upload error:', error);
+			this.showErrorMessage("💥 Yükleme Hatası", "Avatar yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.");
+		}
+	}
+
+	private handleAvatarUploadResponse(response: { success: boolean; data?: { avatar_url: string }; error?: string }): void {
+		if (response.success && response.data?.avatar_url) {
+			// Başarılı upload - user store'u güncelle ve UI'ı yenile
+			const user = getUser();
+			if (user) {
+				user.profile = user.profile || {};
+				user.profile.avatar_url = response.data.avatar_url;
+				const token = getAccessToken();
+				if (token) {
+					setUser(user, token);
+				}
+				this.renderTabContent();
+				this.showSuccessMessage("🎉 Avatar Güncellendi!", "Profil fotoğrafınız başarıyla güncellendi.");
+			}
+			// Input alanını reset et ki aynı dosyayı tekrar seçebilsin
+			const avatarInput = this.querySelector('#avatarInput') as HTMLInputElement;
+			if (avatarInput) {
+				avatarInput.value = '';
+			}
+		} else {
+			// Hata durumları - error mesajını kullan
+			this.showErrorMessage("❌ Yükleme Başarısız", response.error || "Avatar yüklenirken bir hata oluştu.");
+		}
+	}
+
+
+	
 
 
 	private renderTabContent(): void {
@@ -533,6 +608,12 @@ class SettingsComponent extends HTMLElement {
 									<button class="upload-avatar-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300">
 										Fotoğraf Değiştir
 									</button>
+									<input 
+										type="file" 
+										id="avatarInput" 
+										accept="image/jpeg,image/png,image/gif" 
+										class="hidden"
+									>
 									<p class="text-sm text-gray-600 dark:text-gray-400 mt-2">JPG, GIF veya PNG. Maksimum 2MB.</p>
 								</div>
 							</div>
