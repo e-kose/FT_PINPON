@@ -4,7 +4,7 @@ import type { CreateMessage } from "../types/createMessage.type";
 import type { userParam } from "../types/params.types";
 import { chatNotFound } from "../errors/chat.errors.js";
 import { UserCache } from "./cache.service.js";
-import { connections } from "../controller/chat.controller";
+import { connections } from "../controller/chat.controller.js";
 
 const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
 export class ChatService {
@@ -144,6 +144,6 @@ export class ChatService {
   async getNotify(req : FastifyRequest){
     const currentUser = +(req.headers["x-user-id"]!);
     const notifyList = this.messageRepo.getNotify(currentUser);
-    return notifyList; 
+    return notifyList;
   }
 }
