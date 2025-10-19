@@ -11,6 +11,13 @@ import { registerUserBody } from "../types/table.types/register.userBody.js";
 import { checkHash, hashTransaction } from "../utils/hash.utils.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import * as dotenv from "dotenv";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 export class UserService {
   private userRepo: UserRepository;
@@ -57,15 +64,16 @@ export class UserService {
       file.filename.replace(/\s+/g, "_") || "avatar"
     }`;
 
-    const object = new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: file_name,
-      Body: await file.toBuffer(),
-      ContentType: file.mimetype,
-    });
-    await app.r2.send(object);
+    const uploadsDir = path.join(__dirname, "../../../public/avatars");
+    const filePath = path.join(uploadsDir, file_name);
 
-    const url = `${process.env.R2_PUBLIC_URL}/${file_name}`;
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    await fs.writeFile(filePath, await file.toBuffer());
+
+    const url = `http://localhost:${
+      process.env.PORT || 3002
+    }/static/avatars/${file_name}`;
     app.userRepo?.updateTable("user_profiles", id, { avatar_url: url });
 
     return { message: "Avatar updated", avatar_url: url };

@@ -12,6 +12,12 @@ import multipart from "@fastify/multipart";
 import r2Plugin from "./plugins/r2.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
 import { startLogError } from "./user/utils/log.utils.js";
+import fastifyStatic from "@fastify/static";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -27,6 +33,12 @@ app.register(dbPlug);
 app.register(swaggerPlugin);
 app.register(catchGlobErrorPlugin);
 app.register(internalAuthPlugin);
+
+// Static file server for avatars
+app.register(fastifyStatic, {
+  root: path.join(__dirname, "../public"),
+  prefix: "/static/",
+});
 
 app.decorate("userRepo", null);
 app.decorate("userService", null);
