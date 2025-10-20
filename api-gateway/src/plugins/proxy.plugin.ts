@@ -39,7 +39,20 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   app.register(proxy, {
-    upstream: process.env.CHAT_SERVICE_URL || "http://localhost:3003",
+  upstream: process.env.USER_SERVICE_URL || "http://user-service:3002",
+  prefix: "/friend",
+  rewritePrefix: "/friend",
+  preHandler: async (req, reply) => {
+    await app.jwtAuth(req, reply);
+    if (req.user) {
+      req.headers["x-user-id"] = (req.user as any).id;
+      req.headers["x-user-email"] = (req.user as any).email;
+    }
+  },
+});
+
+  app.register(proxy, {
+    upstream: process.env.CHAT_SERVICE_URL || "http://chat-service:3003",
     prefix: "/chat",
     rewritePrefix: "/chat",
     preHandler: async (req, reply) => {

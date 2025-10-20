@@ -6,6 +6,9 @@ import { UserService } from "./user/services/user.service.js";
 import catchGlobErrorPlugin from "./plugins/catchGlobError.plugin.js";
 import sensiblePlugin from "./plugins/sensible.plugin.js";
 import { userRoute } from "./user/routes/user.route.js";
+import { friendshipRoute } from "./friendship/routes/friendship.route.js";
+import { FriendshipRepository } from "./friendship/repository/friendship.repository.js";
+import { FriendshipService } from "./friendship/services/friendship.service.js";
 import internalAuthPlugin from "./plugins/internalAuth.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import multipart from "@fastify/multipart";
@@ -42,12 +45,17 @@ app.register(fastifyStatic, {
 
 app.decorate("userRepo", null);
 app.decorate("userService", null);
+app.decorate("friendshipRepo", null);
+app.decorate("friendshipService", null);
 
 app.register(userRoute);
 app.after(() => {
   app.userRepo = new UserRepository(app.db);
   app.userService = new UserService(app.userRepo);
+  (app as any).friendshipRepo = new FriendshipRepository(app.db);
+  (app as any).friendshipService = new FriendshipService((app as any).friendshipRepo, (app as any).userRepo);
 });
+app.register(friendshipRoute);
 
 const start = async () => {
   try {

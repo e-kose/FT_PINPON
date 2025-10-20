@@ -5,7 +5,7 @@ import http from "http";
 
 export default fp(async (app: FastifyInstance) => {
   const wsProxy = httpProxy.createProxyServer({
-    target: process.env.CHAT_SERVICE_URL || "http://localhost:3003",
+    target: process.env.CHAT_SERVICE_URL || "http://chat-service:3003",
     ws: true,
   });
 
