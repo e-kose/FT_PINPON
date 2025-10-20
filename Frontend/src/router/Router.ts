@@ -15,7 +15,7 @@ import "../components/sideBarComponents/Chat";
 class Router
 {
 	private routes: { path: string; component: string }[] = [];
-	
+
 	public addRoute(path: string, component: string): void {
 		this.routes.push({ path, component });
 	}
@@ -44,7 +44,7 @@ class Router
 	public navigateToAuthError(): void {
 		this.navigateToError('auth');
 	}
-	private handleRoute(path: string | null): void 
+	private handleRoute(path: string | null): void
 	{
 		if (path) {
 			if (window.location.pathname !== path) {
@@ -54,7 +54,7 @@ class Router
 			}
 		}
 	}
-	public navigate(path: string): void 
+	public navigate(path: string): void
 	{
 		const previouesPath = window.location.pathname;
 		const app = document.getElementById("app");
@@ -63,16 +63,16 @@ class Router
 		if (route) {
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
 			fillIndex(route.component, app);
-			window.dispatchEvent(new CustomEvent('routechange', { 
-				detail: { path, previousPath: previouesPath } 
+			window.dispatchEvent(new CustomEvent('routechange', {
+				detail: { path, previousPath: previouesPath }
 			}));
 		} else {
 			this.handleRoute('/error/404');
 			fillIndex('<error-page error-type="404" error-title="Sayfa Bulunamadı" error-description="Aradığınız sayfa mevcut değil veya taşınmış olabilir."></error-page>', app);
-			
+
 			// Dispatch event for error page too
-			window.dispatchEvent(new CustomEvent('routechange', { 
-				detail: { path: '/error/404', previousPath: previouesPath } 
+			window.dispatchEvent(new CustomEvent('routechange', {
+				detail: { path: '/error/404', previousPath: previouesPath }
 			}));
 		}
 	}
@@ -113,8 +113,8 @@ function initializeRouter(): void {
 	router.addRoute('/2fa-login', '<twofa-login></twofa-login>');
 	router.addRoute('/play', '<div class="p-8"><h1 class="text-2xl font-bold">Oyun Oyna</h1><p>Oyun komponenti geliştiriliyor...</p></div>');
 	router.addRoute('/tournament', '<div class="p-8"><h1 class="text-2xl font-bold">Turnuva</h1><p>Turnuva komponenti geliştiriliyor...</p></div>');
-	router.addRoute('/friends', '<div class="p-8"><h1 class="text-2xl font-bold">Arkadaşlar</h1><p>Arkadaşlar komponenti geliştiriliyor...</p></div>');
-	router.addRoute('/chat', '<div class="p-8"><h1 class="text-2xl font-bold">Sohbet</h1><p>Sohbet komponenti geliştiriliyor...</p></div>');
+	router.addRoute('/friends', '<friends-component></friends-component>');
+	router.addRoute('/chat', '<chat-component></chat-component>');
 	router.addRoute('/settings', '<settings-component></settings-component>');
 	router.addRoute('/settings/profile', '<settings-component></settings-component>');
 	router.addRoute('/settings/security', '<settings-component></settings-component>');
@@ -123,20 +123,20 @@ function initializeRouter(): void {
 	router.addRoute('/signup', '<signup-form></signup-form>');
 	router.addRoute('/login', '<login-form></login-form>');
 	router.addRoute('/auth/google', 'http://localhost:3000/auth/google');
-	
+
 	// Error page route'ları
 	router.addRoute('/error/404', '<error-page error-type="404" error-title="Sayfa Bulunamadı" error-description="Aradığınız sayfa mevcut değil veya taşınmış olabilir."></error-page>');
 	router.addRoute('/error/500', '<error-page error-type="500" error-title="Sunucu Hatası" error-description="Sunucuda bir hata oluştu. Lütfen daha sonra tekrar deneyin."></error-page>');
 	router.addRoute('/error/403', '<error-page error-type="403" error-title="Erişim Reddedildi" error-description="Bu sayfaya erişim yetkiniz bulunmuyor."></error-page>');
 	router.addRoute('/error/401', '<error-page error-type="401" error-title="Giriş Gerekli" error-description="Bu sayfayı görüntülemek için giriş yapmanız gerekiyor."></error-page>');
 	router.addRoute('/error/auth', '<error-page error-type="auth" error-title="Kimlik Doğrulama Hatası" error-description="Giriş bilgilerinizde bir sorun var. Lütfen tekrar giriş yapın."></error-page>');
-	
+
 	// Genel error route'u (fallback)
 	router.addRoute('/error', '<error-page error-type="500" error-title="Bir Hata Oluştu" error-description="Lütfen daha sonra tekrar deneyin."></error-page>');
 	document.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
 		const link = target.closest('a');
-		
+
 		if (link && link.href && !link.href.startsWith('http') && !link.href.includes('://')) {
 			e.preventDefault();
 			const path = new URL(link.href).pathname;
