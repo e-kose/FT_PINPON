@@ -3,11 +3,12 @@ import "../utils/SideBar";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { getAccessToken } from "../../store/UserStore";
+import type { Friend } from "../../types/FriendsType";
 
 class Friends extends HTMLElement {
   private sidebarListener: SidebarStateListener | null = null;
   private loading = true;
-  private friends: any[] = [];
+  private friends: Friend[] = [];
   private requests: any[] = [];
 
   constructor() {
@@ -27,42 +28,42 @@ class Friends extends HTMLElement {
     }
   }
 
-  private async fetchData() {
-    const token = getAccessToken();
-    if (!token) return;
+private async fetchData() {
+  const token = getAccessToken();
+  if (!token) return;
 
-    try {
-      const [reqRes, friendsRes] = await Promise.all([
-        fetch("http://localhost:3000/friend/requests", {
-          headers: { Authorization: "Bearer " + token },
-        }),
-        fetch("http://localhost:3000/friend/list", {
-          headers: { Authorization: "Bearer " + token },
-        }),
-      ]);
+  try {
+    const [reqRes, friendsRes] = await Promise.all([
+      fetch("http://localhost:3000/friend/requests", {
+        headers: { Authorization: "Bearer " + token },
+      }),
+      fetch("http://localhost:3000/friend/list", {
+        headers: { Authorization: "Bearer " + token },
+      }),
+    ]);
 
-      if (!reqRes.ok || !friendsRes.ok) {
-        console.error("API error:", reqRes.status, friendsRes.status);
-        this.innerHTML = `<p class="text-red-500">Sunucu hatası: ${reqRes.status}/${friendsRes.status}</p>`;
-        return;
-      }
-
-      const [reqJson, friendsJson] = await Promise.all([
-        reqRes.json(),
-        friendsRes.json(),
-      ]);
-
-      this.requests = Array.isArray(reqJson) ? reqJson : [];
-      this.friends = Array.isArray(friendsJson) ? friendsJson : [];
-      this.loading = false;
-
-      this.render();
-      this.setupEvents();
-    } catch (err) {
-      console.error("Friend fetch error", err);
-      this.innerHTML = `<p class="text-red-500">Sunucu hatası</p>`;
+    if (!reqRes.ok || !friendsRes.ok) {
+      console.error("API error:", reqRes.status, friendsRes.status);
+      this.innerHTML = `<p class="text-red-500">Sunucu hatası: ${reqRes.status}/${friendsRes.status}</p>`;
+      return;
     }
+
+    const [reqJson, friendsJson] = await Promise.all([
+      reqRes.json(),
+      friendsRes.json(),
+    ]);
+
+    this.requests = reqJson.success ? reqJson.requests ?? [] : [];
+    this.friends = friendsJson.success ? friendsJson.friends ?? [] : [];
+    this.loading = false;
+
+    this.render();
+    this.setupEvents();
+  } catch (err) {
+    console.error("Friend fetch error", err);
+    this.innerHTML = `<p class="text-red-500">Sunucu hatası</p>`;
   }
+}
 
   private render() {
     const marginClass = sidebarStateManager.getMarginClass();
@@ -99,7 +100,7 @@ class Friends extends HTMLElement {
       .map(
         (f) => `
         <div class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-          <img src="${f.friend_avatar || "/default-avatar.png"}" class="w-12 h-12 rounded-full" />
+          <img src="${f.friend_id || "/default-avatar.png"}" class="w-12 h-12 rounded-full" />
           <div>
             <div class="font-semibold text-white">${f.friend_username}</div>
             <div class="text-sm text-gray-400">${f.friend_email}</div>
