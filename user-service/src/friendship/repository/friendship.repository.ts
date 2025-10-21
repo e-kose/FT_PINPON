@@ -33,12 +33,16 @@ export class FriendshipRepository {
 
   listFriends(userId: number) {
     const stmt = this.db.prepare(
-      `SELECT f.*, u.username AS friend_username, u.email AS friend_email
+    `SELECT
+      f.id AS id,
+      (CASE WHEN f.user_id = ? THEN f.friend_id ELSE f.user_id END) AS friend_id,
+      u.username AS friend_username,
+      u.email AS friend_email
        FROM friendships f
-       JOIN users u ON (CASE WHEN f.user_id = ? THEN f.friend_id = u.id ELSE f.user_id = u.id END)
+       JOIN users u ON u.id = (CASE WHEN f.user_id = ? THEN f.friend_id ELSE f.user_id END)
        WHERE (f.user_id = ? OR f.friend_id = ?) AND f.status = 'accepted'`
     );
-    return stmt.all(userId, userId, userId);
+    return stmt.all(userId, userId, userId, userId);
   }
 
   listRequests(userId: number) {

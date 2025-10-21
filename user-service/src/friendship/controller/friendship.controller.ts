@@ -1,5 +1,4 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { FriendshipService } from '../services/friendship.service';
 
 export const sendFriendRequest = async (req: FastifyRequest, reply: FastifyReply) => {
 	const app = req.server as any;
@@ -42,7 +41,7 @@ export const listFriendsHandler = async (req: FastifyRequest, reply: FastifyRepl
 	const userId = (req.headers['x-user-id'] as string) ? parseInt(req.headers['x-user-id'] as string) : undefined;
 	if (!userId) return reply.code(400).send({ message: 'Missing user id header' });
 	const res = app.friendshipService.listFriends(userId);
-	return reply.send(res);
+	return reply.code(200).send({ success: true, friends: res });
 };
 
 export const listRequestsHandler = async (req: FastifyRequest, reply: FastifyReply) => {
@@ -50,7 +49,7 @@ export const listRequestsHandler = async (req: FastifyRequest, reply: FastifyRep
 	const userId = (req.headers['x-user-id'] as string) ? parseInt(req.headers['x-user-id'] as string) : undefined;
 	if (!userId) return reply.code(400).send({ message: 'Missing user id header' });
 	const res = app.friendshipService.listRequests(userId);
-	return reply.send(res);
+	return reply.code(200).send({ success: true, requests: res });
 };
 
 export default {} as any;
