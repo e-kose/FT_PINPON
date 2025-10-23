@@ -4,6 +4,7 @@ import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { getAccessToken, getUser } from "../../store/UserStore";
 import type { Friend } from "../../types/FriendsType";
+import ChatService from "../../services/ChatService";
 
 class Chat extends HTMLElement {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -34,12 +35,9 @@ class Chat extends HTMLElement {
 
 	private async fetchFriends() {
 		try {
-			const res = await fetch("http://localhost:3000/friend/list", {
-				headers: { Authorization: "Bearer " + getAccessToken() },
-			});
-			const data = await res.json();
-			if (data.success && Array.isArray(data.friends)) {
-				this.friends = data.friends;
+			const res = await ChatService.getFriendsList();
+			if (res.ok && res.data.success && Array.isArray(res.data.friends)) {
+				this.friends = res.data.friends;
 				this.render();
 			}
 		} catch (err) {
@@ -51,9 +49,7 @@ class Chat extends HTMLElement {
 		const token = getAccessToken();
 		if (!token) return;
 
-		const socket = new WebSocket(
-			"ws://localhost:3000/chat/ws?token=" + encodeURIComponent(token)
-		);
+		const socket = ChatService.connectWebSocket(token);
 		this.socket = socket;
 
 			socket.onmessage = (event) => {
@@ -81,14 +77,9 @@ class Chat extends HTMLElement {
 	}
 
 	private async loadConversation(friendId: string) {
-		const token = getAccessToken();
 		try {
-			const res = await fetch(`http://localhost:3000/chat/conversation/id/${friendId}`, {
-				headers: { Authorization: "Bearer " + token },
-			});
-			const data = await res.json();
-
-			this.messages[friendId] = (data.success && Array.isArray(data.chat)) ? data.chat : [];
+			const res = await ChatService.getConversation(friendId);
+			this.messages[friendId] = (res.ok && res.data.success && Array.isArray(res.data.chat)) ? res.data.chat : [];
 			this.activeConversationId = friendId;
 			this.render();
 		} catch (err) {
@@ -132,10 +123,10 @@ class Chat extends HTMLElement {
 		if (!owner) return "";
 		return /*html*/ `
 		  <div class="flex items-center gap-3 p-3 border-b">
-			<img src="${`/Avatar/${owner.friend_id}.png`}" class="w-12 h-12 rounded-full" />
+			<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-12 h-12 rounded-full" />
 			<div>
 			  <div class="font-semibold text-white">${owner.friend_username}</div>
-			  <div class="text-sm text-gray-400">${owner.friend_email}</div>
+			  <div class="text-sm text-gray-400">${owner.friend_full_name || 'İsim yok'}</div>
 			</div>
 		  </div>`;
 	}
@@ -153,10 +144,10 @@ class Chat extends HTMLElement {
 						return /*html*/`
 						<div data-id="${friendId}"
 							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
-							<img src="${`/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" />
+							<img src="${f.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" />
 							<div class="flex-1">
 								<div class="font-semibold text-white">${f.friend_username}</div>
-								<div class="text-sm text-gray-400">${f.friend_email}</div>
+								<div class="text-sm text-gray-400">${f.friend_full_name || 'İsim yok'}</div>
 							</div>
 						</div>`;
 						})
@@ -211,7 +202,6 @@ class Chat extends HTMLElement {
 			this.setupEvents();
 	}
 
-	/** 🧩 Mesajları yeniden render et */
 	private renderMessages(): void {
 		const messagesEl = this.querySelector(".messages");
 		if (messagesEl) messagesEl.innerHTML = this.renderMessagesHTML();
