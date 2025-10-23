@@ -54,4 +54,50 @@ export class FriendshipRepository {
     );
     return stmt.all(userId);
   }
+
+  listSentRequests(userId: number) {
+    const stmt = this.db.prepare(
+      `SELECT f.*, u.username AS target_username, u.email AS target_email
+       FROM friendships f
+       JOIN users u ON f.friend_id = u.id
+       WHERE f.user_id = ? AND f.status = 'pending'`
+    );
+    return stmt.all(userId);
+  }
+
+  // Blocking API
+  createBlock(blocker_id: number, blocked_id: number) {
+    const stmt = this.db.prepare(
+      "INSERT OR IGNORE INTO blocked_users(blocker_id, blocked_id) VALUES(?, ?)"
+    );
+    const res = stmt.run(blocker_id, blocked_id);
+    return res.lastInsertRowid;
+  }
+
+  getBlockedList(blocker_id: number) {
+    const stmt = this.db.prepare(
+      `SELECT b.blocked_id AS id, u.username, u.email FROM blocked_users b JOIN users u ON u.id = b.blocked_id WHERE b.blocker_id = ?`
+    );
+    return stmt.all(blocker_id);
+  }
+
+  isBlocked(blocker_id: number, blocked_id: number) {
+    const stmt = this.db.prepare(
+      "SELECT * FROM blocked_users WHERE blocker_id = ? AND blocked_id = ?"
+    );
+    return stmt.get(blocker_id, blocked_id);
+  }
+
+  deleteBlock(blocker_id: number, blocked_id: number) {
+    const stmt = this.db.prepare(
+      "DELETE FROM blocked_users WHERE blocker_id = ? AND blocked_id = ?"
+    );
+    const res = stmt.run(blocker_id, blocked_id);
+    return res.changes;
+  }
+
+  getFriendshipById(id: number) {
+    const stmt = this.db.prepare("SELECT * FROM friendships WHERE id = ?");
+    return stmt.get(id);
+  }
 }

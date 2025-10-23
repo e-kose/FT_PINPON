@@ -64,7 +64,7 @@ export class UserRepository {
 
     const setClause = keys.map((key) => `${key} = ?`).join(", ");
     const values = keys.map((key) => data[key]);
-    
+
     const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereColumn} = ?`;
     const stmt = this.db.prepare(sql);
     return stmt.run(...values, id);
@@ -102,7 +102,7 @@ export class UserRepository {
 
   getFullTableById(id: number) {
     const stmt = this.db
-      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.* 
+      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.*
       FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.id = ?`);
     return stmt.get(id);
@@ -110,7 +110,7 @@ export class UserRepository {
 
   getFullTableByEmail(email: string) {
     const stmt = this.db
-      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.* 
+      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.*
       FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.email = ?`);
     return stmt.get(email);
@@ -118,7 +118,7 @@ export class UserRepository {
 
   getFullTableByUsername(username: string) {
     const stmt = this.db
-      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.* 
+      .prepare(`SELECT u.id, u.username, u.email, u.is_2fa_enabled, p.*
       FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.username = ?`);
     return stmt.get(username);
@@ -133,6 +133,17 @@ export class UserRepository {
     const stmt = this.db.prepare("SELECT * FROM user_profiles WHERE user_id = ?");
     return stmt.get(id);
   }
+
+  getUserSummaryById(id: number) {
+    const stmt = this.db.prepare(
+      `SELECT u.id AS user_id, u.username AS username, p.full_name AS full_name, p.avatar_url AS avatar_url
+       FROM users u
+       LEFT JOIN user_profiles p ON u.id = p.user_id
+       WHERE u.id = ?`
+    );
+    return stmt.get(id);
+  }
+
 
   listUsers() {
     const stmt = this.db.prepare("SELECT * FROM users");
@@ -153,7 +164,7 @@ export class UserRepository {
 
   getUserAll(id: number) {
     const stmt = this.db.prepare(`
-    SELECT u.*, p*, 
+    SELECT u.*, p*,
     FROM users u
     LEFT JOIN user_profiles p ON u.id = p.user_id
     WHERE u.id = ?
