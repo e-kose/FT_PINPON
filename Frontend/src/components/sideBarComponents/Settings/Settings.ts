@@ -220,7 +220,7 @@ class SettingsContainer extends Settings {
 	private sidebarListener: SidebarStateListener | null = null;
 	private readonly tabConfig: Record<SettingsTabKey, SettingsTabConfig> = {
 		account: {
-			label: "Account",
+			label: "Hesap",
 			description: "Hesap bilgileri ve tehlikeli işlemler",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7h16M6 11h.01M10 11h8M6 15h.01M10 15h8M19 5H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2z"></path></svg>`,
 			accent: {
@@ -233,7 +233,7 @@ class SettingsContainer extends Settings {
 			}
 		},
 		security: {
-			label: "Security",
+			label: "Güvenlik",
 			description: "Şifreler ve iki faktörlü doğrulama",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5l7 4v5a7 7 0 01-7 7 7 7 0 01-7-7V9l7-4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4"></path></svg>`,
 			accent: {
@@ -246,7 +246,7 @@ class SettingsContainer extends Settings {
 			}
 		},
 		profile: {
-			label: "Profile",
+			label: "Profil",
 			description: "Kişisel bilgiler ve avatar",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9A3.75 3.75 0 1112 5.25 3.75 3.75 0 0115.75 9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 20.25a7.5 7.5 0 0115 0"></path></svg>`,
 			accent: {
@@ -259,7 +259,7 @@ class SettingsContainer extends Settings {
 			}
 		},
 		view: {
-			label: "Appearance",
+			label: "Görünüm",
 			description: "Tema ve dil seçenekleri",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v18m-6-6h12M6 9h12"></path></svg>`,
 			accent: {
