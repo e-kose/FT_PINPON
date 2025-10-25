@@ -9,7 +9,7 @@ import "./components/utils/Header"
 import "./components/utils/SideBar"
 import "./components/utils/Statistics"
 import "./components/utils/LastGames"
-import "./components/sideBarComponents/Settings/SettingsOld"
+import "./components/sideBarComponents/Settings/Settings"
 import { handleLogin } from "./services/AuthService"
 
 
@@ -19,4 +19,3 @@ initializeRouter();
 handleLogin().then(() => {
 	router.navigate(document.location.pathname || "/");
 });
-

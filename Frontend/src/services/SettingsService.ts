@@ -81,7 +81,7 @@ export async function changePasswordAsync(passwordData: { oldPass: string; newPa
 			return { success: false, message: "User ID not available", status: 400 };
 		}
 	try {
-		
+		console.log("--->TOKEn: ", accessToken);
 		const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/password`, {
 			method: 'PATCH',
 			headers: {

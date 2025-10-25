@@ -442,11 +442,11 @@ class SettingsComponent extends HTMLElement {
 		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 		if  (!validatePassword(currentPasswordInput.value) || !validatePassword(newPasswordInput.value) || newPasswordInput.value !== confirmPasswordInput.value)
 		{
-			this.showErrorMessage("❌ Hata", "Lütfen şifre gereksinimlerini karşıladığınızdan emin olun.");
+			this.showErrorMessage("Hata", "Lütfen şifre gereksinimlerini karşıladığınızdan emin olun.");
 			return;
 		}
 		if (newPasswordInput.value !== confirmPasswordInput.value) {
-			this.showErrorMessage("❌ Hata", "Yeni şifre ve onay şifresi eşleşmiyor.");
+			this.showErrorMessage("Hata", "Yeni şifre ve onay şifresi eşleşmiyor.");
 			return;
 		}
 		
