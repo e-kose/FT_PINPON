@@ -12,8 +12,8 @@ export type SidebarStateListener = (state: SidebarState) => void;
 
 class SidebarStateManager {
     private state: SidebarState = {
-        isCollapsed: true,  // Varsayılan olarak kapalı
-        sidebarWidth: 64    // 16 * 4 = 64px (w-16)
+        isCollapsed: false,  // Varsayılan olarak açık
+        sidebarWidth: 288    // 72 * 4 = 288px (w-72)
     };
 
     private listeners: Set<SidebarStateListener> = new Set();

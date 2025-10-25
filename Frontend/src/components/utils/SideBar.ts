@@ -3,7 +3,7 @@ import { sidebarStateManager } from "../../router/SidebarStateManager";
 
 class SideBar extends HTMLElement {
     private activeRoute: string = "dashboard";
-    private isCollapsed: boolean = true;
+    private isCollapsed: boolean = false;
 
     constructor() {
         super();

@@ -88,6 +88,7 @@ export abstract class UserForm extends HTMLElement {
 	}
 	messages.showMessage("Bağlantı Hatası", userMessage, "error", messageContainer);
 }
+
 protected async loginCheck(data: any, messageContainer: string): Promise<void> {
 	if (!data.success) {
 		const errorMessage = typeof data.message === 'string'

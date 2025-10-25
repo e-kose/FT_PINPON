@@ -1,14 +1,14 @@
-import "../utils/Header"
-import "../utils/SideBar";
-import { getUser, setUser, getAccessToken } from "../../store/UserStore";
-import { sidebarStateManager } from "../../router/SidebarStateManager";
-import type { SidebarStateListener } from "../../router/SidebarStateManager";
-import { updateUser, updateAvatar } from "../../services/SettingsService";
-import type { UserCredentialsUpdate } from "../../types/SettingsType";
-import messages from "../utils/Messages";
-import { validateFullProfile } from "../utils/Validation";
-import { handleLogin, removeUndefinedKey } from "../../services/AuthService";
-import { router } from "../../router/Router";
+import "../../utils/Header"
+import "../../utils/SideBar";
+import { getUser, setUser, getAccessToken } from "../../../store/UserStore";
+import { sidebarStateManager } from "../../../router/SidebarStateManager";
+import type { SidebarStateListener } from "../../../router/SidebarStateManager";
+import { updateUser, updateAvatar, changePasswordAsync } from "../../../services/SettingsService";
+import type { UserCredentialsUpdate } from "../../../types/SettingsType";
+import messages from "../../utils/Messages";
+import { validateFullProfile, validatePassword } from "../../utils/Validation";
+import { handleLogin, removeUndefinedKey } from "../../../services/AuthService";
+import { router } from "../../../router/Router"
 
 class SettingsComponent extends HTMLElement {
 
@@ -409,7 +409,6 @@ class SettingsComponent extends HTMLElement {
 		const validation = validateFullProfile(userInfo);
 		
 		if (!validation.isValid) {
-			// Hataları daha güzel bir formatta göster
 			this.showValidationErrors(validation.errors);
 			return;
 		}
@@ -437,11 +436,39 @@ class SettingsComponent extends HTMLElement {
 
 
 	private changePassword(): void {
-		// Şifre değiştirme işlevi - henüz implement edilmedi
-		console.log('Changing password...');
-		messages.showMessage("🔧 Geliştirme Aşamasında", "Şifre değiştirme özelliği yakında kullanıma sunulacak. Şimdilik mevcut şifrenizi kullanmaya devam edin.", "info", ".security-message-container");
-		// 7 saniye sonra mesajı temizle
-		this.scheduleMessageCleanup(".security-message-container");
+		const currentPasswordInput = this.querySelector('#currentPassword') as HTMLInputElement;
+		const newPasswordInput = this.querySelector('#newPassword') as HTMLInputElement;
+		const confirmPasswordInput = this.querySelector('#confirmPassword') as HTMLInputElement;
+		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+		if  (!validatePassword(currentPasswordInput.value) || !validatePassword(newPasswordInput.value) || newPasswordInput.value !== confirmPasswordInput.value)
+		{
+			this.showErrorMessage("❌ Hata", "Lütfen şifre gereksinimlerini karşıladığınızdan emin olun.");
+			return;
+		}
+		if (newPasswordInput.value !== confirmPasswordInput.value) {
+			this.showErrorMessage("❌ Hata", "Yeni şifre ve onay şifresi eşleşmiyor.");
+			return;
+		}
+		
+		changePasswordAsync({
+			oldPass: currentPasswordInput.value,
+			newPass: newPasswordInput.value
+		}).then((response) => {
+			if (response.success) {
+				this.showSuccessMessage("Şifre Değiştirildi!", "Şifreniz başarıyla güncellendi.");
+				this.scheduleMessageCleanup(".security-message-container");
+			}
+		}).catch((error) => {
+			console.error('Şifre değiştirme hatası:', error);
+			
+			const status = error.status || 0;
+			const errorInfo = this.userResponseMappings[status];
+			if (errorInfo) {
+				this.showErrorMessage(errorInfo.title, errorInfo.message);
+			} else {
+				this.showErrorMessage("❌ Şifre Değiştirme Hatası", "Şifre değiştirilirken bir sorun oluştu. Lütfen tekrar deneyin.");
+			}
+		});
 	}
 
 
@@ -523,12 +550,11 @@ class SettingsComponent extends HTMLElement {
 	}
 
 	private handleAvatarUploadResponse(response: { success: boolean; data?: { avatar_url: string }; error?: string }): void {
-		if (response.success && response.data?.avatar_url) {
-			// Başarılı upload - user store'u güncelle ve UI'ı yenile
+		if (response.success) {
 			const user = getUser();
-			if (user) {
+			if (user && response.data?.avatar_url) {
 				user.profile = user.profile || {};
-				user.profile.avatar_url = response.data.avatar_url;
+				user.profile.avatar_url = response.data?.avatar_url;
 				const token = getAccessToken();
 				if (token) {
 					setUser(user, token);
@@ -536,7 +562,11 @@ class SettingsComponent extends HTMLElement {
 				this.renderTabContent();
 				this.showSuccessMessage("🎉 Avatar Güncellendi!", "Profil fotoğrafınız başarıyla güncellendi.");
 			}
-			// Input alanını reset et ki aynı dosyayı tekrar seçebilsin
+			else
+			{
+				this.renderTabContent();
+				this.showErrorMessage("Avatar Güncellenemedi", "Avatar yüklendi fakat güncellenirken bir sorun oluştu.");
+			}
 			const avatarInput = this.querySelector('#avatarInput') as HTMLInputElement;
 			if (avatarInput) {
 				avatarInput.value = '';
@@ -546,10 +576,6 @@ class SettingsComponent extends HTMLElement {
 			this.showErrorMessage("❌ Yükleme Başarısız", response.error || "Avatar yüklenirken bir hata oluştu.");
 		}
 	}
-
-
-	
-
 
 	private renderTabContent(): void {
 		const tabContent = this.querySelector('.tab-content');

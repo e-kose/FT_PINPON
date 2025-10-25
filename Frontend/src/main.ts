@@ -9,7 +9,7 @@ import "./components/utils/Header"
 import "./components/utils/SideBar"
 import "./components/utils/Statistics"
 import "./components/utils/LastGames"
-import "./components/sideBarComponents/Settings"
+import "./components/sideBarComponents/Settings/SettingsOld"
 import { handleLogin } from "./services/AuthService"
 
 
