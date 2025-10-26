@@ -4,6 +4,7 @@
  */
 
 import type { UserCredentialsUpdate } from "../../types/SettingsType";
+import { t } from "../../i18n/lang";
 
 // XSS Koruması - HTML karakterlerini encode eder
 export function sanitizeHtml(input: string): string {
@@ -87,7 +88,7 @@ export function sanitizeInput(input: string): string {
 // Email validasyonu
 export function validateEmail(email: string): { isValid: boolean; message: string } {
 	if (!email || typeof email !== 'string') {
-		return { isValid: false, message: 'Email adresi gereklidir.' };
+		return { isValid: false, message: t("validation_email_required") };
 	}
 	
 	// XSS ve SQL injection koruması
@@ -97,11 +98,11 @@ export function validateEmail(email: string): { isValid: boolean; message: strin
 	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/; 
 
 	if (!emailPattern.test(cleanEmail)) {
-		return { isValid: false, message: 'Geçerli bir email adresi girin.' };
+		return { isValid: false, message: t("validation_email_invalid") };
 	}
 	
 	if (cleanEmail.length > 254) {
-		return { isValid: false, message: 'Email adresi çok uzun.' };
+		return { isValid: false, message: t("validation_email_too_long") };
 	}
 	
 	return { isValid: true, message: '' };
@@ -109,7 +110,7 @@ export function validateEmail(email: string): { isValid: boolean; message: strin
 
 export function validateUsername(username: string): { isValid: boolean; message: string } {
 	if (!username || typeof username !== 'string') {
-		return { isValid: false, message: 'Kullanıcı adı gereklidir.' };
+		return { isValid: false, message: t("validation_username_required") };
 	}
 	
 	// XSS ve SQL injection koruması
@@ -117,13 +118,13 @@ export function validateUsername(username: string): { isValid: boolean; message:
 	const trimmed = sanitized.trim();
 	
 	if (trimmed.length < 3 || trimmed.length > 20) {
-		return { isValid: false, message: 'Kullanıcı adı 3-20 karakter arasında olmalıdır.' };
+		return { isValid: false, message: t("validation_username_length") };
 	}
 	// Sadece İngilizce harf, rakam ve alt çizgi (Türkçe karakter yok)
 	const usernamePattern = /^[a-zA-Z0-9_]+$/;
 
 	if (!usernamePattern.test(trimmed)) {
-		return { isValid: false, message: 'Kullanıcı adı sadece İngilizce harf, rakam ve alt çizgi içermelidir.' };
+		return { isValid: false, message: t("validation_username_chars") };
 	}
 	return { isValid: true, message: '' };
 }
@@ -131,7 +132,7 @@ export function validateUsername(username: string): { isValid: boolean; message:
 // Ad soyad validasyonu
 export function validateFullName(fullName: string): { isValid: boolean; message: string } {
 	if (!fullName || typeof fullName !== 'string') {
-		return { isValid: false, message: 'Ad soyad gereklidir.' };
+		return { isValid: false, message: t("validation_fullname_required") };
 	}
 	
 	// XSS ve SQL injection koruması
@@ -139,14 +140,14 @@ export function validateFullName(fullName: string): { isValid: boolean; message:
 	const trimmed = sanitized.trim();
 	
 	if (trimmed.length < 2 || trimmed.length > 50) {
-		return { isValid: false, message: 'Ad soyad 2-50 karakter arasında olmalıdır.' };
+		return { isValid: false, message: t("validation_fullname_length") };
 	}
 	
 	// Türkçe karakterler dahil harf ve boşluk kontrolü
 	const nameRegex = /^[a-zA-ZçğıöşüÇĞIİÖŞÜ\s]+$/;
 	
 	if (!nameRegex.test(trimmed)) {
-		return { isValid: false, message: 'Ad soyad sadece harf ve boşluk içermelidir.' };
+		return { isValid: false, message: t("validation_fullname_chars") };
 	}
 	
 	return { isValid: true, message: '' };
@@ -155,7 +156,7 @@ export function validateFullName(fullName: string): { isValid: boolean; message:
 // Bio/Açıklama validasyonu
 export function validateBio(bio: string): { isValid: boolean; message: string } {
 	if (!bio || typeof bio !== 'string') {
-		return { isValid: true, message: 'Bio opsiyonel' }; // Bio opsiyonel
+		return { isValid: true, message: t("validation_bio_optional") }; // Bio opsiyonel
 	}
 	
 	// XSS ve SQL injection koruması
@@ -163,7 +164,7 @@ export function validateBio(bio: string): { isValid: boolean; message: string } 
 	const trimmed = sanitized.trim();
 	
 	if (trimmed.length > 500) {
-		return { isValid: false, message: 'Açıklama 500 karakterden uzun olamaz.' };
+		return { isValid: false, message: t("validation_bio_length") };
 	}
 	
 	return { isValid: true, message: '' };
@@ -172,22 +173,22 @@ export function validateBio(bio: string): { isValid: boolean; message: string } 
 // Şifre validasyonu
 export function validatePassword(password: string): { isValid: boolean; message: string } {
 	if (!password || typeof password !== 'string') {
-		return { isValid: false, message: 'Şifre gereklidir.' };
+		return { isValid: false, message: t("validation_password_required") };
 	}
 	
 	// SQL injection koruması (XSS koruması şifreler için gerekli değil)
 	const sanitized = sanitizeSqlChars(password);
 	
 	if (sanitized.length < 6) {
-		return { isValid: false, message: 'Şifre en az 6 karakter olmalıdır.' };
+		return { isValid: false, message: t("validation_password_length_min") };
 	}
 	if (sanitized.length > 128) {
-		return { isValid: false, message: 'Şifre çok uzun.' };
+		return { isValid: false, message: t("validation_password_length_max") };
 	}
 	const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 	
 	if (!passwordPattern.test(sanitized)) {
-		return { isValid: false, message: 'Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.' };
+		return { isValid: false, message: t("validation_password_complexity") };
 	}
 	
 	return { isValid: true, message: '' };
@@ -203,7 +204,7 @@ export function validatePasswordChangeForm(data: {
 	const errors: Record<string, string> = {};
 	
 	if (!data.currentPassword) {
-		errors.currentPassword = 'Mevcut şifre gereklidir.';
+		errors.currentPassword = t("validation_current_password_required");
 	}
 	
 	const newPasswordValidation = validatePassword(data.newPassword);
@@ -212,11 +213,11 @@ export function validatePasswordChangeForm(data: {
 	}
 	
 	if (data.newPassword !== data.confirmPassword) {
-		errors.confirmPassword = 'Şifreler eşleşmiyor.';
+		errors.confirmPassword = t("validation_password_mismatch");
 	}
 	
 	if (data.currentPassword === data.newPassword) {
-		errors.newPassword = 'Yeni şifre mevcut şifreden farklı olmalıdır.';
+		errors.newPassword = t("validation_password_new_different");
 	}
 	return {
 		isValid: Object.keys(errors).length === 0,
@@ -227,7 +228,7 @@ export function validatePasswordChangeForm(data: {
 // URL validasyonu (avatar URL için)
 export function validateUrl(url: string): { isValid: boolean; message: string } {
 	if (!url || typeof url !== 'string') {
-		return { isValid: false, message: 'URL gereklidir.' };
+		return { isValid: false, message: t("validation_url_required") };
 	}
 	
 	// XSS ve SQL injection koruması
@@ -236,25 +237,25 @@ export function validateUrl(url: string): { isValid: boolean; message: string } 
 	try {
 		const urlObj = new URL(cleanUrl);
 		if (!['http:', 'https:'].includes(urlObj.protocol)) {
-			return { isValid: false, message: 'Sadece HTTP/HTTPS URL\'leri kabul edilir.' };
+			return { isValid: false, message: t("validation_url_protocol") };
 		}
 		
 		return { isValid: true, message: '' };
 	} catch {
-		return { isValid: false, message: 'Geçerli bir URL girin.' };
+		return { isValid: false, message: t("validation_url_invalid") };
 	}
 }
 
 // Dosya boyutu kontrolü (MB cinsinden)
 export function validateFileSize(file: File, maxSizeMB: number): { isValid: boolean; message: string } {
 	if (!file) {
-		return { isValid: false, message: 'Dosya gereklidir.' };
+		return { isValid: false, message: t("validation_file_required") };
 	}
 	
 	const maxSizeBytes = maxSizeMB * 1024 * 1024;
 	
 	if (file.size > maxSizeBytes) {
-		return { isValid: false, message: `Dosya boyutu ${maxSizeMB}MB'dan küçük olmalıdır.` };
+		return { isValid: false, message: t("validation_file_size", { size: maxSizeMB }) };
 	}
 	
 	return { isValid: true, message: '' };
@@ -263,11 +264,11 @@ export function validateFileSize(file: File, maxSizeMB: number): { isValid: bool
 // Dosya türü kontrolü
 export function validateFileType(file: File, allowedTypes: string[]): { isValid: boolean; message: string } {
 	if (!file) {
-		return { isValid: false, message: 'Dosya gereklidir.' };
+		return { isValid: false, message: t("validation_file_required") };
 	}
 	
 	if (!allowedTypes.includes(file.type)) {
-		return { isValid: false, message: `Sadece ${allowedTypes.join(', ')} dosya türlerine izin verilir.` };
+		return { isValid: false, message: t("validation_file_type", { types: allowedTypes.join(", ") }) };
 	}
 	
 	return { isValid: true, message: '' };
@@ -278,7 +279,7 @@ export function validateFullProfile(userInfo: UserCredentialsUpdate): { isValid:
 
 	// Username keyi var mı ve değeri var mı kontrol et (zorunlu)
 	if (!('username' in userInfo) || !userInfo.username || userInfo.username.trim() === '') {
-		errors.username = 'Kullanıcı adı gereklidir.';
+		errors.username = t("validation_username_required");
 	} else {
 		const usernameValidation = validateUsername(userInfo.username);
 		if (!usernameValidation.isValid) {
@@ -286,7 +287,7 @@ export function validateFullProfile(userInfo: UserCredentialsUpdate): { isValid:
 		}
 	}
 	if (!('email' in userInfo) || !userInfo.email || userInfo.email.trim() === '') {
-		errors.email = 'Email adresi gereklidir.';
+		errors.email = t("validation_email_required");
 	} else {
 		const emailValidation = validateEmail(userInfo.email);
 		if (!emailValidation.isValid) {

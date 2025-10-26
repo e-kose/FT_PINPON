@@ -1,3 +1,6 @@
+import { t } from "../../i18n/lang";
+import { LocalizedComponent } from "../base/LocalizedComponent";
+
 interface UserStats {
     wins: number;
     losses: number;
@@ -5,7 +8,7 @@ interface UserStats {
     winRate?: number;
 }
 
-class Statistics extends HTMLElement {
+class Statistics extends LocalizedComponent {
     private userStats: UserStats = {
         wins: 12,
         losses: 8,
@@ -13,25 +16,15 @@ class Statistics extends HTMLElement {
         winRate: 60
     };
 
-    constructor() {
-        super();
-        this.render();
-    }
-
-    connectedCallback(): void {
+    protected renderComponent(): void {
+        const winRate = this.userStats.winRate ?? 0;
         this.calculateWinRate();
-    }
-
-    disconnectedCallback(): void {
-    }
-
-    private render(): void {
         this.innerHTML = `
             <div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-xl shadow-xl border border-white/20 p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
                         <span class="mr-3 text-2xl">📊</span>
-                        İstatistikleriniz
+                        ${t("statistics_heading")}
                     </h3>
                 </div>
                 <div id="userStatsContainer" class="space-y-4">
@@ -41,16 +34,16 @@ class Statistics extends HTMLElement {
                 <!-- Win Rate Circle -->
                 <div class="mt-6 flex justify-center">
                     <div class="relative w-24 h-24">
-                        <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
+                        <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36" role="img" aria-label="${t("statistics_win_rate_label")}">
                             <circle cx="18" cy="18" r="16" fill="none" class="stroke-gray-300 dark:stroke-gray-600" stroke-width="3"></circle>
-                            <circle cx="18" cy="18" r="16" fill="none" class="stroke-blue-600 dark:stroke-blue-400" stroke-width="3" stroke-dasharray="${this.userStats.winRate}, ${100 - (this.userStats.winRate || 0)}" stroke-linecap="round"></circle>
+                            <circle cx="18" cy="18" r="16" fill="none" class="stroke-blue-600 dark:stroke-blue-400" stroke-width="3" stroke-dasharray="${winRate}, ${100 - winRate}" stroke-linecap="round"></circle>
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">${this.userStats.winRate}%</span>
+                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">${winRate}%</span>
                         </div>
                     </div>
                 </div>
-                <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">Kazanma Oranı</p>
+                <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">${t("statistics_win_rate_label")}</p>
             </div>
         `;
     }
@@ -65,7 +58,7 @@ class Statistics extends HTMLElement {
                             <span class="text-green-600 dark:text-green-400 text-lg">🏆</span>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Kazanç</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("statistics_card_wins_label")}</p>
                             <p class="text-2xl font-bold text-green-600 dark:text-green-400">${this.userStats.wins}</p>
                         </div>
                     </div>
@@ -80,7 +73,7 @@ class Statistics extends HTMLElement {
                             <span class="text-red-600 dark:text-red-400 text-lg">💔</span>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Kaybetme</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("statistics_card_losses_label")}</p>
                             <p class="text-2xl font-bold text-red-600 dark:text-red-400">${this.userStats.losses}</p>
                         </div>
                     </div>
@@ -95,7 +88,7 @@ class Statistics extends HTMLElement {
                             <span class="text-yellow-600 dark:text-yellow-400 text-lg">⭐</span>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Rütbe</p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("statistics_card_rank_label")}</p>
                             <p class="text-lg font-bold text-yellow-600 dark:text-yellow-400">${this.userStats.rank}</p>
                         </div>
                     </div>
@@ -120,7 +113,7 @@ class Statistics extends HTMLElement {
         this.calculateWinRate();
         
         // DOM'u yeniden render et
-        this.render();
+        this.renderAndBind();
     }
 
     public refreshStats(): Promise<void> {
@@ -137,7 +130,7 @@ class Statistics extends HTMLElement {
         try {
             // API call buraya eklenecek
         } catch (error) {
-            console.error('Error loading user stats:', error);
+            console.error(t("statistics_load_error_log"), error);
         }
     }
 

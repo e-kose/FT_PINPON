@@ -1,3 +1,6 @@
+import { t } from "../../i18n/lang";
+import { LocalizedComponent } from "../base/LocalizedComponent";
+
 interface GameResult {
     id: string;
     opponent: string;
@@ -8,50 +11,69 @@ interface GameResult {
     gameMode?: string;
 }
 
-class LastGames extends HTMLElement {
-    private games: GameResult[] = [
-        {
-            id: "1",
-            opponent: "PlayerX",
-            result: "win",
-            playerScore: 7,
-            opponentScore: 5,
-            timeAgo: "2 saat önce",
-            gameMode: "Ranked"
-        },
-        {
-            id: "2",
-            opponent: "Irfan",
-            result: "loss",
-            playerScore: 4,
-            opponentScore: 7,
-            timeAgo: "5 saat önce",
-            gameMode: "Casual"
-        },
-        {
-            id: "3",
-            opponent: "GameMaster",
-            result: "win",
-            playerScore: 7,
-            opponentScore: 3,
-            timeAgo: "1 gün önce",
-            gameMode: "Tournament"
-        }
-    ];
+class LastGames extends LocalizedComponent {
+    private games: GameResult[] = [];
+    private isUsingDefaultData = true;
 
     constructor() {
         super();
-        this.render();
+        this.games = this.getDefaultGames();
     }
 
-    connectedCallback(): void {
-        this.setupEvents();
+    private getDefaultGames(): GameResult[] {
+        return [
+            {
+                id: "1",
+                opponent: "PlayerX",
+                result: "win",
+                playerScore: 7,
+                opponentScore: 5,
+                timeAgo: t("last_games_time_hours_ago", { count: 2 }),
+                gameMode: "ranked"
+            },
+            {
+                id: "2",
+                opponent: "Irfan",
+                result: "loss",
+                playerScore: 4,
+                opponentScore: 7,
+                timeAgo: t("last_games_time_hours_ago", { count: 5 }),
+                gameMode: "casual"
+            },
+            {
+                id: "3",
+                opponent: "GameMaster",
+                result: "win",
+                playerScore: 7,
+                opponentScore: 3,
+                timeAgo: t("last_games_time_days_ago", { count: 1 }),
+                gameMode: "tournament"
+            }
+        ];
     }
 
-    disconnectedCallback(): void {
+    private translateGameMode(mode?: string): { label: string; icon: string } {
+        if (!mode) {
+            return { label: "", icon: "🎮" };
+        }
+
+        const normalized = mode.toLowerCase();
+        switch (normalized) {
+            case "ranked":
+                return { label: t("last_games_mode_ranked"), icon: "🏅" };
+            case "tournament":
+                return { label: t("last_games_mode_tournament"), icon: "🏆" };
+            case "casual":
+                return { label: t("last_games_mode_casual"), icon: "🎮" };
+            default:
+                return { label: mode, icon: "🎮" };
+        }
     }
 
-    private render(): void {
+    protected renderComponent(): void {
+        if (this.isUsingDefaultData) {
+            this.games = this.getDefaultGames();
+        }
         this.innerHTML = `
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -60,12 +82,12 @@ class LastGames extends HTMLElement {
                             <span class="text-white text-lg">🎮</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Son Oyunlar</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Son oynadığın maçların özeti</p>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">${t("last_games_heading")}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${t("last_games_subheading")}</p>
                         </div>
                     </div>
                     <button id="viewAllGamesBtn" class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-600">
-                        Tümünü Gör →
+                        ${t("last_games_view_all")}
                     </button>
                 </div>
                 <div id="gamesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -75,6 +97,10 @@ class LastGames extends HTMLElement {
         `;
     }
 
+    protected afterRender(): void {
+        this.setupEvents();
+    }
+
     private generateGamesHTML(): string {
         return this.games.map(game => {
             const resultClass = game.result === 'win' 
@@ -82,10 +108,9 @@ class LastGames extends HTMLElement {
                 : 'bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/40 dark:to-red-800/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700';
             
             const resultIcon = game.result === 'win' ? '🏆' : '😞';
-            const resultText = game.result === 'win' ? 'KAZANDIN' : 'KAYBETTİN';
+            const resultText = game.result === 'win' ? t("last_games_result_win") : t("last_games_result_loss");
             
-            const gameModeIcon = game.gameMode === 'Ranked' ? '🏅' : 
-                                game.gameMode === 'Tournament' ? '🏆' : '🎮';
+            const { label: gameModeLabel, icon: gameModeIcon } = this.translateGameMode(game.gameMode);
             
             return `
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border-2 border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105" data-game-id="${game.id}">
@@ -110,7 +135,7 @@ class LastGames extends HTMLElement {
                             <span class="text-gray-400 mx-2">-</span>
                             <span class="${game.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">${game.opponentScore}</span>
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">FINAL SCORE</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">${t("last_games_final_score")}</div>
                     </div>
                     
                     <!-- Footer with time and game mode -->
@@ -119,10 +144,10 @@ class LastGames extends HTMLElement {
                             <span class="text-xs">⏰</span>
                             <span class="text-xs font-medium">${game.timeAgo}</span>
                         </div>
-                        ${game.gameMode ? `
+                        ${gameModeLabel ? `
                             <div class="flex items-center space-x-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800">
                                 <span class="text-xs">${gameModeIcon}</span>
-                                <span class="text-xs font-semibold">${game.gameMode}</span>
+                                <span class="text-xs font-semibold">${gameModeLabel}</span>
                             </div>
                         ` : ''}
                     </div>
@@ -160,20 +185,20 @@ class LastGames extends HTMLElement {
     // Update Methods - İçleri boş, sen dolduracaksın
     public updateGames(games: GameResult[]): void {
         // Oyun listesini güncelle
+        this.isUsingDefaultData = false;
         this.games = games;
-        this.render();
-        this.setupEvents();
+        this.renderAndBind();
     }
 
     public addGame(game: GameResult): void {
         // Yeni oyun ekle (en başa)
+        this.isUsingDefaultData = false;
         this.games.unshift(game);
         // Sadece son 10 oyunu tut
         if (this.games.length > 10) {
             this.games = this.games.slice(0, 10);
         }
-        this.render();
-        this.setupEvents();
+        this.renderAndBind();
     }
 
     public refreshGames(): Promise<void> {
@@ -190,16 +215,16 @@ class LastGames extends HTMLElement {
         try {
             // API call buraya eklenecek
         } catch (error) {
-            console.error('Error loading recent games:', error);
+            console.error(t("last_games_load_error_log"), error);
         }
     }
 
     // Utility Methods - İçleri boş, sen dolduracaksın
     public clearGames(): void {
         // Tüm oyunları temizle
+        this.isUsingDefaultData = false;
         this.games = [];
-        this.render();
-        this.setupEvents();
+        this.renderAndBind();
     }
 
     public getGamesByResult(result: 'win' | 'loss'): GameResult[] {

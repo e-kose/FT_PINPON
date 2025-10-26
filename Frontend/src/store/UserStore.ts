@@ -1,5 +1,6 @@
 import { removeUndefinedKey } from '../services/AuthService.ts';
 import type { User, UserLogin, UserProfile } from '../types/AuthType.ts';
+import { t } from '../i18n/lang';
 
 // Simple in-memory user store
 let currentUser: User | null = null;
@@ -133,7 +134,7 @@ export function getUserAvatar(): string {
 }
 
 export function getUserFuallNme(): string {
-	return currentUser?.profile?.full_name || currentUser?.username || 'Kullanıcı';
+	return currentUser?.profile?.full_name || currentUser?.username || t("user_store_default_username");
 }
 
 export function getUserBio(): string {
@@ -157,7 +158,7 @@ export function submitCodeIfValid(callBack?: any, twoFaCode?: HTMLInputElement |
 		if (!twoFaCode) return;
 		const code = (twoFaCode.value || '').trim();
 		if (!/^[0-9]{6}$/.test(code)) {
-			alert('Lütfen 6 haneli sayısal kodu girin');
+			alert(t("user_store_twofa_code_invalid"));
 			twoFaCode.focus();
 			return;
 		}

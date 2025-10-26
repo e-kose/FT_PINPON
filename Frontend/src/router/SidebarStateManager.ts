@@ -11,12 +11,19 @@ export interface SidebarState {
 export type SidebarStateListener = (state: SidebarState) => void;
 
 class SidebarStateManager {
-    private state: SidebarState = {
-        isCollapsed: false,  // Varsayılan olarak açık
-        sidebarWidth: 288    // 72 * 4 = 288px (w-72)
-    };
-
+    private state: SidebarState;
     private listeners: Set<SidebarStateListener> = new Set();
+
+    constructor() {
+        // localStorage'dan önceki state'i oku, yoksa default olarak açık
+        const savedState = localStorage.getItem('sidebar-state');
+        const isCollapsed = savedState ? JSON.parse(savedState) : false; // Default: açık
+        
+        this.state = {
+            isCollapsed,
+            sidebarWidth: isCollapsed ? 64 : 288
+        };
+    }
 
     /**
      * Sidebar durumunu günceller ve tüm dinleyicileri bilgilendirir
@@ -26,6 +33,9 @@ class SidebarStateManager {
             isCollapsed,
             sidebarWidth: isCollapsed ? 64 : 288 // w-16 : w-72
         };
+
+        // localStorage'a kaydet
+        localStorage.setItem('sidebar-state', JSON.stringify(isCollapsed));
 
         // Tüm dinleyicileri bilgilendir
         this.listeners.forEach(listener => {

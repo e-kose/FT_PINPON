@@ -3,6 +3,7 @@ import { getUser } from "../../../store/UserStore";
 import { changePasswordAsync } from "../../../services/SettingsService";
 import { validatePassword } from "../../utils/Validation";
 import { router } from "../../../router/Router";
+import { t } from "../../../i18n/lang";
 
 const MESSAGE_CONTAINER = ".security-message-container";
 
@@ -17,8 +18,8 @@ class SecuritySettings extends Settings {
 		if (!user) {
 			this.innerHTML = `
 				<div class="flex flex-col items-center justify-center min-h-[40vh] text-center">
-					<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Güvenlik bilgileri yüklenemedi</h2>
-					<p class="text-gray-600 dark:text-gray-400">Lütfen tekrar giriş yapmayı deneyin.</p>
+					<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">${t("security_settings_load_error_title")}</h2>
+					<p class="text-gray-600 dark:text-gray-400">${t("security_settings_load_error_description")}</p>
 				</div>
 			`;
 			return;
@@ -32,43 +33,43 @@ class SecuritySettings extends Settings {
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
 						</svg>
 					</div>
-					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Security Settings</h2>
+					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">${t("security_settings_title")}</h2>
 				</div>
 
 				<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-6 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Şifre Değiştir</h3>
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${t("security_settings_change_password_title")}</h3>
 					<div class="space-y-4">
 						<div>
-							<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Mevcut Şifre</label>
+							<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t("security_settings_current_password_label")}</label>
 							<input 
 								type="password" 
 								id="currentPassword"
 								class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
-								placeholder="Mevcut şifrenizi girin"
+								placeholder="${t("security_settings_current_password_placeholder")}"
 							>
 						</div>
 						<div>
-							<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Yeni Şifre</label>
+							<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t("security_settings_new_password_label")}</label>
 							<input 
 								type="password" 
 								id="newPassword"
 								class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
-								placeholder="Yeni şifrenizi girin"
+								placeholder="${t("security_settings_new_password_placeholder")}"
 							>
 						</div>
 						<div>
-							<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Yeni Şifre Tekrar</label>
+							<label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">${t("security_settings_confirm_password_label")}</label>
 							<input 
 								type="password" 
 								id="confirmPassword"
 								class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
-								placeholder="Yeni şifrenizi tekrar girin"
+								placeholder="${t("security_settings_confirm_password_placeholder")}"
 							>
 						</div>
 					</div>
 					<div class="flex justify-end mt-6">
 						<button class="save-password-btn bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
-							Şifreyi Güncelle
+							${t("security_settings_change_password_button")}
 						</button>
 					</div>
 				</div>
@@ -76,11 +77,11 @@ class SecuritySettings extends Settings {
 				<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-6 rounded-xl border border-gray-200/50 dark:border-gray-600/50 space-y-4">
 					<div class="flex items-center justify-between">
 						<div>
-							<h3 class="text-lg font-semibold text-gray-900 dark:text-white">İki Faktörlü Doğrulama</h3>
-							<p class="text-sm text-gray-600 dark:text-gray-400">Hesabınızı ek güvenlik katmanıyla koruyun.</p>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-white">${t("security_settings_2fa_title")}</h3>
+							<p class="text-sm text-gray-600 dark:text-gray-400">${t("security_settings_2fa_description")}</p>
 						</div>
 						<button class="toggle-2fa-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300">
-							2FA Ayarla
+							${t("security_settings_2fa_button")}
 						</button>
 					</div>
 				</div>
@@ -111,7 +112,7 @@ class SecuritySettings extends Settings {
 		const confirmPasswordInput = this.querySelector<HTMLInputElement>("#confirmPassword");
 
 		if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput) {
-			this.showErrorMessage("Hata", "Şifre alanları yüklenemedi.", MESSAGE_CONTAINER);
+			this.showErrorMessage(t("common_error"), t("security_settings_fields_load_error"), MESSAGE_CONTAINER);
 			return;
 		}
 
@@ -121,15 +122,15 @@ class SecuritySettings extends Settings {
 			newPasswordInput.value !== confirmPasswordInput.value
 		) {
 			this.showErrorMessage(
-				"Hata",
-				"Lütfen şifre gereksinimlerini karşıladığınızdan emin olun.",
+				t("common_error"),
+				t("security_settings_password_requirements_error"),
 				MESSAGE_CONTAINER
 			);
 			return;
 		}
 
 		if (newPasswordInput.value !== confirmPasswordInput.value) {
-			this.showErrorMessage("Hata", "Yeni şifre ve onay şifresi eşleşmiyor.", MESSAGE_CONTAINER);
+			this.showErrorMessage(t("common_error"), t("security_settings_password_mismatch_error"), MESSAGE_CONTAINER);
 			return;
 		}
 
@@ -139,7 +140,11 @@ class SecuritySettings extends Settings {
 		})
 			.then((response) => {
 				if (response.success) {
-					this.showSuccessMessage("Şifre Değiştirildi!", "Şifreniz başarıyla güncellendi.", MESSAGE_CONTAINER);
+					this.showSuccessMessage(
+						t("security_settings_change_password_success_title"),
+						t("security_settings_change_password_success_message"),
+						MESSAGE_CONTAINER
+					);
 					this.scheduleMessageCleanup(MESSAGE_CONTAINER);
 					currentPasswordInput.value = "";
 					newPasswordInput.value = "";
@@ -149,7 +154,7 @@ class SecuritySettings extends Settings {
 				}
 			})
 			.catch((error) => {
-				console.error("Şifre değiştirme hatası:", error);
+				console.error(t("security_settings_change_password_error_log"), error);
 				const status = error?.status || 0;
 				const info = this.getUserResponseMessage(status);
 				this.showErrorMessage(info.title, info.message, MESSAGE_CONTAINER);

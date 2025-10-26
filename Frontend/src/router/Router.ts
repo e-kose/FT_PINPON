@@ -68,7 +68,7 @@ class Router
 			}));
 		} else {
 			this.handleRoute('/error/404');
-			fillIndex('<error-page error-type="404" error-title="Sayfa Bulunamadı" error-description="Aradığınız sayfa mevcut değil veya taşınmış olabilir."></error-page>', app);
+			fillIndex('<error-page error-type="404" error-title="error_404_title" error-description="error_404_description"></error-page>', app);
 
 			// Dispatch event for error page too
 			window.dispatchEvent(new CustomEvent('routechange', {
@@ -90,7 +90,7 @@ function stringToHTMLElement(htmlString: string): HTMLElement {
 function fillIndex(htmlValue: string, app: HTMLElement | null): void {
 	if (app) {
 		app.innerHTML = "";
-		htmlValue ? app.appendChild(stringToHTMLElement(htmlValue)) : app.appendChild(stringToHTMLElement('<error-page error-type="500" error-title="Beklenmeyen Hata" error-description="Bir şeyler ters gitti."></error-page>'));
+		htmlValue ? app.appendChild(stringToHTMLElement(htmlValue)) : app.appendChild(stringToHTMLElement('<error-page error-type="500" error-title="error_500_title" error-description="error_500_description"></error-page>'));
 	}
 	else{
 		throw new Error("Error: root is undefined");
@@ -125,14 +125,14 @@ function initializeRouter(): void {
 	router.addRoute('/auth/google', 'http://localhost:3000/auth/google');
 
 	// Error page route'ları
-	router.addRoute('/error/404', '<error-page error-type="404" error-title="Sayfa Bulunamadı" error-description="Aradığınız sayfa mevcut değil veya taşınmış olabilir."></error-page>');
-	router.addRoute('/error/500', '<error-page error-type="500" error-title="Sunucu Hatası" error-description="Sunucuda bir hata oluştu. Lütfen daha sonra tekrar deneyin."></error-page>');
-	router.addRoute('/error/403', '<error-page error-type="403" error-title="Erişim Reddedildi" error-description="Bu sayfaya erişim yetkiniz bulunmuyor."></error-page>');
-	router.addRoute('/error/401', '<error-page error-type="401" error-title="Giriş Gerekli" error-description="Bu sayfayı görüntülemek için giriş yapmanız gerekiyor."></error-page>');
-	router.addRoute('/error/auth', '<error-page error-type="auth" error-title="Kimlik Doğrulama Hatası" error-description="Giriş bilgilerinizde bir sorun var. Lütfen tekrar giriş yapın."></error-page>');
+	router.addRoute('/error/404', '<error-page error-type="404" error-title="error_404_title" error-description="error_404_description"></error-page>');
+	router.addRoute('/error/500', '<error-page error-type="500" error-title="error_500_title" error-description="error_500_description"></error-page>');
+	router.addRoute('/error/403', '<error-page error-type="403" error-title="error_403_title" error-description="error_403_description"></error-page>');
+	router.addRoute('/error/401', '<error-page error-type="401" error-title="error_401_title" error-description="error_401_description"></error-page>');
+	router.addRoute('/error/auth', '<error-page error-type="auth" error-title="error_auth_title" error-description="error_auth_description"></error-page>');
 
 	// Genel error route'u (fallback)
-	router.addRoute('/error', '<error-page error-type="500" error-title="Bir Hata Oluştu" error-description="Lütfen daha sonra tekrar deneyin."></error-page>');
+	router.addRoute('/error', '<error-page error-type="500" error-title="error_generic_title" error-description="error_generic_description"></error-page>');
 	document.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
 		const link = target.closest('a');

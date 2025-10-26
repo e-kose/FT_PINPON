@@ -1,39 +1,44 @@
 import { router } from "../../router/Router";
-import { getUser} from "../../store/UserStore";
+import { getUser } from "../../store/UserStore";
 import { logout } from "../../services/AuthService";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
+import { t } from "../../i18n/lang";
+import { LocalizedComponent } from "../base/LocalizedComponent";
 
-
-class Header extends HTMLElement {
+class Header extends LocalizedComponent {
     private sidebarListener: SidebarStateListener | null = null;
-  
-    constructor() {
-        super();
-        this.render();
+    private documentClickHandler: ((event: MouseEvent) => void) | null = null;
+
+    private cleanupDocumentClickHandler(): void {
+        if (this.documentClickHandler) {
+            document.removeEventListener("click", this.documentClickHandler);
+            this.documentClickHandler = null;
+        }
     }
 
-    connectedCallback(): void {
-        this.setupEvents();
-        this.setupSidebarListener();
+    protected onConnected(): void {
+        if (!this.sidebarListener) {
+            this.setupSidebarListener();
+        }
     }
 
-    disconnectedCallback(): void {
-        // Listener'ı temizle
+    protected onDisconnected(): void {
         if (this.sidebarListener) {
             sidebarStateManager.removeListener(this.sidebarListener);
             this.sidebarListener = null;
         }
+        this.cleanupDocumentClickHandler();
     }
 
-    private render(): void {
+    protected renderComponent(): void {
         const user = getUser();
         this.innerHTML = `
             <nav class="bg-white/95 backdrop-blur-sm dark:bg-gray-800/95 shadow-xl border-b border-gray-200 dark:border-gray-700 fixed top-0 w-full z-50">
                 <div class="relative flex items-center h-24 px-6">
                     <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
-                    <div id="logoSection" class="flex items-center space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-16" >
-                        <img class="w-12 h-12 drop-shadow-lg" src="/pong.png" alt="logo">
+                    <div id="logoSection" class="flex items-center space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-16" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
+                        <img class="w-12 h-12 drop-shadow-lg" src="/pong.png" alt="${t("header_logo_alt")}">
                         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-wide">Ft_Transcendance</h1>
                     </div>
                     <!-- User Section -->
@@ -42,7 +47,7 @@ class Header extends HTMLElement {
                         <div id="userDropdownBtn" class="flex items-center gap-4 px-6 py-4 rounded-2xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-600">
                             <!-- Avatar with Status Indicator -->
                             <div class="relative">
-                                <img id="userAvatar" class="h-14 w-14 rounded-full border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-2 ring-white dark:ring-gray-800" src="${user.profile?.avatar_url}" alt="Avatar">
+                                <img id="userAvatar" class="h-14 w-14 rounded-full border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-2 ring-white dark:ring-gray-800" src="${user.profile?.avatar_url}" alt="${t("header_user_avatar_alt")}">
                                 <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse shadow-lg"></div>
                             </div>
                             
@@ -70,8 +75,8 @@ class Header extends HTMLElement {
                                         </svg>
                                     </div>
                                     <div class="text-left">
-                                        <div class="font-semibold">Profilimi Gör</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">İstatistiklerin ve başarıların</div>
+                                        <div class="font-semibold">${t("header_dropdown_profile_title")}</div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">${t("header_dropdown_profile_description")}</div>
                                     </div>
                                 </button>
                                 
@@ -83,8 +88,8 @@ class Header extends HTMLElement {
                                         </svg>
                                     </div>
                                     <div class="text-left">
-                                        <div class="font-semibold">Profil Ayarları</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">Hesap ve tercihler</div>
+                                        <div class="font-semibold">${t("header_dropdown_settings_title")}</div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">${t("header_dropdown_settings_description")}</div>
                                     </div>
                                 </button>
                                 
@@ -96,8 +101,8 @@ class Header extends HTMLElement {
                                             </svg>
                                         </div>
                                         <div class="text-left">
-                                            <div class="font-semibold">Çıkış Yap</div>
-                                            <div class="text-sm text-red-400">Hesabından çık</div>
+                                            <div class="font-semibold">${t("header_dropdown_logout_title")}</div>
+                                            <div class="text-sm text-red-400">${t("header_dropdown_logout_description")}</div>
                                         </div>
                                     </button>
                                 </div>
@@ -105,8 +110,8 @@ class Header extends HTMLElement {
                         </div>
                         ` : `
                         <div class="flex items-center gap-3">
-                            <button id="headerLoginBtn" class="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-semibold rounded-xl text-base px-6 py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">Giriş Yap</button>
-                            <button id="headerSignupBtn" class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 font-semibold rounded-xl text-base px-6 py-3 border-2 border-blue-200 dark:border-blue-700 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 transform hover:scale-105">Kayıt Ol</button>
+                            <button id="headerLoginBtn" class="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-semibold rounded-xl text-base px-6 py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">${t("header_login_button")}</button>
+                            <button id="headerSignupBtn" class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 font-semibold rounded-xl text-base px-6 py-3 border-2 border-blue-200 dark:border-blue-700 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 transform hover:scale-105">${t("header_signup_button")}</button>
                         </div>
                         `}
                     </div>
@@ -115,7 +120,14 @@ class Header extends HTMLElement {
         `;
     }
 
+    protected afterRender(): void {
+        this.setupEvents();
+        this.adjustLogoPosition(sidebarStateManager.getState().isCollapsed);
+    }
+
     private setupEvents(): void {
+        this.cleanupDocumentClickHandler();
+
         // Giriş yapılmadıysa buton eventleri
         const headerLoginBtn = this.querySelector('#headerLoginBtn');
         headerLoginBtn?.addEventListener('click', (e) => {
@@ -146,6 +158,8 @@ class Header extends HTMLElement {
         const dropdownArrow = this.querySelector('#dropdownArrow') as HTMLElement;
         let dropdownOpen = false;
         
+        dropdownMenu?.addEventListener('click', (e) => e.stopPropagation());
+
         dropdownBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
             dropdownOpen = !dropdownOpen;
@@ -158,24 +172,25 @@ class Header extends HTMLElement {
             }
         });
         
-        // Kapanma için dışarı tıkla
-        document.addEventListener('click', () => {
-            if (dropdownOpen && dropdownMenu) {
-                dropdownMenu.classList.add('hidden');
-                dropdownOpen = false;
-                // Arrow'u geri çevir
-                if (dropdownArrow) {
-                    dropdownArrow.style.transform = 'rotate(0deg)';
+        if (dropdownMenu && dropdownBtn) {
+            this.documentClickHandler = () => {
+                if (dropdownOpen && dropdownMenu) {
+                    dropdownMenu.classList.add('hidden');
+                    dropdownOpen = false;
+                    if (dropdownArrow) {
+                        dropdownArrow.style.transform = 'rotate(0deg)';
+                    }
                 }
-            }
-        });
+            };
+            document.addEventListener('click', this.documentClickHandler);
+        }
         
         // Logout button event
         const logoutBtn = this.querySelector('#logoutBtn');
         logoutBtn?.addEventListener('click', async (e) => {
             e.preventDefault();
             const success = await logout();
-            success ? router.navigate("/") : router.navigate("/error-500");
+            success ? router.navigate("/") : router.navigate("/error/500");
         });
         const profileBtn = this.querySelector('#profileBtn');
         profileBtn?.addEventListener('click', (e) => {
@@ -193,6 +208,9 @@ class Header extends HTMLElement {
         };
         
         sidebarStateManager.addListener(this.sidebarListener);
+        
+        // Initial state için logo pozisyonunu ayarla
+        this.adjustLogoPosition(sidebarStateManager.getState().isCollapsed);
     }
 
     private adjustLogoPosition(isCollapsed: boolean): void {

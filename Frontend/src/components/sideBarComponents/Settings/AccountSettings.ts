@@ -1,5 +1,6 @@
 import { Settings } from "./Settings";
 import { getUser } from "../../../store/UserStore";
+import { t } from "../../../i18n/lang";
 
 const MESSAGE_CONTAINER = ".account-message-container";
 
@@ -14,8 +15,8 @@ class AccountSettings extends Settings {
 		if (!user) {
 			this.innerHTML = `
 				<div class="flex flex-col items-center justify-center min-h-[40vh] text-center">
-					<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Hesap bilgileri yüklenemedi</h2>
-					<p class="text-gray-600 dark:text-gray-400">Lütfen tekrar giriş yapmayı deneyin.</p>
+					<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">${t("account_settings_load_error_title")}</h2>
+					<p class="text-gray-600 dark:text-gray-400">${t("account_settings_load_error_description")}</p>
 				</div>
 			`;
 			return;
@@ -30,22 +31,22 @@ class AccountSettings extends Settings {
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
 						</svg>
 					</div>
-					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Account Settings</h2>
+					<h2 class="text-2xl font-bold text-gray-900 dark:text-white">${t("account_settings_title")}</h2>
 				</div>
 
 				<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-6 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Hesap Bilgileri</h3>
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${t("account_settings_info_title")}</h3>
 					<div class="space-y-4">
 						<div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-600">
-							<span class="text-sm font-medium text-gray-600 dark:text-gray-400">Hesap ID</span>
+							<span class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("account_settings_field_id")}</span>
 							<span class="text-sm font-bold text-gray-900 dark:text-white">${user.id}</span>
 						</div>
 						<div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-600">
-							<span class="text-sm font-medium text-gray-600 dark:text-gray-400">Üyelik Tarihi</span>
+							<span class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("account_settings_field_created")}</span>
 							<span class="text-sm font-bold text-gray-900 dark:text-white">${new Date(user.created_at).toLocaleDateString("tr-TR")}</span>
 						</div>
 						<div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-600">
-							<span class="text-sm font-medium text-gray-600 dark:text-gray-400">Son Güncelleme</span>
+							<span class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("account_settings_field_updated")}</span>
 							<span class="text-sm font-bold text-gray-900 dark:text-white">${new Date(user.updated_at).toLocaleDateString("tr-TR")}</span>
 						</div>
 					</div>
@@ -58,15 +59,15 @@ class AccountSettings extends Settings {
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
 							</svg>
 						</div>
-						<h3 class="text-lg font-semibold text-red-800 dark:text-red-400">Tehlikeli Bölge</h3>
+						<h3 class="text-lg font-semibold text-red-800 dark:text-red-400">${t("account_settings_danger_zone_title")}</h3>
 					</div>
-					<p class="text-sm text-red-700 dark:text-red-300 mb-6">Bu işlemler geri alınamaz. Lütfen dikkatli olun.</p>
+					<p class="text-sm text-red-700 dark:text-red-300 mb-6">${t("account_settings_danger_zone_description")}</p>
 					<button class="delete-account-btn bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
 						<span class="flex items-center space-x-2 justify-center">
 							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
 							</svg>
-							<span>Hesabımı Sil</span>
+							<span>${t("account_settings_delete_button")}</span>
 						</span>
 					</button>
 				</div>
@@ -79,14 +80,14 @@ class AccountSettings extends Settings {
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
 								</svg>
 							</div>
-							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Hesabınızı Silmek İstediğinizden Emin misiniz?</h3>
-							<p class="text-gray-600 dark:text-gray-400 mb-6">Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.</p>
+							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">${t("account_settings_delete_modal_title")}</h3>
+							<p class="text-gray-600 dark:text-gray-400 mb-6">${t("account_settings_delete_modal_description")}</p>
 							<div class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
 								<button class="cancel-delete-btn flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
-									İptal
+									${t("common_cancel")}
 								</button>
 								<button class="confirm-delete-btn flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
-									Evet, Sil
+									${t("account_settings_delete_confirm_button")}
 								</button>
 							</div>
 						</div>
@@ -127,11 +128,11 @@ class AccountSettings extends Settings {
 	}
 
 	private deleteAccount(): void {
-		console.log("Deleting account...");
+		console.log(t("account_settings_delete_log"));
 		this.hideDeleteAccountModal();
 		this.showErrorMessage(
-			"⚠️ Bilgi",
-			"Hesap silme özelliği yakında eklenecek.",
+			t("account_settings_delete_info_title"),
+			t("account_settings_delete_info_message"),
 			MESSAGE_CONTAINER
 		);
 	}

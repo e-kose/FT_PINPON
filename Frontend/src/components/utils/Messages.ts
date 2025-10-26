@@ -1,3 +1,5 @@
+import { t } from "../../i18n/lang";
+
 export class Messages {
 	// Mevcut mesajları temizleme fonksiyonu
 	public clearMessages(parentSelector: string): void {
@@ -100,7 +102,7 @@ export class Messages {
 		// Text first for better visual hierarchy
 		const span = document.createElement('span');
 		span.className = 'mb-2 text-sm font-semibold text-blue-700 dark:text-green-300';
-		span.textContent = 'Giriş yapılıyor...';
+		span.textContent = t("messages_loading_login");
 
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.setAttribute('aria-hidden', 'true');
@@ -167,25 +169,25 @@ export class Messages {
 		if (status === 'enable') {
 			if (success) {
 				icon = '✅';
-				title = '2FA Aktifleştirildi';
-				desc = 'Hesabınız artık ek bir güvenlik katmanıyla korunuyor.';
+				title = t("twofa_enable_success_title");
+				desc = t("twofa_enable_success_message");
 				theme = 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200';
 			} else {
 				icon = '⚠️';
-				title = 'Doğrulama Başarısız';
-				desc = 'Kod geçersiz veya süresi dolmuş olabilir. Tekrar deneyiniz.';
+				title = t("twofa_enable_error_title");
+				desc = t("twofa_enable_error_message");
 				theme = 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-800 dark:text-red-200';
 			}
 		} else { // disable
 			if (success) {
 				icon = '🛑';
-				title = '2FA Devre Dışı Bırakıldı';
-				desc = 'Artık yalnızca şifre ile giriş yapılacak.';
+				title = t("twofa_disable_success_title");
+				desc = t("twofa_disable_success_message");
 				theme = 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-600 text-amber-800 dark:text-amber-200';
 			} else {
 				icon = '❌';
-				title = 'İşlem Başarısız';
-				desc = 'Devre dışı bırakma gerçekleşmedi. Lütfen tekrar deneyin.';
+				title = t("twofa_disable_error_title");
+				desc = t("twofa_disable_error_message");
 				theme = 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-800 dark:text-red-200';
 			}
 		}
@@ -211,7 +213,7 @@ export class Messages {
 		// Close btn
 		const closeBtn = document.createElement('button');
 		closeBtn.type = 'button';
-		closeBtn.setAttribute('aria-label', 'Kapat');
+		closeBtn.setAttribute('aria-label', t("common_close"));
 		closeBtn.className = 'text-xs px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition';
 		closeBtn.textContent = '✕';
 		closeBtn.addEventListener('click', () => {

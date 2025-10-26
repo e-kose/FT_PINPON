@@ -4,6 +4,7 @@ import { getUser } from "../../../store/UserStore";
 import { sidebarStateManager } from "../../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../../router/SidebarStateManager";
 import messages from "../../utils/Messages";
+import { t } from "../../../i18n/lang";
 
 export type SettingsTabKey = "profile" | "security" | "account" | "view";
 
@@ -18,31 +19,37 @@ type TabAccentStyles = {
 };
 
 type SettingsTabConfig = {
-	label: string;
-	description: string;
+	labelKey: string;
+	descriptionKey: string;
 	icon: string;
 	accent: TabAccentStyles;
 };
 
 export class Settings extends HTMLElement {
-	protected userResponseMappings: Record<number, { title: string; message: string }> = {
-		0: { title: "Bağlantı Hatası", message: "İnternet bağlantınızı kontrol edin ve tekrar deneyin." },
-		400: { title: "Geçersiz Veri", message: "Gönderilen bilgiler geçersiz. Lütfen kontrol edin." },
-		401: { title: "Yetkilendirme Hatası", message: "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın." },
-		403: { title: "Erişim Engellendi", message: "Bu işlemi gerçekleştirmek için yetkiniz bulunmuyor." },
-		404: { title: "Kullanıcı Bulunamadı", message: "Kullanıcı bilgileri bulunamadı." },
-		409: { title: "Çakışma Hatası", message: "Kullanıcı zaten mevcut veya çakışan bir bilgi var." },
-		429: { title: "Çok Fazla İstek", message: "Çok fazla istek gönderdiniz. Lütfen bekleyip tekrar deneyin." },
-		500: { title: "Sunucu Hatası", message: "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin." }
+	protected userResponseMappings: Record<number, { titleKey: string; messageKey: string }> = {
+		0: { titleKey: "settings_error_connection_title", messageKey: "settings_error_connection_message" },
+		400: { titleKey: "settings_error_invalid_data_title", messageKey: "settings_error_invalid_data_message" },
+		401: { titleKey: "settings_error_unauthorized_title", messageKey: "settings_error_unauthorized_message" },
+		403: { titleKey: "settings_error_forbidden_title", messageKey: "settings_error_forbidden_message" },
+		404: { titleKey: "settings_error_not_found_title", messageKey: "settings_error_not_found_message" },
+		409: { titleKey: "settings_error_conflict_title", messageKey: "settings_error_conflict_message" },
+		429: { titleKey: "settings_error_rate_limit_title", messageKey: "settings_error_rate_limit_message" },
+		500: { titleKey: "settings_error_server_title", messageKey: "settings_error_server_message" }
 	};
 
 	protected getUserResponseMessage(status: number): { title: string; message: string } {
-		return (
-			this.userResponseMappings[status] || {
-				title: "Beklenmeyen Hata",
-				message: "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin."
-			}
-		);
+		const mapping = this.userResponseMappings[status];
+		if (!mapping) {
+			return {
+				title: t("settings_error_generic_title"),
+				message: t("settings_error_generic_message")
+			};
+		}
+
+		return {
+			title: t(mapping.titleKey),
+			message: t(mapping.messageKey)
+		};
 	}
 
 	protected handleApiResponse(status: number, containerSelector: string): void {
@@ -54,8 +61,8 @@ export class Settings extends HTMLElement {
 	protected handleUpdateResponse(response: UpdateResponse, containerSelector: string): void {
 		if (response.success) {
 			messages.showMessage(
-				"Başarılı",
-				response.message || "Bilgileriniz başarıyla güncellendi.",
+				t("common_success"),
+				response.message || t("settings_generic_update_success"),
 				"success",
 				containerSelector
 			);
@@ -94,8 +101,8 @@ export class Settings extends HTMLElement {
 
 		const titleDiv = document.createElement("div");
 		titleDiv.innerHTML = `
-			<h3 class="text-red-800 dark:text-red-200 font-bold text-lg">⚠️ Form Eksikleri</h3>
-			<p class="text-red-600 dark:text-red-300 text-sm">Formu tamamlamak için aşağıdaki alanları kontrol edin</p>
+			<h3 class="text-red-800 dark:text-red-200 font-bold text-lg">${t("validation_form_missing_title")}</h3>
+			<p class="text-red-600 dark:text-red-300 text-sm">${t("validation_form_missing_subtitle")}</p>
 		`;
 
 		headerDiv.appendChild(iconDiv);
@@ -129,7 +136,7 @@ export class Settings extends HTMLElement {
 				<svg class="w-4 h-4 mr-2 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 				</svg>
-				Bu alanları düzelttikten sonra tekrar kaydetmeyi deneyin.
+				${t("validation_form_missing_footer")}
 			</p>
 		`;
 
@@ -218,10 +225,24 @@ export class Settings extends HTMLElement {
 class SettingsContainer extends Settings {
 	private currentTab: SettingsTabKey = "profile";
 	private sidebarListener: SidebarStateListener | null = null;
+	private languageChangeHandler: ((event: Event) => void) | null = null;
 	private readonly tabConfig: Record<SettingsTabKey, SettingsTabConfig> = {
+		profile: {
+			labelKey: "settings_tabs_profile_label",
+			descriptionKey: "settings_tabs_profile_description",
+			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9A3.75 3.75 0 1112 5.25 3.75 3.75 0 0115.75 9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 20.25a7.5 7.5 0 0115 0"></path></svg>`,
+			accent: {
+				buttonActive: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-400/40 dark:bg-blue-900/30 dark:text-blue-200",
+				buttonInactive:
+					"border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-blue-50/40 dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:bg-blue-900/20",
+				iconActive: "bg-blue-100 text-blue-600 dark:bg-blue-800/60 dark:text-blue-100",
+				iconInactive: "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-300",
+				indicator: "bg-blue-400/70"
+			}
+		},
 		account: {
-			label: "Hesap",
-			description: "Hesap bilgileri ve tehlikeli işlemler",
+			labelKey: "settings_tabs_account_label",
+			descriptionKey: "settings_tabs_account_description",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7h16M6 11h.01M10 11h8M6 15h.01M10 15h8M19 5H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2z"></path></svg>`,
 			accent: {
 				buttonActive: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-900/30 dark:text-emerald-200",
@@ -233,8 +254,8 @@ class SettingsContainer extends Settings {
 			}
 		},
 		security: {
-			label: "Güvenlik",
-			description: "Şifreler ve iki faktörlü doğrulama",
+			labelKey: "settings_tabs_security_label",
+			descriptionKey: "settings_tabs_security_description",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5l7 4v5a7 7 0 01-7 7 7 7 0 01-7-7V9l7-4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4"></path></svg>`,
 			accent: {
 				buttonActive: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/40 dark:bg-rose-900/30 dark:text-rose-200",
@@ -245,22 +266,9 @@ class SettingsContainer extends Settings {
 				indicator: "bg-rose-400/70"
 			}
 		},
-		profile: {
-			label: "Profil",
-			description: "Kişisel bilgiler ve avatar",
-			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9A3.75 3.75 0 1112 5.25 3.75 3.75 0 0115.75 9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.5 20.25a7.5 7.5 0 0115 0"></path></svg>`,
-			accent: {
-				buttonActive: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-400/40 dark:bg-blue-900/30 dark:text-blue-200",
-				buttonInactive:
-					"border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-blue-50/40 dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:bg-blue-900/20",
-				iconActive: "bg-blue-100 text-blue-600 dark:bg-blue-800/60 dark:text-blue-100",
-				iconInactive: "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-300",
-				indicator: "bg-blue-400/70"
-			}
-		},
 		view: {
-			label: "Görünüm",
-			description: "Tema ve dil seçenekleri",
+			labelKey: "settings_tabs_view_label",
+			descriptionKey: "settings_tabs_view_description",
 			icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v18m-6-6h12M6 9h12"></path></svg>`,
 			accent: {
 				buttonActive: "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-400/40 dark:bg-purple-900/30 dark:text-purple-200",
@@ -282,6 +290,8 @@ class SettingsContainer extends Settings {
 	connectedCallback(): void {
 		this.renderRoot();
 		this.setupSidebarListener();
+		this.languageChangeHandler = () => this.renderRoot();
+		document.addEventListener("languagechange", this.languageChangeHandler as EventListener);
 	}
 
 	disconnectedCallback(): void {
@@ -289,11 +299,18 @@ class SettingsContainer extends Settings {
 			sidebarStateManager.removeListener(this.sidebarListener);
 			this.sidebarListener = null;
 		}
+		if (this.languageChangeHandler) {
+			document.removeEventListener("languagechange", this.languageChangeHandler as EventListener);
+			this.languageChangeHandler = null;
+		}
 	}
 
 	private setupSidebarListener(): void {
 		this.sidebarListener = (state) => this.updateMainContentMargin(state.isCollapsed);
 		sidebarStateManager.addListener(this.sidebarListener);
+		
+		// Initial state için margin'i ayarla
+		this.updateMainContentMargin(sidebarStateManager.getState().isCollapsed);
 	}
 
 	private updateMainContentMargin(isCollapsed: boolean): void {
@@ -311,8 +328,8 @@ class SettingsContainer extends Settings {
 			this.innerHTML = `
 				<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
 					<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Oturum Açmalısınız</h2>
-						<p class="text-gray-600 dark:text-gray-400">Ayarlarınızı görüntülemek için önce giriş yapın.</p>
+						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">${t("settings_login_required_title")}</h2>
+						<p class="text-gray-600 dark:text-gray-400">${t("settings_login_required_description")}</p>
 					</div>
 				</div>
 			`;
@@ -339,10 +356,10 @@ class SettingsContainer extends Settings {
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
 											</svg>
 										</div>
-										<div>
-											<h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Ayarlar</h1>
+										<div class="text-center">
+											<h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">${t("settings_title")}</h1>
 											<p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-												Hesabınızın görünümü ve güvenliği için tercihlerinizi tek yerden yönetin.
+												${t("settings_subtitle")}
 											</p>
 										</div>
 									</div>
@@ -353,15 +370,8 @@ class SettingsContainer extends Settings {
 						<section class="settings-container flex flex-col xl:flex-row gap-6 xl:gap-8 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-2xl shadow-2xl shadow-black/10 border border-white/30 overflow-hidden min-h-[60vh]">
 							<aside class="settings-sidebar bg-gray-50/85 dark:bg-gray-900/70 border-b xl:border-b-0 xl:border-r border-gray-200/50 dark:border-gray-700/50 p-4 sm:p-5 xl:p-6 xl:w-64 xl:max-w-sm flex flex-col gap-4">
 								<div class="hidden xl:block">
-									<div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200/50 dark:border-blue-700/30 mb-4">
-										<div class="flex items-center gap-3">
-											<div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-												<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-												</svg>
-											</div>
-											<h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">Hesap Yönetimi</h3>
-										</div>
+									<div class="px-2 py-3 mb-2">
+										<h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">${t("settings_sidebar_card_title")}</h3>
 									</div>
 								</div>
 								<nav class="flex gap-3 xl:flex-col xl:gap-3 overflow-x-auto pb-2 pr-1 xl:overflow-visible xl:pb-0">
@@ -411,8 +421,8 @@ class SettingsContainer extends Settings {
 		if (!user) {
 			container.innerHTML = `
 				<div class="flex flex-col items-center justify-center min-h-[40vh] text-center">
-					<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Oturum Açmalısınız</h2>
-					<p class="text-gray-600 dark:text-gray-400">Ayarlarınızı görüntülemek için giriş yapmanız gerekiyor.</p>
+					<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">${t("settings_login_required_title")}</h2>
+					<p class="text-gray-600 dark:text-gray-400">${t("settings_login_required_description")}</p>
 				</div>
 			`;
 			this.updateTabItemStyles();
@@ -443,8 +453,8 @@ class SettingsContainer extends Settings {
 							${config.icon}
 						</span>
 						<span class="flex flex-col items-start">
-							<span class="${this.getLabelClass(isActive)}">${config.label}</span>
-							<span class="${this.getDescriptionClass(isActive)}">${config.description}</span>
+							<span class="${this.getLabelClass(isActive)}">${t(config.labelKey)}</span>
+							<span class="${this.getDescriptionClass(isActive)}">${t(config.descriptionKey)}</span>
 						</span>
 					</button>
 				`;
