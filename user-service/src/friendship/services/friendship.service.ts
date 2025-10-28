@@ -37,7 +37,7 @@ export class FriendshipService {
     const req = this.friendshipRepo.getFriendshipById(requestId) as any;
     if (!req) throw new FriendBadRequest('Friend request not found');
     if (req.friend_id !== actorId) throw new FriendBadRequest('Not authorized to accept');
-    this.friendshipRepo.updateStatus(requestId, 'accepted');
+    return this.friendshipRepo.updateStatus(requestId, 'accepted');
   }
 
   rejectRequest(requestId: number, actorId: number) {
