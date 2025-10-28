@@ -52,6 +52,19 @@ export default fp(async (app: FastifyInstance) => {
 });
 
   app.register(proxy, {
+  upstream: process.env.NOTIFICATION_SERVICE_URL || "http://notification-service:3003",
+  prefix: "/notification",
+  rewritePrefix: "/notification",
+  preHandler: async (req, reply) => {
+    await app.jwtAuth(req, reply);
+    if (req.user) {
+      req.headers["x-user-id"] = (req.user as any).id;
+      req.headers["x-user-email"] = (req.user as any).email;
+    }
+  },
+});
+
+  app.register(proxy, {
     upstream: process.env.CHAT_SERVICE_URL || "http://chat-service:3003",
     prefix: "/chat",
     rewritePrefix: "/chat",

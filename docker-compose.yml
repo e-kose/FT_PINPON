@@ -11,10 +11,11 @@ services:
   #     - IPC_LOCK
   #   command: server -config=/vault/config/vault.config.hcl
   #   environment:
-  #     VAULT_ADDR: "http://127.0.0.1:8200" 
+  #     VAULT_ADDR: "http://127.0.0.1:8200"
   #   networks:
   #     - internal-network
-  ####HTTPS İÇİN
+
+  #### HTTPS İÇİN
   # caddy:
   #   image: caddy:latest
   #   container_name: caddy
@@ -27,21 +28,25 @@ services:
   #     - caddy_config:/config
   #   networks:
   #     - internal-network
+
   api-gateway:
-    build: 
+    build:
       context: ./api-gateway
     ports:
       - "3000:3000"
     depends_on:
       - auth-service
       - user-service
+      - chat-service
+      - notification-service
     env_file:
       - ./api-gateway/.env
     networks:
       - internal-network
     restart: always
+
   auth-service:
-    build: 
+    build:
       context: ./auth-service
     expose:
       - "3001"
@@ -52,6 +57,7 @@ services:
     networks:
       - internal-network
     restart: always
+
   user-service:
     build:
       context: ./user-service
@@ -64,8 +70,9 @@ services:
     networks:
       - internal-network
     restart: always
+
   chat-service:
-    build: 
+    build:
       context: ./chat-service
     expose:
       - "3003"
@@ -76,14 +83,14 @@ services:
     networks:
       - internal-network
     restart: always
-  elasticsearch :
+
+  elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
     container_name: "elasticsearch"
     environment:
       - ES_JAVA_OPTS=-Xms512m -Xmx2048m
       - discovery.type=single-node
       - xpack.security.enabled=true
-
     env_file:
       - ./elastic-search/.env
     ports:
@@ -109,7 +116,7 @@ services:
       "
     restart: always
 
-  logstash :
+  logstash:
     image: docker.elastic.co/logstash/logstash:8.14.0
     container_name: "logstash"
     ports:
@@ -123,8 +130,8 @@ services:
     env_file:
       - ./elastic-search/.env
     volumes:
-    - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
     networks:
       - internal-network
     depends_on:
@@ -139,8 +146,8 @@ services:
     mem_limit: 2g
     restart: always
 
-  kibana : 
-    image:  docker.elastic.co/kibana/kibana:8.14.0
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
     container_name: "kibana"
     ports:
       - "5601:5601"
@@ -167,6 +174,25 @@ services:
       - redis-data:/data
     networks:
       - internal-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+    expose:
+      - "3004"
+    volumes:
+      - ./notification-service/db:/app/db
+    env_file:
+      - ./notification-service/.env
+    networks:
+      - internal-network
+    # healthcheck:
+    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+    restart: always
 
 volumes:
   es_data:
