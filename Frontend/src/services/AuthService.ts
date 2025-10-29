@@ -1,6 +1,7 @@
 import { setUser, clearUser, getUser } from "../store/UserStore";
 import { router } from "../router/Router";
 import type { UserLogin } from "../types/AuthType";
+import { initializeNotifications } from "./NotificationService";
 
 
 
@@ -29,7 +30,7 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 					}
 				}
 			}
-			
+
 			return responseData;
 		}).catch((error) => {
 			throw error;
@@ -52,6 +53,7 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	const data = await res.json();
 	if (data.success) {
 		setUser(data.user, token);
+		await initializeNotifications();
 		return true;
 	}
 	return false;
@@ -209,9 +211,9 @@ export async function disable2FA(): Promise<boolean> {
 
 export function removeUndefinedKey(data:any): void {
 	Object.keys(data).forEach(key => {
-		if (data[key] && typeof data[key] === 'object') 
+		if (data[key] && typeof data[key] === 'object')
 			removeUndefinedKey(data[key]);
-		else if (data[key] === undefined) 
+		else if (data[key] === undefined)
 			delete data[key];
 	});
 }

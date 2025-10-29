@@ -7,6 +7,15 @@ import type { Friend } from "../../types/FriendsType";
 import ChatService from "../../services/ChatService";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
+import {
+	getMultipleUsersOnlineStatus,
+	getNotificationSocket,
+	initializeNotifications,
+	createNotification,
+	getNotifications,
+	markAllNotificationsAsRead,
+	deleteNotification
+} from "../../services/NotificationService";
 
 class Chat extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -15,12 +24,19 @@ class Chat extends LocalizedComponent {
 	private socket: WebSocket | null = null;
 	private friends: Friend[] = [];
 	private isLoadingFriends = true;
+	private friendsOnlineStatus: Record<string, boolean> = {};
+	private onlineStatusInterval: number | null = null;
+	private unreadMessageCounts: Record<string, number> = {};
+	private eventListeners: Array<{ element: Element; type: string; handler: EventListener }> = [];
 
 	protected onConnected(): void {
 		if (!this.sidebarListener) {
 			this.setupSidebarListener();
 		}
 		void this.fetchFriends();
+		this.startOnlineStatusInterval();
+		this.setupNotificationListener();
+		void this.loadUnreadMessageCounts();
 	}
 
 	protected onDisconnected(): void {
@@ -30,6 +46,18 @@ class Chat extends LocalizedComponent {
 		}
 		this.socket?.close();
 		this.socket = null;
+		this.stopOnlineStatusInterval();
+
+		// Event listener'ları temizle
+		this.removeAllEventListeners();
+
+		// Tüm state'i temizle - memory'de hiçbir şey kalmasın
+		this.activeConversationId = null;
+		this.messages = {};
+		this.friends = [];
+		this.isLoadingFriends = true;
+		this.friendsOnlineStatus = {};
+		this.unreadMessageCounts = {};
 	}
 
 	protected renderComponent(): void {
@@ -63,6 +91,8 @@ class Chat extends LocalizedComponent {
 			const res = await ChatService.getFriendsList();
 			if (res.ok && res.data.success && Array.isArray(res.data.friends)) {
 				this.friends = res.data.friends;
+				// Friend'lerin online durumlarını çek
+				await this.fetchFriendsOnlineStatus();
 			} else {
 				this.friends = [];
 			}
@@ -72,6 +102,37 @@ class Chat extends LocalizedComponent {
 		} finally {
 			this.isLoadingFriends = false;
 			this.renderAndBind();
+		}
+	}
+
+	private async fetchFriendsOnlineStatus(): Promise<void> {
+		try {
+			// Friend ID'lerini map'le
+			const friendIds = this.friends.map(friend => friend.friend_id);
+
+			if (friendIds.length === 0) {
+				this.friendsOnlineStatus = {};
+				return;
+			}
+
+			// Online durumlarını çek
+			const onlineStatusResponse = await getMultipleUsersOnlineStatus(friendIds);
+
+			if (onlineStatusResponse.ok && onlineStatusResponse.data.success) {
+				// Response'dan gelen veriyi Record formatına çevir
+				this.friendsOnlineStatus = {};
+				if (onlineStatusResponse.data.data?.onlineStatus) {
+					for (const statusItem of onlineStatusResponse.data.data.onlineStatus) {
+						this.friendsOnlineStatus[statusItem.userId.toString()] = statusItem.isOnline;
+					}
+				}
+			} else {
+				console.error("Failed to fetch friends online status:", onlineStatusResponse);
+				this.friendsOnlineStatus = {};
+			}
+		} catch (error) {
+			console.error("Error fetching friends online status:", error);
+			this.friendsOnlineStatus = {};
 		}
 	}
 
@@ -87,12 +148,22 @@ class Chat extends LocalizedComponent {
 				.map((friend) => {
 					const friendId = friend.friend_id;
 					const isActive = this.activeConversationId === friendId.toString();
+					const isOnline = this.friendsOnlineStatus[friendId.toString()] || false;
+					const unreadCount = this.unreadMessageCounts[friendId.toString()] || 0;
+
 					return `
 						<div data-id="${friendId}"
 							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
-							<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+							<div class="relative">
+								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+								<!-- Online/Offline Badge -->
+								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+							</div>
 							<div class="flex-1">
-								<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
+								<div class="flex items-center gap-2">
+									<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
+									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? '99+' : unreadCount}</span>` : ''}
+								</div>
 								<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("chat_friend_no_name")}</div>
 							</div>
 						</div>`;
@@ -140,9 +211,15 @@ class Chat extends LocalizedComponent {
 		const owner = this.friends.find((friend) => friend.friend_id.toString() === this.activeConversationId);
 		if (!owner) return "";
 
+		const isOnline = this.friendsOnlineStatus[this.activeConversationId] || false;
+
 		return `
 			<div class="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/60">
-				<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+				<div class="relative">
+					<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+					<!-- Online/Offline Badge -->
+					<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+				</div>
 				<div>
 					<div class="font-semibold text-gray-900 dark:text-gray-100">${owner.friend_username}</div>
 					<div class="text-sm text-gray-500 dark:text-gray-400">${owner.friend_full_name || t("chat_friend_no_name")}</div>
@@ -178,31 +255,49 @@ class Chat extends LocalizedComponent {
 	}
 
 	private setupEvents(): void {
+		// Önceki event listener'ları temizle
+		this.removeAllEventListeners();
+
 		this.querySelectorAll<HTMLElement>(".conversation-item").forEach((item) => {
-			item.addEventListener("click", () => {
+			const handler = () => {
 				const id = item.getAttribute("data-id");
 				if (id) {
 					this.handleConversationClick(id);
 				}
-			});
+			};
+			item.addEventListener("click", handler);
+			this.eventListeners.push({ element: item, type: "click", handler });
 		});
 
 		const sendBtn = this.querySelector("#chatSend");
 		const input = this.querySelector<HTMLInputElement>("#chatInput");
 
-		sendBtn?.addEventListener("click", () => this.handleSend());
-		input?.addEventListener("keydown", (event) => {
-			if ((event as KeyboardEvent).key === "Enter") {
-				event.preventDefault();
-				this.handleSend();
-			}
-		});
+		if (sendBtn) {
+			const sendHandler = () => this.handleSend();
+			sendBtn.addEventListener("click", sendHandler);
+			this.eventListeners.push({ element: sendBtn, type: "click", handler: sendHandler });
+		}
+
+		if (input) {
+			const keyHandler = (event: Event) => {
+				if ((event as KeyboardEvent).key === "Enter") {
+					event.preventDefault();
+					this.handleSend();
+				}
+			};
+			input.addEventListener("keydown", keyHandler);
+			this.eventListeners.push({ element: input, type: "keydown", handler: keyHandler });
+		}
 	}
 
 	private async handleConversationClick(friendId: string): Promise<void> {
 		if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
 			this.connectWs();
 		}
+
+		// O kullanıcıdan gelen mesajları okundu olarak işaretle
+		await this.markMessagesAsReadFromUser(friendId);
+
 		await this.loadConversation(friendId);
 	}
 
@@ -287,6 +382,9 @@ class Chat extends LocalizedComponent {
 			})
 		);
 
+		// Notification oluştur
+		void this.createMessageNotification(parseInt(conversationId), text);
+
 		input.value = "";
 	}
 
@@ -317,6 +415,224 @@ class Chat extends LocalizedComponent {
 		mainContent.classList.add(...transitionClasses);
 		mainContent.classList.toggle("ml-72", !isCollapsed);
 		mainContent.classList.toggle("ml-16", isCollapsed);
+	}
+
+	private startOnlineStatusInterval(): void {
+		// Önceki interval'ı temizle
+		this.stopOnlineStatusInterval();
+
+		// 10 saniyede bir online status'ları güncelle
+		this.onlineStatusInterval = window.setInterval(async () => {
+			if (this.friends.length > 0) {
+				await this.fetchFriendsOnlineStatus();
+				// Sadece friend list ve conversation header'ı yeniden render et
+				this.updateOnlineStatusUI();
+			}
+		}, 10000);
+	}
+
+	private stopOnlineStatusInterval(): void {
+		if (this.onlineStatusInterval !== null) {
+			clearInterval(this.onlineStatusInterval);
+			this.onlineStatusInterval = null;
+		}
+	}
+
+	private updateOnlineStatusUI(): void {
+		// Friend list'i yeniden render et
+		const friendListContainer = this.querySelector('.lg\\:col-span-1');
+		if (friendListContainer) {
+			friendListContainer.innerHTML = this.renderFriendList().replace(/<aside[^>]*>/, '').replace(/<\/aside>$/, '');
+		}
+
+		// Conversation header'ı yeniden render et
+		if (this.activeConversationId) {
+			const conversationHeader = this.querySelector('.lg\\:col-span-2 .border-b');
+			if (conversationHeader) {
+				conversationHeader.outerHTML = this.renderMessagesOwnerInfo();
+			}
+		}
+
+		// Event'leri tekrar bağla
+		this.setupEvents();
+	}
+
+	private setupNotificationListener(): void {
+		// Notification socket'ini başlat
+		void initializeNotifications();
+
+		// Socket'i al ve message listener ekle
+		setTimeout(() => {
+			const notificationSocket = getNotificationSocket();
+			if (notificationSocket) {
+				// Mevcut onmessage handler'ı sakla
+				const originalOnMessage = notificationSocket.onmessage;
+
+				// Yeni handler ekle
+				notificationSocket.onmessage = (event) => {
+					// Orijinal handler'ı çağır
+					if (originalOnMessage) {
+						originalOnMessage.call(notificationSocket, event);
+					}
+
+					// Chat için özel logic
+					this.handleNotificationMessage(event);
+				};
+			}
+		}, 1000); // Socket bağlantısı için kısa bir bekleme
+	}
+
+	private handleNotificationMessage(event: MessageEvent): void {
+		try {
+			const message = JSON.parse(event.data);
+
+			// Chat mesajı bildirimi kontrolü - sadece yeni oluşturulan notifications için
+			if (message.type === 'notification' &&
+			    message.data?.notification?.type === 'chat_message' &&
+			    message.data?.action === 'created') {
+
+				const notification = message.data.notification;
+				const fromUserId = notification.from_user_id.toString();
+
+				// Chat component'inin aktif olup olmadığını kontrol et
+				const chatComponent = document.querySelector('chat-component');
+				const isChatComponentActive = !!chatComponent && this.isConnected;
+
+				// Eğer chat component aktif VE bu kişi ile aktif chat yapıyorsak, notification'ı sil
+				if (this.activeConversationId === fromUserId && isChatComponentActive) {
+					void this.deleteNotificationById(notification.id);
+					return; // Badge güncelleme yok çünkü aktif chat'te
+				}
+
+				// Unread count'ı güncelle (sadece aktif chat değilse veya chat component aktif değilse)
+				if (!this.unreadMessageCounts[fromUserId]) {
+					this.unreadMessageCounts[fromUserId] = 0;
+				}
+				this.unreadMessageCounts[fromUserId]++;
+
+				// UI'ı güncelle (sadece chat component aktifse)
+				if (isChatComponentActive) {
+					this.updateFriendListUI();
+				}
+			}
+		} catch (error) {
+			console.error('Notification message parse error:', error);
+		}
+	}
+
+	private async loadUnreadMessageCounts(): Promise<void> {
+		try {
+			// Chat mesajı tipindeki okunmamış bildirimleri al
+			const response = await getNotifications({
+				type: 'chat_message',
+				is_read: false
+			});
+
+			if (response.ok && response.data.success && Array.isArray(response.data.data)) {
+				// Her kullanıcıdan gelen mesaj sayısını hesapla
+				this.unreadMessageCounts = {};
+				response.data.data.forEach((notification: any) => {
+					const fromUserId = notification.from_user_id.toString();
+					if (!this.unreadMessageCounts[fromUserId]) {
+						this.unreadMessageCounts[fromUserId] = 0;
+					}
+					this.unreadMessageCounts[fromUserId]++;
+				});
+
+				// UI'ı güncelle
+				this.updateFriendListUI();
+			}
+		} catch (error) {
+			console.error('Error loading unread message counts:', error);
+		}
+	}
+
+	private updateFriendListUI(): void {
+		// Friend list container'ı bul ve yeniden render et
+		const friendListContainer = this.querySelector('.lg\\:col-span-1 .divide-y');
+		if (friendListContainer && this.friends.length > 0) {
+			friendListContainer.innerHTML = this.friends
+				.map((friend) => {
+					const friendId = friend.friend_id;
+					const isActive = this.activeConversationId === friendId.toString();
+					const isOnline = this.friendsOnlineStatus[friendId.toString()] || false;
+					const unreadCount = this.unreadMessageCounts[friendId.toString()] || 0;
+
+					return `
+						<div data-id="${friendId}"
+							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
+							<div class="relative">
+								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+								<!-- Online/Offline Badge -->
+								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+							</div>
+							<div class="flex-1">
+								<div class="flex items-center gap-2">
+									<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
+									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? '99+' : unreadCount}</span>` : ''}
+								</div>
+								<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("chat_friend_no_name")}</div>
+							</div>
+						</div>`;
+				})
+				.join("");
+
+			// Event'leri tekrar bağla
+			this.setupEvents();
+		}
+	}
+
+	private async markMessagesAsReadFromUser(fromUserId: string): Promise<void> {
+		try {
+			// O kullanıcıdan gelen chat_message tipindeki bildirimleri okundu olarak işaretle
+			const response = await markAllNotificationsAsRead({
+				type: 'chat_message',
+				from_user_id: parseInt(fromUserId)
+			});
+
+			if (response.ok && response.data.success) {
+				// Unread count'ı sıfırla
+				this.unreadMessageCounts[fromUserId] = 0;
+				// UI'ı güncelle
+				this.updateFriendListUI();
+			}
+		} catch (error) {
+			console.error('Error marking messages as read:', error);
+		}
+	}
+
+	private async createMessageNotification(toUserId: number, message: string): Promise<void> {
+		try {
+			const currentUser = getUser();
+			if (!currentUser) return;
+
+			await createNotification({
+				to_user_id: toUserId,
+				title: `${currentUser.username}'den yeni mesaj`,
+				message: message.length > 50 ? message.substring(0, 50) + '...' : message,
+				type: 'chat_message'
+			});
+		} catch (error) {
+			console.error('Error creating message notification:', error);
+		}
+	}
+
+	private async deleteNotificationById(notificationId: number): Promise<void> {
+		try {
+			const response = await deleteNotification(notificationId);
+			if (!response.ok || !response.data.success) {
+				console.error('Failed to delete notification:', notificationId, response);
+			}
+		} catch (error) {
+			console.error('Error deleting notification:', notificationId, error);
+		}
+	}
+
+	private removeAllEventListeners(): void {
+		this.eventListeners.forEach(({ element, type, handler }) => {
+			element.removeEventListener(type, handler);
+		});
+		this.eventListeners = [];
 	}
 }
 
