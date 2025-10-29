@@ -49,7 +49,8 @@ export class NotificationRepository {
 
         if (filters.is_read !== undefined) {
             query += ` AND is_read = ?`;
-            params.push(filters.is_read);
+            // Convert boolean to 0/1 for SQLite
+            params.push(filters.is_read ? 1 : 0);
         }
 
         if (filters.type) {
@@ -87,7 +88,8 @@ export class NotificationRepository {
 
         if (data.is_read !== undefined) {
             fields.push('is_read = ?');
-            params.push(data.is_read);
+            // Convert boolean to 0/1 for SQLite
+            params.push(data.is_read ? 1 : 0);
         }
 
         if (data.title) {

@@ -49,7 +49,40 @@ export class NotificationController {
     getUserNotifications = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
-            const filters = request.query as NotificationFilters;
+            const queryFilters = request.query as any;
+
+            // Convert query string parameters to proper types
+            const filters: NotificationFilters = {};
+
+            if (queryFilters.type) {
+                filters.type = queryFilters.type;
+            }
+
+            if (queryFilters.is_read !== undefined) {
+                // Convert string to boolean: "true" -> true, "false" -> false
+                filters.is_read = queryFilters.is_read === 'true';
+            }
+
+            if (queryFilters.from_user_id) {
+                const fromUserId = parseInt(queryFilters.from_user_id);
+                if (!isNaN(fromUserId)) {
+                    filters.from_user_id = fromUserId;
+                }
+            }
+
+            if (queryFilters.limit) {
+                const limit = parseInt(queryFilters.limit);
+                if (!isNaN(limit)) {
+                    filters.limit = limit;
+                }
+            }
+
+            if (queryFilters.offset) {
+                const offset = parseInt(queryFilters.offset);
+                if (!isNaN(offset)) {
+                    filters.offset = offset;
+                }
+            }
 
             const notifications = await this.notificationService.getUserNotifications(currentUserId, filters);
 
