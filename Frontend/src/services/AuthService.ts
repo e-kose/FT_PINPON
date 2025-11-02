@@ -175,9 +175,10 @@ export async function enable2Fa(code: string): Promise<boolean> {
 	if (res.ok) {
 		const data = await res.json();
 		if (data.success) {
-			handleLogin();
-			console.log("2FA enabled successfully-------------------:", getUser()?.is_2fa_enabled);
-			return data.success;
+			await handleLogin();
+			const updatedUser = getUser();
+			console.log("2FA enabled successfully-------------------:", updatedUser?.is_2fa_enabled);
+			return true;
 		}
 	}
 	return false;
@@ -201,9 +202,10 @@ export async function disable2FA(): Promise<boolean> {
 	if (res.ok) {
 		const data = await res.json();
 		if (data.success) {
-			handleLogin();
-			console.log("2FA disabled successfully:", getUser()?.is_2fa_enabled);
-			return data.success;
+			await handleLogin();
+			const updatedUser = getUser();
+			console.log("2FA disabled successfully:", updatedUser?.is_2fa_enabled);
+			return true;
 		}
 	}
 	return false;

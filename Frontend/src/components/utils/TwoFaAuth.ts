@@ -219,11 +219,12 @@ class TwoFaAuth extends LocalizedComponent {
 			if (success) {
 				this.qrData = null;
 				messages.twoFaMessage("enable", true);
-				setTimeout(() => router.navigate("/settings/security"), 1500);
+				this.renderAndBind();
+				setTimeout(() => router.navigate("/settings/security"), 2000);
 			} else {
 				messages.twoFaMessage("enable", false);
+				this.renderAndBind();
 			}
-			this.renderAndBind();
 		});
 	}
 
@@ -232,11 +233,12 @@ class TwoFaAuth extends LocalizedComponent {
 			if (success) {
 				this.qrData = null;
 				messages.twoFaMessage("disable", true);
-				setTimeout(() => router.navigate("/settings/security"), 1500);
+				this.renderAndBind();
+				setTimeout(() => router.navigate("/settings/security"), 2000);
 			} else {
 				messages.twoFaMessage("disable", false);
+				this.renderAndBind();
 			}
-			this.renderAndBind();
 		});
 	}
 

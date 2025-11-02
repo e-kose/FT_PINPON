@@ -25,6 +25,21 @@ class SecuritySettings extends Settings {
 			return;
 		}
 
+		const is2FAEnabled = user.is_2fa_enabled === 1;
+		const twoFaStatusBadge = is2FAEnabled 
+			? `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold">
+					<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+					</svg>
+					${t("security_settings_2fa_enabled")}
+				</span>`
+			: `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-semibold">
+					<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+					</svg>
+					${t("security_settings_2fa_disabled")}
+				</span>`;
+
 		this.innerHTML = `
 			<div class="space-y-8">
 				<div class="flex items-center space-x-3">
@@ -75,13 +90,16 @@ class SecuritySettings extends Settings {
 				</div>
 
 				<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-6 rounded-xl border border-gray-200/50 dark:border-gray-600/50 space-y-4">
-					<div class="flex items-center justify-between">
-						<div>
-							<h3 class="text-lg font-semibold text-gray-900 dark:text-white">${t("security_settings_2fa_title")}</h3>
+					<div class="flex items-center justify-between flex-wrap gap-4">
+						<div class="flex-1 min-w-[200px]">
+							<div class="flex items-center gap-2 mb-2">
+								<h3 class="text-lg font-semibold text-gray-900 dark:text-white">${t("security_settings_2fa_title")}</h3>
+								${twoFaStatusBadge}
+							</div>
 							<p class="text-sm text-gray-600 dark:text-gray-400">${t("security_settings_2fa_description")}</p>
 						</div>
-						<button class="toggle-2fa-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300">
-							${t("security_settings_2fa_button")}
+						<button class="toggle-2fa-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2.5 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+							${is2FAEnabled ? t("security_settings_2fa_manage") : t("security_settings_2fa_button")}
 						</button>
 					</div>
 				</div>
@@ -107,6 +125,7 @@ class SecuritySettings extends Settings {
 	};
 
 	private changePassword(): void {
+		console.log("Change Password button clicked");
 		const currentPasswordInput = this.querySelector<HTMLInputElement>("#currentPassword");
 		const newPasswordInput = this.querySelector<HTMLInputElement>("#newPassword");
 		const confirmPasswordInput = this.querySelector<HTMLInputElement>("#confirmPassword");
@@ -117,8 +136,8 @@ class SecuritySettings extends Settings {
 		}
 
 		if (
-			!validatePassword(currentPasswordInput.value) ||
-			!validatePassword(newPasswordInput.value) ||
+			!validatePassword(currentPasswordInput.value).isValid ||
+			!validatePassword(newPasswordInput.value).isValid ||
 			newPasswordInput.value !== confirmPasswordInput.value
 		) {
 			this.showErrorMessage(
