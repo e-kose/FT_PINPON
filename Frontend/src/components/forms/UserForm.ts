@@ -40,7 +40,21 @@ export abstract class UserForm extends HTMLElement {
 	}
 
 	protected handleGoogleAuth(): void {
-		window.location.href = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT;
+		const authUrl = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT;
+		const popupWidth = 500;
+		const popupHeight = 600;
+		const left = window.screenX + (window.outerWidth - popupWidth) / 2;
+		const top = window.screenY + (window.outerHeight - popupHeight) / 2;
+		const features = `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no`;
+
+		const popup = window.open(authUrl, "googleAuthPopup", features);
+
+		if (!popup) {
+			// Popup blocked; fall back to redirecting the current window.
+			window.location.href = authUrl;
+		} else {
+			popup.focus();
+		}
 	}
 
 	protected abstract createFormContent(): string;
