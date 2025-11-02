@@ -134,7 +134,6 @@ export async function logout(req: FastifyRequest, reply: FastifyReply) {
 export async function me(req: FastifyRequest, reply: FastifyReply) {
   try {
     const result = await getMeService(req);
-    console.log(result);
     return reply.code(200).send({ success: result.success, user: result.user });
   } catch (error: any) {
     logError(req.server, req, error);

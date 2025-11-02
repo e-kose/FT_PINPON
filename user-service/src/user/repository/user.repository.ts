@@ -62,8 +62,14 @@ export class UserRepository {
     const keys = Object.keys(data);
     if (keys.length === 0) return 0;
 
-    const setClause = keys.map((key) => `${key} = ?`).join(", ");
-    const values = keys.map((key) => data[key]);
+     const setClause = keys.map((key) => `${key} = ?`).join(", ");
+    const values = keys.map((key) => {
+      const value = data[key];
+      if (typeof value === 'boolean') {
+        return value ? 1 : 0;
+      }
+      return value;
+    });
 
     const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereColumn} = ?`;
     const stmt = this.db.prepare(sql);

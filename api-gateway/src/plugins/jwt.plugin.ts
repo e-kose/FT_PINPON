@@ -16,7 +16,6 @@ export default fp(async (app: FastifyInstance) => {
     "jwtAuth",
     async function (req: FastifyRequest, reply: FastifyReply) {
       try {
-        console.log(req.headers);
         await req.jwtVerify();
       } catch (error: any) {
         startLogError(app, error);

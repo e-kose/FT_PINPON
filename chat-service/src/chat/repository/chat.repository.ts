@@ -107,7 +107,6 @@ export class ChatRepository {
         "INSERT INTO game_invites(inviting_user, invited_user) VALUES(?, ?)"
       )
       .run(inviting_user, invited_user);
-    console.log(invited_user, inviting_user);
     return info.lastInsertRowid;
   }
 
