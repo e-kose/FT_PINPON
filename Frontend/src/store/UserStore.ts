@@ -83,8 +83,15 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			if (userData.profile.bio)
 				profile.bio = sanitizeString(userData.profile.bio.toString()).trim();
 
-			if (userData.profile.avatar_url && userData.profile.avatar_url.toString().trim() !== '')
-				profile.avatar_url = (userData.profile.avatar_url.toString()).trim();
+			// Avatar URL validation - allow any non-empty URL
+			if (userData.profile.avatar_url) {
+				const avatarUrl = userData.profile.avatar_url.toString().trim();
+				if (avatarUrl !== '') {
+					profile.avatar_url = avatarUrl;
+					console.log("Avatar URL set in profile:", avatarUrl);
+				}
+			}
+			
 			if (userData.oauth_id) {
 				profile.user_google_id = userData.oauth_id;
 			}

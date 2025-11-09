@@ -230,6 +230,7 @@ class ProfileSettings extends Settings {
 	private async performAvatarUpload(formData: FormData): Promise<void> {
 		try {
 			const response = await updateAvatar(formData);
+			console.log("Avatar upload response received:", response);
 			this.handleAvatarUploadResponse(response);
 		} catch (error) {
 			console.error("Avatar upload error:", error);
@@ -241,8 +242,10 @@ class ProfileSettings extends Settings {
 		}
 	}
 
-	private handleAvatarUploadResponse(response: { success: boolean; data?: { avatar_url: string }; error?: string }): void {
-		if (!response.success) {
+	private handleAvatarUploadResponse(response: { success: boolean; avatar_url?: string; error?: string; status: number }): void {
+		// Status 200 değilse hata
+		if (response.status !== 200 || !response.success) {
+			console.log("Avatar upload failed:", response);
 			this.showErrorMessage(
 				t("profile_settings_avatar_upload_failed_title"),
 				response.error || t("profile_settings_avatar_upload_failed_message"),
@@ -252,23 +255,45 @@ class ProfileSettings extends Settings {
 		}
 
 		const user = getUser();
-
-		if (user && response.data?.avatar_url) {
-			user.profile = user.profile || {};
-			user.profile.avatar_url = response.data.avatar_url;
+		
+		// Avatar URL varsa user store'u güncelle
+		if (user && response.avatar_url) {
+			console.log("Updating user avatar from:", user.profile?.avatar_url, "to:", response.avatar_url);
+			
+			// Profile objesini güncelle
+			if (!user.profile) {
+				user.profile = {
+					user_id: user.id,
+					full_name: user.username,
+					bio: '',
+					avatar_url: response.avatar_url
+				};
+			} else {
+				user.profile.avatar_url = response.avatar_url;
+			}
 
 			const token = getAccessToken();
 			if (token) {
-				setUser(user, token);
+				const updateResult = setUser(user, token);
+				console.log("setUser result:", updateResult, "New user data:", getUser());
 			}
 
+			// Render'dan önce DOM'daki avatar'ı direkt güncelle (immediate feedback)
+			const avatarImg = this.querySelector<HTMLImageElement>("img[alt='Profil Resmi']");
+			if (avatarImg) {
+				avatarImg.src = response.avatar_url;
+			}
+
+			// Sonra tam render
 			this.renderSection();
+			
 			this.showSuccessMessage(
 				t("profile_settings_avatar_update_success_title"),
 				t("profile_settings_avatar_update_success_message"),
 				MESSAGE_CONTAINER
 			);
 		} else {
+			console.log("Avatar upload success but no URL in response:", response);
 			this.renderSection();
 			this.showErrorMessage(
 				t("profile_settings_avatar_update_fallback_title"),
