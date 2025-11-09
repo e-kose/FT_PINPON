@@ -152,8 +152,14 @@ export async function updateRefreshToken(
 }
 
 export async function OAuthLoginService(app: FastifyInstance, user: any) {
-  const payload: payload = {
+  let oauth_id = "";
+  const authValues = getAuthTable(app.db, user.id);
+  if (authValues && authValues.oauth_id) {
+    oauth_id = authValues.oauth_id;
+  }
+  const payload = {
     id: user.id,
+    oauth_id,
     email: user.email,
     username: user.username,
   };
