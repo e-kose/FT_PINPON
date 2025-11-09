@@ -85,10 +85,8 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 
 			if (userData.profile.avatar_url && userData.profile.avatar_url.toString().trim() !== '')
 				profile.avatar_url = (userData.profile.avatar_url.toString()).trim();
-			else {
-				console.log("Rastgele avatarr")
-				const random = Math.floor(Math.random() * 13) + 1;
-				profile.avatar_url = `/Avatar/${random}.png`;
+			if (userData.oauth_id) {
+				profile.user_google_id = userData.oauth_id;
 			}
 			if (Object.keys(profile).length > 0) {
 				sanitizedUser.profile = profile as UserProfile;
@@ -112,7 +110,6 @@ export function setUser(userData: any, token: string): boolean
 		console.warn('Failed to set user - invalid data:', userData);
 		return false;
 	}
-	console.log("===============================================");
 	console.log("----------------------> Sanitized User Data ----->", sanitizedData);
 	console.log("User_Token ----->", token);
 	currentUser ? Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;

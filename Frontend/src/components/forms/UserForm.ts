@@ -40,20 +40,81 @@ export abstract class UserForm extends HTMLElement {
 	}
 
 	protected handleGoogleAuth(): void {
-		const authUrl = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT;
-		const popupWidth = 500;
-		const popupHeight = 600;
-		const left = window.screenX + (window.outerWidth - popupWidth) / 2;
-		const top = window.screenY + (window.outerHeight - popupHeight) / 2;
-		const features = `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no`;
+	const authUrl = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT;
+	const popupWidth = 500;
+	const popupHeight = 600;
+	const left = window.screenX + (window.outerWidth - popupWidth) / 2;
+	const top = window.screenY + (window.outerHeight - popupHeight) / 2;
+	const features = `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no`;
 
-		const popup = window.open(authUrl, "googleAuthPopup", features);
+	const messageContainer = "#messageContainer";
 
-		if (!popup) {
-			// Popup blocked; fall back to redirecting the current window.
-			window.location.href = authUrl;
-		} else {
-			popup.focus();
+	messages.showLoadingAnimation(messageContainer);
+
+	const popup = window.open(authUrl, "googleAuthPopup", features);
+
+	if (!popup) {
+		// Popup bloklandı -> fallback: tam sayfa yönlendirme
+		window.location.href = authUrl;
+		return;
+	}
+
+	const apiOrigin = new URL(import.meta.env.VITE_API_BASE_URL).origin;
+
+	const onMessage = (event: MessageEvent) => {
+		if (event.origin !== apiOrigin) return;
+		if (!event.data || event.data.type !== "GOOGLE_AUTH_RESULT") return;
+		window.removeEventListener("message", onMessage);
+		try {
+			const payload = event.data.data;
+			
+			void this.handleGoogleAuthResponse(payload, messageContainer);
+		} finally {
+			try {
+				popup.close();
+			} catch {
+				// ignore
+			}
+		}
+	};
+
+	window.addEventListener("message", onMessage);
+
+	popup.focus();
+}
+
+	protected async handleGoogleAuthResponse(data: any, messageContainer: string): Promise<void> {
+		if (!data.success) {
+			const errorMessage = typeof data.message === "string"
+				? data.message.slice(0, 200)
+				: t("login_generic_error_message");
+			messages.showMessage(t("login_generic_error_title"), errorMessage, "error", messageContainer);
+			return;
+		}
+
+		if (!data.user || typeof data.user !== "object") {
+			messages.showMessage(t("common_error"), t("login_user_fetch_error"), "error", messageContainer);
+			return;
+		}
+
+		if (!data.accesstoken) {
+			messages.showMessage(t("common_error"), t("login_token_missing"), "error", messageContainer);
+			return;
+		}
+
+		messages.showLoadingAnimation(messageContainer);
+
+		try {
+			const valid = await fetchUser(data.accesstoken);
+			if (valid) {
+				setTimeout(() => {
+					router.navigate("/");
+				}, 1000);
+			} else {
+				messages.showMessage(t("common_error"), t("login_user_validation_error"), "error", messageContainer);
+			}
+		} catch (error) {
+			this.handleNetworkError(error, messageContainer);
 		}
 	}
 
@@ -186,7 +247,7 @@ export abstract class UserForm extends HTMLElement {
 			if (valid) {
 				setTimeout(() => {
 					router.navigate("/");
-				}, 3000);
+				}, 1000);
 			} else {
 				messages.showMessage(t("common_error"), t("login_user_validation_error"), "error", messageContainer);
 			}

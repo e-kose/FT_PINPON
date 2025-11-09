@@ -139,11 +139,11 @@ class Header extends LocalizedComponent {
             e.preventDefault();
             router.navigate("/signup");
         });
-        // Profil Ayarları tıklanınca (şimdilik boş)
+        // Profil Ayarları tıklanınca
         const profileSettingsBtn = this.querySelector('#profileSettingsBtn');
         profileSettingsBtn?.addEventListener('click', (e) => {
             e.preventDefault();
-            // Profil Ayarları fonksiyonu buraya yazılacak
+            router.navigate("/settings");
         });
 
         // Logo click event - Ana sayfaya yönlendir

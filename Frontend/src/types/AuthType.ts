@@ -1,5 +1,6 @@
 export type UserProfile = {
   user_id: number;
+  user_google_id?: string;
   full_name: string;
   avatar_url: string;
   bio: string;

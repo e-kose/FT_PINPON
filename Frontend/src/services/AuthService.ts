@@ -38,7 +38,6 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 }
 
 export async function 	fetchUser(token: string): Promise<boolean> {
-	console.log("-------------------------- Fetch USER -------------------------- ");
 	const res = await fetch("http://localhost:3000/auth/me", {
 		method: "GET",
 		headers: {
