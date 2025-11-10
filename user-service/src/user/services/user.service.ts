@@ -71,9 +71,8 @@ export class UserService {
 
     await fs.writeFile(filePath, await file.toBuffer());
 
-    const url = `http://localhost:${
-      process.env.PORT || 3002
-    }/static/avatars/${file_name}`;
+    const baseUrl = process.env.API_GATEWAY_URL || "http://localhost:3000";
+    const url = `${baseUrl}/users/avatars/${file_name}`;
     app.userRepo?.updateTable("user_profiles", id, { avatar_url: url });
 
     return { message: "Avatar updated", avatar_url: url };
