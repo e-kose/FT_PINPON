@@ -19,6 +19,9 @@ import { payload } from "./types/payload.js";
 import * as dotenv from "dotenv";
 import axios from "axios";
 import { checkUserExist, userServicePost } from "./utils/axios.js";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
@@ -179,12 +182,38 @@ export async function OAuthRegister(
   userName: string,
   user: any
 ) {
+  // Download Google avatar and save locally
+  let avatarUrl = process.env.API_GATEWAY_URL + "/auth/static/default-profile.png";
+  
+  if (user.picture) {
+    try {
+      const avatarResponse = await fetch(user.picture);
+      if (avatarResponse.ok) {
+        const buffer = await avatarResponse.arrayBuffer();
+        const fileName = `google-${user.id}-${Date.now()}.jpg`;
+        
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const avatarsDir = path.join(__dirname, "../../public");
+        const filePath = path.join(avatarsDir, fileName);
+        
+        await fs.mkdir(avatarsDir, { recursive: true });
+        await fs.writeFile(filePath, Buffer.from(buffer));
+        
+        avatarUrl = `${process.env.API_GATEWAY_URL}/auth/static/${fileName}`;
+      }
+    } catch (error) {
+      console.error("Failed to download Google avatar:", error);
+      // Use default avatar if download fails
+    }
+  }
+  
   const result = await userServicePost(userService + `/internal/user`, {
     username: userName,
     email: user.email,
     password: null,
     profile: {
-      avatar_url: user.picture,
+      avatar_url: avatarUrl,
     },
   });
   app.db

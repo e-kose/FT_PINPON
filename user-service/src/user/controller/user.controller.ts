@@ -179,6 +179,7 @@ export async function updateAvatarHandler(
     const result = await req.server.userService!.avatarUpdateService(req, id);
     reply.send(result);
   } catch (error) {
+    console.error("❌ Avatar upload error:", error);
     logError(req.server, req, error);
     if (error instanceof BadRequest || error instanceof UserNotFound)
       return reply
@@ -186,7 +187,7 @@ export async function updateAvatarHandler(
         .send({ success: false, message: error.message });
     return reply
       .code(500)
-      .send({ success: false, message: "An error has occurred" });
+      .send({ success: false, message: "An error has occurred", error: error instanceof Error ? error.message : String(error) });
   }
 }
 
