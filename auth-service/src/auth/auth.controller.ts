@@ -22,6 +22,8 @@ import {
   Forbidden,
   InvalidCredentials,
   InvalidToken,
+  InvalidTwaFacToken,
+  RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
 import { registerUserBody } from "./types/register.userBody.js";
@@ -79,7 +81,9 @@ export async function login(
     if (
       error instanceof InvalidToken ||
       error instanceof InvalidCredentials ||
-      error instanceof Forbidden
+      error instanceof Forbidden ||
+      error instanceof InvalidTwaFacToken ||
+      error instanceof RequiredToken
     )
       return reply
         .code(error.statusCode)

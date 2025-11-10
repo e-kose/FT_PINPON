@@ -5,6 +5,7 @@ build/
 
 .env
 .env.*
+*/.env
 !.env.example
 
 *.log
@@ -25,6 +26,13 @@ docker-compose.override.yml
 *.sqlite
 *.sqlite3
 
+# SQLite database files
+*.db
+auth-service/db/*.db
+user-service/db/*.db
+notification-service/db/*.db
+chat-service/db/*.db
+
 coverage/
 
 
@@ -35,3 +43,4 @@ dist/
 .env
 
 *.log
+

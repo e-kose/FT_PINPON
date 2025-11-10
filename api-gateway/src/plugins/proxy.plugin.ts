@@ -3,11 +3,17 @@ import fp from "fastify-plugin";
 import proxy from "@fastify/http-proxy";
 
 export default fp(async (app: FastifyInstance) => {
+  // Auth service proxy (API endpoints)
   app.register(proxy, {
     upstream: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
     prefix: "/auth",
     rewritePrefix: "/auth",
     preHandler: async (req, reply) => {
+      // Skip JWT for static files
+      if (req.url.startsWith("/auth/static/")) {
+        return;
+      }
+      
       if (
         req.url.startsWith("/auth/2fa/setup") ||
         req.url.startsWith("/auth/2fa/enable") ||
@@ -28,6 +34,11 @@ export default fp(async (app: FastifyInstance) => {
     prefix: "/user",
     rewritePrefix: "/user",
     preHandler: async (req, reply) => {
+      // Skip JWT for static avatar files
+      if (req.url.startsWith("/user/static/avatars/")) {
+        return;
+      }
+      
       if (req.url.startsWith("/user") && !req.url.startsWith("/user/docs")) {
         await app.jwtAuth(req, reply);
         if (req.user) {

@@ -64,7 +64,8 @@ export class UserService {
       file.filename.replace(/\s+/g, "_") || "avatar"
     }`;
 
-    const uploadsDir = path.join(__dirname, "../../../public/avatars");
+    // Use absolute path in container
+    const uploadsDir = path.join(process.cwd(), "public/avatars");
     const filePath = path.join(uploadsDir, file_name);
 
     await fs.mkdir(uploadsDir, { recursive: true });
@@ -72,7 +73,7 @@ export class UserService {
     await fs.writeFile(filePath, await file.toBuffer());
 
     const baseUrl = process.env.API_GATEWAY_URL || "http://localhost:3000";
-    const url = `${baseUrl}/users/avatars/${file_name}`;
+    const url = `${baseUrl}/user/static/avatars/${file_name}`;
     app.userRepo?.updateTable("user_profiles", id, { avatar_url: url });
 
     return { message: "Avatar updated", avatar_url: url };

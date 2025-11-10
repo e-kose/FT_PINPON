@@ -40,7 +40,7 @@ app.register(internalAuthPlugin);
 // Static file server for avatars
 app.register(fastifyStatic, {
   root: path.join(__dirname, "../public"),
-  prefix: "/static/",
+  prefix: "/user/static/",
 });
 
 app.decorate("userRepo", null);
