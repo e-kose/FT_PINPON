@@ -54,7 +54,6 @@ export async function blockUserHandler(
   try {
     const chatService = req.server.chatService;
     const res = await chatService?.blockUser(req);
-    console.log("res", res);
     return reply.code(201).send({ success: true, blockId: res });
   } catch (error) {
     logError(req.server, req, error);

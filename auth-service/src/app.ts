@@ -10,6 +10,12 @@ import { dbPlug } from "./plugins/db.plugin.js";
 import sensiblePlugin from "./plugins/sensible.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
 import { startLogError } from "./auth/utils/log.utils.js";
+import fastifyStatic from "@fastify/static";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -32,6 +38,12 @@ app.register(replyCookie);
 app.register(swaggerPlugin);
 app.register(jwtPlugin);
 app.register(errorHandlerPlugin);
+
+// Static file server for default avatar
+app.register(fastifyStatic, {
+  root: path.join(__dirname, "../public"),
+  prefix: "/static/",
+});
 
 app.register(authRoutes, { prefix: "/auth" });
 

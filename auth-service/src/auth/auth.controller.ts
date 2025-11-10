@@ -12,6 +12,7 @@ import {
   twoFactorSetupService,
   twoFactorEnableService,
   twoFactorDisableService,
+  getAuthTable,
 } from "./auth.service.js";
 import { refreshToken } from "./types/refresh.token.js";
 import * as dotenv from "dotenv";
@@ -29,7 +30,8 @@ import { registerUserBody } from "./types/register.userBody.js";
 import { logError } from "./utils/log.utils.js";
 
 dotenv.config();
-const DEFAULT_AVATAR = process.env.R2_PUBLIC_URL + "/default-profile.png";
+const API_GATEWAY_URL = process.env.API_GATEWAY_URL || "http://localhost:3000";
+const DEFAULT_AVATAR = `${API_GATEWAY_URL}/auth/static/default-profile.png`;
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
 const headers = {
   headers: {
@@ -37,10 +39,7 @@ const headers = {
   },
 };
 
-export async function register(
-  req: FastifyRequest<{ Body: registerUserBody }>,
-  reply: FastifyReply
-) {
+export async function register(req: FastifyRequest<{ Body: registerUserBody }>, reply: FastifyReply) {
   try {
     if (!req.body.profile) req.body.profile = { avatar_url: DEFAULT_AVATAR };
     else req.body.profile.avatar_url = DEFAULT_AVATAR;
@@ -139,6 +138,14 @@ export async function logout(req: FastifyRequest, reply: FastifyReply) {
 export async function me(req: FastifyRequest, reply: FastifyReply) {
   try {
     const result = await getMeService(req);
+    const oauth_id = (() => {
+      const authValues = getAuthTable(req.server.db, result.user.id);
+      if (authValues && authValues.oauth_id) {
+        return authValues.oauth_id;
+      }
+      return "";
+    })();
+    result.user.oauth_id = oauth_id;
     return reply.code(200).send({ success: result.success, user: result.user });
   } catch (error: any) {
     logError(req.server, req, error);
@@ -158,8 +165,81 @@ export async function googleAuth(req: FastifyRequest, reply: FastifyReply) {
       req
     );
     reply.setRefreshTokenCookie(refreshtoken);
-    return reply.redirect("http://localhost:5173/");
+    const frontendOrigin =
+      process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+    // loginCheck'in beklediği yapı: { success, accesstoken, user, message? }
+    const safePayload = {
+      success: true,
+      accesstoken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        is_2fa_enabled: user.is_2fa_enabled,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        profile: user.profile ?? {}
+      }
+    };
+
+    reply
+      .type("text/html")
+      .send(`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Authentication</title>
+  </head>
+  <body>
+    <script>
+      (function() {
+        var targetOrigin = '${frontendOrigin}';
+        var payload = ${JSON.stringify(safePayload)};
+
+        try {
+          if (window.opener && window.opener !== window) {
+            window.opener.postMessage(
+              { type: 'GOOGLE_AUTH_RESULT', data: payload },
+              targetOrigin
+            );
+            window.close();
+          } else {
+            window.location.href = targetOrigin + '/login?oauth=success';
+          }
+        } catch (e) {
+          window.location.href = targetOrigin + '/login?oauth=error';
+        }
+      })();
+    </script>
+  </body>
+</html>`);
   } catch (error) {
+    console.log("Google Auth Error:", error);
+    if (error instanceof InvalidToken) {
+      const frontendOrigin =
+        process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+      const targetOrigin = frontendOrigin;
+      return reply
+        .type("text/html")
+        .send(`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Authentication Error</title>
+  </head>
+  <body>
+    <script>
+      (function() {
+        var targetOrigin = '${targetOrigin}';
+        window.location.href = targetOrigin + '/login?oauth=error';
+      })();
+    </script>
+  </body>
+</html>`);
+    }
     logError(req.server, req, error);
     return reply.internalServerError("Google Auth error");
   }

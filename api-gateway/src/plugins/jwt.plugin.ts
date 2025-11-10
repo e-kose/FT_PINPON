@@ -4,6 +4,7 @@ import { fastifyJwt } from "@fastify/jwt";
 import * as dotenv from "dotenv";
 import { startLogError } from "../utils/log.utils.js";
 import http from "http";
+import { parse } from "url";
 
 dotenv.config();
 
@@ -25,14 +26,14 @@ export default fp(async (app: FastifyInstance) => {
     }
   );
 
-  app.decorate("wsJwtAuth", async function (req: http.IncomingMessage) {
-    const authHeader = req.headers["authorization"];
-    let token: string | undefined;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      token = authHeader.slice(7);
+    app.decorate("wsJwtAuth", async function (req: http.IncomingMessage) {
+    const { query } = parse(req.url || "", true);
+    const token = query?.token as string | undefined;
+
+    if (!token) {
+      throw new Error("Token not found in query params");
     }
-    if(!token)
-      throw new Error("Token nout found")
+
     return app.jwt.verify(token);
   });
 });

@@ -27,7 +27,7 @@ export const InvalidCredentials = createError(
 
 export const InvalidToken = createError(
   'INVALID_TOKEN',
-  'Token is invalid or deleted',
+  '2FA token is required',
   401
 );
 

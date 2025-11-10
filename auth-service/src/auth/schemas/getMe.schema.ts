@@ -10,6 +10,7 @@ export const getMeSchema = {
           type: "object",
           properties: {
             id: { type: "number", example: 1 },
+            oauth_id: { type: "string", example: "oauth-123456" },
             email: { type: "string", example: "john@example.com" },
             username: { type: "string", example: "john_doe" },
             is_2fa_enabled: { type: "string", example: "0" },

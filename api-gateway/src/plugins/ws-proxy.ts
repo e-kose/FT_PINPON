@@ -5,7 +5,7 @@ import http from "http";
 
 export default fp(async (app: FastifyInstance) => {
   const wsProxy = httpProxy.createProxyServer({
-    target: process.env.CHAT_SERVICE_URL || "http://localhost:3003",
+    target: process.env.CHAT_SERVICE_URL || "http://chat-service:3003",
     ws: true,
   });
 
@@ -17,7 +17,6 @@ export default fp(async (app: FastifyInstance) => {
         req.headers["x-user-email"] = user.email;
         wsProxy.ws(req, socket, head);
       } catch (err) {
-        console.log(err);
         socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
         socket.destroy();
       }

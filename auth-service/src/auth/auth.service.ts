@@ -34,7 +34,7 @@ export async function loginUserService(response: any, req: FastifyRequest) {
   const authValues = getAuthTable(db, response.data.id);
 
   if (authValues && authValues.twofa_enable) {
-    if (!body.token) throw new RequiredToken();
+    if (!body.token) throw new InvalidToken();
     const speakeasy = (await import("speakeasy")).default;
     const verified = speakeasy.totp.verify({
       secret: authValues.twofa_secret,
@@ -157,8 +157,14 @@ export async function updateRefreshToken(
 }
 
 export async function OAuthLoginService(app: FastifyInstance, user: any) {
-  const payload: payload = {
+  let oauth_id = "";
+  const authValues = getAuthTable(app.db, user.id);
+  if (authValues && authValues.oauth_id) {
+    oauth_id = authValues.oauth_id;
+  }
+  const payload = {
     id: user.id,
+    oauth_id,
     email: user.email,
     username: user.username,
   };
@@ -238,6 +244,21 @@ export async function twoFactorEnableService(req: FastifyRequest) {
   db.prepare("UPDATE auth_table SET twofa_enable = 1 WHERE user_id = ?").run(
     id
   );
+  try {
+    await axios.patch(
+      userService + "/user",
+      {
+        is_2fa_enabled: true,
+      },
+      {
+        headers: {
+          "x-user-id": id,
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Failed to update 2FA status in user service:", err);
+  }
   return { success: true, message: "2FA enabled" };
 }
 
@@ -253,6 +274,21 @@ export async function twoFactorDisableService(req: FastifyRequest) {
   db.prepare(
     "UPDATE auth_table SET twofa_enable = 0, twofa_secret = NULL WHERE user_id = ?"
   ).run(id);
+  try {
+    await axios.patch(
+      userService + "/user",
+      {
+        is_2fa_enabled: false,
+      },
+      {
+        headers: {
+          "x-user-id": id,
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Failed to update 2FA status in user service:", err);
+  }
   return { success: true, message: "2FA disabled" };
 }
 
