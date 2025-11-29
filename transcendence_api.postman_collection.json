@@ -1,0 +1,358 @@
+{
+    "info": {
+        "_postman_id": "d4e8c1b2-a9f6-4b10-8654-abcdef123456",
+        "name": "Full Project API (All Services)",
+        "description": "Comprehensive collection for all microservices in the project. Features automated JWT token handling for authenticated endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Authentication Service",
+            "item": [
+                {
+                    "name": "Login and Globally Save Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const responseBody = pm.response.json();",
+                                    "    if (responseBody && responseBody.accessToken) {",
+                                    "        pm.collectionVariables.set(\"jwt_token\", responseBody.accessToken);",
+                                    "        console.log(\"Access Token saved globally.\");",
+                                    "    } else {",
+                                    "        console.error(\"Response did not contain 'accessToken'.\");",
+                                    "    }",
+                                    "} else {",
+                                    "    console.error(\"Login failed with status: \" + pm.response.code);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Log in with a user to get a JWT. The script will save the token for all other requests in this collection."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register New User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Swagger Docs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/auth/docs",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "auth",
+                                "docs"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "2. User Service",
+            "item": [
+                {
+                    "name": "Get My Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/user/me",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "user",
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/user/:userId",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "user",
+                                ":userId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "userId",
+                                    "value": "some-user-id"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send Friend Request",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/user/friends/add/:userId",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "user",
+                                "friends",
+                                "add",
+                                ":userId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "userId",
+                                    "value": "friend-user-id"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "auth": {
+                "type": "bearer",
+                "bearer": [
+                    {
+                        "key": "token",
+                        "value": "{{jwt_token}}",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "3. Chat Service",
+            "item": [
+                {
+                    "name": "Get My Messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/chat/messages",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "chat",
+                                "messages"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"receiverId\": \"some-friend-id\",\n    \"content\": \"Hello from Postman!\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/chat/send",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "chat",
+                                "send"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "auth": {
+                "type": "bearer",
+                "bearer": [
+                    {
+                        "key": "token",
+                        "value": "{{jwt_token}}",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "4. Game Service",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/game/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "game",
+                                "health"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Join Matchmaking",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/game/matchmaking/join",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "game",
+                                "matchmaking",
+                                "join"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:3000/game/stats/:userId",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3000",
+                            "path": [
+                                "game",
+                                "stats",
+                                ":userId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "userId",
+                                    "value": "some-user-id"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "auth": {
+                "type": "bearer",
+                "bearer": [
+                    {
+                        "key": "token",
+                        "value": "{{jwt_token}}",
+                        "type": "string"
+                    }
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "jwt_token",
+            "value": "",
+            "description": "This variable is automatically set by the script in the 'Login and Globally Save Token' request."
+        }
+    ]
+}

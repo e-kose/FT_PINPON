@@ -69,4 +69,24 @@ export default fp(async (app: FastifyInstance) => {
       }
     },
   });
+
+  app.register(proxy, {
+    upstream: process.env.GAME_SERVICE_URL || "http://localhost:3005",
+    prefix: "/game",
+    rewritePrefix: "/game",
+    preHandler: async (req, reply) => {
+      console.log("aaaaaaa");
+      // Public endpoints: health, docs, local games
+      const publicPaths = ["/game/docs", "/game/health"];
+      const isPublic = publicPaths.some(path => req.url.startsWith(path));
+
+      if (!isPublic) {
+        await app.jwtAuth(req, reply);
+        if (req.user) {
+          req.headers["x-user-id"] = (req.user as any).id;
+          req.headers["x-user-email"] = (req.user as any).email;
+        }
+      }
+    },
+  });
 });

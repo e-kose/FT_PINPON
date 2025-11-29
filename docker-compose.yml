@@ -11,7 +11,7 @@ services:
   #     - IPC_LOCK
   #   command: server -config=/vault/config/vault.config.hcl
   #   environment:
-  #     VAULT_ADDR: "http://127.0.0.1:8200" 
+  #     VAULT_ADDR: "http://127.0.0.1:8200"
   #   networks:
   #     - internal-network
   ####HTTPS İÇİN
@@ -28,20 +28,21 @@ services:
   #   networks:
   #     - internal-network
   api-gateway:
-    build: 
+    build:
       context: ./api-gateway
     ports:
       - "3000:3000"
     depends_on:
       - auth-service
       - user-service
+      - game-service
     env_file:
       - ./api-gateway/.env
     networks:
       - internal-network
     restart: always
   auth-service:
-    build: 
+    build:
       context: ./auth-service
     expose:
       - "3001"
@@ -65,7 +66,7 @@ services:
       - internal-network
     restart: always
   chat-service:
-    build: 
+    build:
       context: ./chat-service
     expose:
       - "3003"
@@ -73,6 +74,18 @@ services:
       - ./chat-service/db:/app/db
     env_file:
       - ./chat-service/.env
+    networks:
+      - internal-network
+    restart: always
+  game-service:
+    build:
+      context: ./game-service
+    expose:
+      - "3005"
+    volumes:
+      - ./game-service/db:/app/db
+    env_file:
+      - ./game-service/.env
     networks:
       - internal-network
     restart: always
@@ -139,7 +152,7 @@ services:
     mem_limit: 2g
     restart: always
 
-  kibana : 
+  kibana :
     image:  docker.elastic.co/kibana/kibana:8.14.0
     container_name: "kibana"
     ports:
