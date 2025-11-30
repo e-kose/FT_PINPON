@@ -1,0 +1,205 @@
+services:
+  # vault:
+  #   image: hashicorp/vault
+  #   container_name: vault
+  #   ports:
+  #     - "8200:8200"
+  #   volumes:
+  #     - ./vault/config:/vault/config
+  #     - ./vault/data:/vault/data
+  #   cap_add:
+  #     - IPC_LOCK
+  #   command: server -config=/vault/config/vault.config.hcl
+  #   environment:
+  #     VAULT_ADDR: "http://127.0.0.1:8200"
+  #   networks:
+  #     - internal-network
+
+  #### HTTPS İÇİN
+  # caddy:
+  #   image: caddy:latest
+  #   container_name: caddy
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   volumes:
+  #     - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  #   networks:
+  #     - internal-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - user-service
+      - chat-service
+      - notification-service
+    env_file:
+      - ./api-gateway/.env
+    networks:
+      - internal-network
+    restart: always
+
+  auth-service:
+    build:
+      context: ./auth-service
+    expose:
+      - "3001"
+    volumes:
+      - ./auth-service/db:/app/db
+    env_file:
+      - ./auth-service/.env
+    networks:
+      - internal-network
+    restart: always
+
+  user-service:
+    build:
+      context: ./user-service
+    expose:
+      - "3002"
+    volumes:
+      - ./user-service/db:/app/db
+    env_file:
+      - ./user-service/.env
+    networks:
+      - internal-network
+    restart: always
+
+  chat-service:
+    build:
+      context: ./chat-service
+    expose:
+      - "3003"
+    volumes:
+      - ./chat-service/db:/app/db
+    env_file:
+      - ./chat-service/.env
+    networks:
+      - internal-network
+    restart: always
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    container_name: "elasticsearch"
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx2048m
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+    env_file:
+      - ./elastic-search/.env
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - ./elastic-search/init-scripts.sh:/init-scripts.sh
+    networks:
+      - internal-network
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    command: >
+      bash -c "
+      /usr/local/bin/docker-entrypoint.sh &
+      sleep 30 &&
+      bash /init-scripts.sh &&
+      wait
+      "
+    restart: always
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.14.0
+    container_name: "logstash"
+    ports:
+      - "5044:5044"
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - LOGSTASH_WRITER_USER=${LOGSTASH_WRITER_USER}
+      - LOGSTASH_WRITER_PASSWORD=${LOGSTASH_WRITER_PASSWORD}
+    env_file:
+      - ./elastic-search/.env
+    volumes:
+      - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
+    networks:
+      - internal-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    mem_limit: 2g
+    restart: always
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
+    container_name: "kibana"
+    ports:
+      - "5601:5601"
+    environment:
+      - XPACK_SECURITY_ENABLED=true
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+    env_file:
+      - ./elastic-search/.env
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - internal-network
+    mem_limit: 2g
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - internal-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+    expose:
+      - "3004"
+    volumes:
+      - ./notification-service/db:/app/db
+    env_file:
+      - ./notification-service/.env
+    networks:
+      - internal-network
+    # healthcheck:
+    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+    restart: always
+
+volumes:
+  es_data:
+  caddy_data:
+  caddy_config:
+  redis-data:
+
+networks:
+  internal-network:
+    driver: bridge

@@ -1,0 +1,48 @@
+{
+  "name": "auth-service",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "e-kose",
+  "type": "module",
+  "main": "dist/app.js",
+  "scripts": {
+    "start:dev": "nodemon --watch src --ext ts --exec tsx src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "migration": "tsx src/run.migrations.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/error": "^4.2.0",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/oauth2": "^8.1.2",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/static": "^8.3.0",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
+    "@types/bcrypt": "^6.0.0",
+    "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.2.0",
+    "fastify": "^5.5.0",
+    "fastify-plugin": "^5.0.1",
+    "fastify-sensible": "^3.1.2",
+    "ms": "^2.1.3",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
+    "tsx": "^4.20.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/ms": "^2.1.0",
+    "@types/node": "^24.2.1",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10",
+    "@types/ws": "^8.18.1",
+    "dotenv": "^17.2.1",
+    "nodemon": "^3.1.10",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}
