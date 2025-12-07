@@ -97,6 +97,7 @@ services:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
+      - es_backups:/usr/share/elasticsearch/backups
       - ./elastic-search/init-scripts.sh:/init-scripts.sh
     networks:
       - internal-network
@@ -127,6 +128,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - LOGSTASH_WRITER_USER=${LOGSTASH_WRITER_USER}
       - LOGSTASH_WRITER_PASSWORD=${LOGSTASH_WRITER_PASSWORD}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     env_file:
       - ./elastic-search/.env
     volumes:
@@ -155,6 +157,7 @@ services:
       - XPACK_SECURITY_ENABLED=true
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
     env_file:
       - ./elastic-search/.env
     depends_on:
@@ -174,6 +177,7 @@ services:
       - redis-data:/data
     networks:
       - internal-network
+    restart: always
 
   notification-service:
     build:
@@ -196,6 +200,7 @@ services:
 
 volumes:
   es_data:
+  es_backups:
   caddy_data:
   caddy_config:
   redis-data:
