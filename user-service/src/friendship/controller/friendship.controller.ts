@@ -22,18 +22,18 @@ export const acceptFriendRequest = async (req: FastifyRequest, reply: FastifyRep
 	const app = req.server as any;
 	const params = req.params as { id: number };
 	const userId = (req.headers['x-user-id'] as string) ? parseInt(req.headers['x-user-id'] as string) : undefined;
-	if (!userId) return reply.code(400).send({ message: 'Missing user id header' });
+	if (!userId) return reply.code(400).send({ success: false, message: 'Missing user id header' });
 	const res = app.friendshipService.acceptRequest(params.id, userId);
-	return reply.send(res);
+	return reply.code(200).send({ success: true, affected: res });
 };
 
 export const rejectFriendRequest = async (req: FastifyRequest, reply: FastifyReply) => {
 	const app = req.server as any;
 	const params = req.params as { id: number };
 	const userId = (req.headers['x-user-id'] as string) ? parseInt(req.headers['x-user-id'] as string) : undefined;
-	if (!userId) return reply.code(400).send({ message: 'Missing user id header' });
+	if (!userId) return reply.code(400).send({ success: false, message: 'Missing user id header' });
 	const res = app.friendshipService.rejectRequest(params.id, userId);
-	return reply.send(res);
+	return reply.code(200).send({ success: true, affected: res });
 };
 
 export const listFriendsHandler = async (req: FastifyRequest, reply: FastifyReply) => {

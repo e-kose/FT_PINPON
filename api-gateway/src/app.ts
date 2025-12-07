@@ -5,6 +5,7 @@ import loggerPlugin from "./plugins/logger.plugin.js";
 import { startLogError } from "./utils/log.utils.js";
 import proxyPlugin from "./plugins/proxy.plugin.js";
 import wsProxy from "./plugins/ws-proxy.js";
+import notificationWsProxy from "./plugins/notification.ws-proxy.js";
 
 dotenv.config();
 
@@ -26,6 +27,8 @@ app.register(jwtPlugin);
 app.register(loggerPlugin);
 app.register(proxyPlugin);
 app.register(wsProxy);
+app.register(notificationWsProxy);
+
 
 const start = async () => {
   try {

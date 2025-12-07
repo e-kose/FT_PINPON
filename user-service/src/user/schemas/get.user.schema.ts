@@ -11,6 +11,7 @@ export const getUserSchema = {
             id: { type: "number" },
             email: { type: "string", format: "email" },
             username: { type: "string" },
+            is_2fa_enabled: { type: "boolean" },
             created_at: {
               type: "string",
               format: "date-time",

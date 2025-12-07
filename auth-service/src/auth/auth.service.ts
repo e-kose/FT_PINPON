@@ -11,12 +11,17 @@ import { auth_tableDb } from "./types/authDb.js";
 import {
   InvalidCredentials,
   InvalidToken,
+  InvalidTwaFacToken,
+  RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
 import { payload } from "./types/payload.js";
 import * as dotenv from "dotenv";
 import axios from "axios";
 import { checkUserExist, userServicePost } from "./utils/axios.js";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
@@ -26,14 +31,13 @@ const headers = {
   },
 };
 
-
 export async function loginUserService(response: any, req: FastifyRequest) {
   const body = req.body as loginUserBody;
   const db = req.server.db;
   const authValues = getAuthTable(db, response.data.id);
 
   if (authValues && authValues.twofa_enable) {
-    if (!body.token) throw new InvalidCredentials();
+    if (!body.token) throw new InvalidToken();
     const speakeasy = (await import("speakeasy")).default;
     const verified = speakeasy.totp.verify({
       secret: authValues.twofa_secret,
@@ -41,7 +45,7 @@ export async function loginUserService(response: any, req: FastifyRequest) {
       token: body.token,
       window: 1,
     });
-    if (!verified) throw new InvalidToken();
+    if (!verified) throw new InvalidTwaFacToken();
   }
   const payload: payload = {
     id: response.data.id,
@@ -92,8 +96,9 @@ export async function logoutService(req: FastifyRequest) {
 }
 
 export async function getMeService(req: FastifyRequest) {
-  const userId = req.headers['x-user-id'];
+  const userId = req.headers["x-user-id"];
   const user = await checkUserExist(userService + `/user/id/${userId}`);
+  console.log(user);
   return user;
 }
 
@@ -112,14 +117,17 @@ export async function googleAuthService(
       },
     }
   ).then((res) => res.json());
-  const emailIsExist = await checkUserExist(userService + `/user/email/${googleUser.email}`);
-  if (emailIsExist.user){
+  const emailIsExist = await checkUserExist(
+    userService + `/user/email/${googleUser.email}`
+  );
+  if (emailIsExist.user) {
     return OAuthLoginService(app, emailIsExist.user!);
-  }
-  else {
+  } else {
     let userName = googleUser.email.split("@")[0];
     while (true) {
-      let isExist = await checkUserExist(userService + `/user/username/${userName}`);
+      let isExist = await checkUserExist(
+        userService + `/user/username/${userName}`
+      );
       if (!isExist.data.succes) break;
       else userName = userName + generateRandom4Digit();
     }
@@ -152,8 +160,14 @@ export async function updateRefreshToken(
 }
 
 export async function OAuthLoginService(app: FastifyInstance, user: any) {
-  const payload: payload = {
+  let oauth_id = "";
+  const authValues = getAuthTable(app.db, user.id);
+  if (authValues && authValues.oauth_id) {
+    oauth_id = authValues.oauth_id;
+  }
+  const payload = {
     id: user.id,
+    oauth_id,
     email: user.email,
     username: user.username,
   };
@@ -168,13 +182,39 @@ export async function OAuthRegister(
   userName: string,
   user: any
 ) {
+  // Download Google avatar and save locally
+  let avatarUrl = process.env.API_GATEWAY_URL + "/auth/static/default-profile.png";
+  
+  if (user.picture) {
+    try {
+      const avatarResponse = await fetch(user.picture);
+      if (avatarResponse.ok) {
+        const buffer = await avatarResponse.arrayBuffer();
+        const fileName = `google-${user.id}-${Date.now()}.jpg`;
+        
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const avatarsDir = path.join(__dirname, "../../public");
+        const filePath = path.join(avatarsDir, fileName);
+        
+        await fs.mkdir(avatarsDir, { recursive: true });
+        await fs.writeFile(filePath, Buffer.from(buffer));
+        
+        avatarUrl = `${process.env.API_GATEWAY_URL}/auth/static/${fileName}`;
+      }
+    } catch (error) {
+      console.error("Failed to download Google avatar:", error);
+      // Use default avatar if download fails
+    }
+  }
+  
   const result = await userServicePost(userService + `/internal/user`, {
     username: userName,
     email: user.email,
     password: null,
-    profile : {
-      avatar_url: user.picture
-    }
+    profile: {
+      avatar_url: avatarUrl,
+    },
   });
   app.db
     .prepare("INSERT INTO auth_table (user_id, oauth_id) VALUES(?,?)")
@@ -184,8 +224,8 @@ export async function OAuthRegister(
 }
 
 export async function twoFactorSetupService(req: FastifyRequest) {
-  const id = req.headers['x-user-id'];
-  const email =  req.headers['x-user-email'];
+  const id = req.headers["x-user-id"];
+  const email = req.headers["x-user-email"];
   const db = req.server.db;
   const secret = speakeasy.generateSecret({
     name: `FtTranscendence:${email}`,
@@ -210,7 +250,7 @@ export async function twoFactorSetupService(req: FastifyRequest) {
 }
 
 export async function twoFactorEnableService(req: FastifyRequest) {
-  const id = req.headers['x-user-id'];
+  const id = req.headers["x-user-id"];
   const db = req.server.db;
   const { token } = req.body as { token: string };
   const row = db
@@ -225,19 +265,59 @@ export async function twoFactorEnableService(req: FastifyRequest) {
   });
   if (!verified) throw new InvalidToken();
 
-  //->>>>>>>>>>>>>>>>>>MESAJ BROKER EKLE>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  await axios.patch(
+    userService + "/user",
+    { is_2fa_enabled: true },
+    { headers: { "x-user-id": id } }
+  );
   db.prepare("UPDATE auth_table SET twofa_enable = 1 WHERE user_id = ?").run(
     id
   );
+  try {
+    await axios.patch(
+      userService + "/user",
+      {
+        is_2fa_enabled: true,
+      },
+      {
+        headers: {
+          "x-user-id": id,
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Failed to update 2FA status in user service:", err);
+  }
   return { success: true, message: "2FA enabled" };
 }
 
 export async function twoFactorDisableService(req: FastifyRequest) {
   const db = req.server.db;
-  const id = req.headers['x-user-id'];
+  const id = req.headers["x-user-id"];
+  console.log(id);
+  await axios.patch(
+    userService + "/user",
+    { is_2fa_enabled: false },
+    { headers: { "x-user-id": id } }
+  );
   db.prepare(
     "UPDATE auth_table SET twofa_enable = 0, twofa_secret = NULL WHERE user_id = ?"
   ).run(id);
+  try {
+    await axios.patch(
+      userService + "/user",
+      {
+        is_2fa_enabled: false,
+      },
+      {
+        headers: {
+          "x-user-id": id,
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Failed to update 2FA status in user service:", err);
+  }
   return { success: true, message: "2FA disabled" };
 }
 

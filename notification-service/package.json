@@ -1,0 +1,43 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "soksak",
+  "type": "module",
+  "main": "dist/app.js",
+  "scripts": {
+    "start:dev": "nodemon --watch src --ext ts --exec tsx src/app.ts",
+    "start:prod": "NODE_ENV=production node dist/app.js",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "migration": "tsx src/run-migrations.ts",
+    "migration:prod": "NODE_ENV=production tsx src/run-migrations.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@fastify/error": "^4.2.0",
+    "@fastify/multipart": "^9.0.3",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/static": "^8.3.0",
+    "@fastify/swagger": "^9.5.1",
+    "@fastify/swagger-ui": "^5.2.3",
+    "@fastify/websocket": "^11.2.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.2.0",
+    "dotenv": "^17.2.1",
+    "fastify": "^5.5.0",
+    "fastify-plugin": "^5.0.1",
+    "speakeasy": "^2.0.0",
+    "tsx": "^4.20.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.2.1",
+    "@types/speakeasy": "^2.0.10",
+    "nodemon": "^3.1.10",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2"
+  }
+}
