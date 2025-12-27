@@ -239,6 +239,65 @@ export function setPaddleDirection(paddle: Paddle, direction: "up" | "down" | "s
 }
 
 /**
+ * Update paddle position from client input with speed enforcement
+ * This function clamps paddle movement to PADDLE_SPEED to prevent cheating
+ *
+ * @param paddle The paddle to update
+ * @param targetY The target Y position from client (or direction)
+ * @param deltaTime Optional delta time for smooth movement
+ * @returns The actual position after clamping
+ */
+export function updatePaddleFromInput(
+  paddle: Paddle,
+  input: { direction?: "up" | "down" | "stop"; targetY?: number },
+  canvas: GameCanvas
+): number {
+  const previousY = paddle.y;
+  const halfHeight = paddle.height / 2;
+
+  if (input.direction !== undefined) {
+    // Direction-based input (keyboard)
+    setPaddleDirection(paddle, input.direction);
+
+    if (input.direction === "up") {
+      paddle.y -= PADDLE_SPEED;
+    } else if (input.direction === "down") {
+      paddle.y += PADDLE_SPEED;
+    }
+  } else if (input.targetY !== undefined) {
+    // Direct position input (mouse/touch) - CLAMP to max speed
+    const requestedMove = input.targetY - paddle.y;
+    const clampedMove = Math.max(-PADDLE_SPEED, Math.min(PADDLE_SPEED, requestedMove));
+    paddle.y += clampedMove;
+  }
+
+  // Enforce canvas bounds
+  paddle.y = Math.max(halfHeight, Math.min(canvas.height - halfHeight, paddle.y));
+
+  // Return actual movement (for anti-cheat logging)
+  return paddle.y - previousY;
+}
+
+/**
+ * Validate paddle movement for anti-cheat
+ * Returns true if movement is within allowed speed
+ */
+export function validatePaddleMovement(
+  previousY: number,
+  newY: number,
+  framesElapsed: number = 1
+): { valid: boolean; actualSpeed: number; maxAllowed: number } {
+  const actualSpeed = Math.abs(newY - previousY);
+  const maxAllowed = PADDLE_SPEED * framesElapsed;
+
+  return {
+    valid: actualSpeed <= maxAllowed + 0.01, // Small tolerance for floating point
+    actualSpeed,
+    maxAllowed,
+  };
+}
+
+/**
  * Check if game is over
  */
 export function isGameOver(state: GamePhysicsState): boolean {

@@ -17,12 +17,16 @@ import type { GameMode } from "../types/game.types.js";
 // TYPES
 // ============================================================================
 
+/** Reconnection timeout in milliseconds (30 seconds) */
+const RECONNECT_TIMEOUT_MS = 30000;
+
 export interface PlayerConnection {
-  ws: WebSocket;
+  ws: WebSocket | null; // null when disconnected but waiting for reconnect
   playerId: string;
   nickname: string;
   playerNumber: "player1" | "player2";
   lastPing: number;
+  disconnectedAt: number | null; // Timestamp when player disconnected, null if connected
 }
 
 export interface ActiveGame {
@@ -90,8 +94,18 @@ export class GameStateManager {
     const game = this.games.get(gameId);
     if (!game) return false;
 
-    // Check if game is full
-    if (game.players.size >= 2) return false;
+    // Check if player is reconnecting
+    const existingPlayer = game.players.get(playerId);
+    if (existingPlayer && existingPlayer.disconnectedAt !== null) {
+      // Player is reconnecting within timeout window
+      return this.handleReconnect(gameId, playerId, ws);
+    }
+
+    // Check if game is full (only count active players)
+    const activePlayerCount = Array.from(game.players.values()).filter(
+      (p) => p.disconnectedAt === null
+    ).length;
+    if (activePlayerCount >= 2) return false;
 
     // Determine player number
     let assignedNumber = playerNumber;
@@ -106,6 +120,7 @@ export class GameStateManager {
       nickname,
       playerNumber: assignedNumber,
       lastPing: Date.now(),
+      disconnectedAt: null,
     };
 
     game.players.set(playerId, player);
@@ -117,6 +132,125 @@ export class GameStateManager {
     }
 
     return true;
+  }
+
+  /**
+   * Handle player reconnection
+   */
+  private handleReconnect(gameId: string, playerId: string, ws: WebSocket): boolean {
+    const game = this.games.get(gameId);
+    if (!game) return false;
+
+    const player = game.players.get(playerId);
+    if (!player) return false;
+
+    // Check if reconnect is within timeout window
+    if (player.disconnectedAt !== null) {
+      const timeSinceDisconnect = Date.now() - player.disconnectedAt;
+      if (timeSinceDisconnect > RECONNECT_TIMEOUT_MS) {
+        // Too late to reconnect
+        console.log(`[StateManager] Player ${playerId} reconnect timeout exceeded`);
+        return false;
+      }
+    }
+
+    // Reconnect the player
+    player.ws = ws;
+    player.disconnectedAt = null;
+    player.lastPing = Date.now();
+
+    console.log(`[StateManager] Player ${playerId} reconnected to game ${gameId}`);
+
+    // Send full game state snapshot to reconnected player
+    this.sendFullStateSnapshot(gameId, playerId);
+
+    // Resume game if it was paused due to disconnect
+    if (game.status === "paused") {
+      const allPlayersConnected = Array.from(game.players.values()).every(
+        (p) => p.disconnectedAt === null && p.ws !== null
+      );
+      if (allPlayersConnected) {
+        game.status = "playing";
+        setPaused(game.physics, false);
+        this.broadcastToGame(gameId, {
+          type: "game_resumed",
+          data: {
+            gameId,
+            message: "All players reconnected, game resumed",
+          },
+        });
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Send full game state snapshot to a specific player
+   */
+  private sendFullStateSnapshot(gameId: string, playerId: string): void {
+    const game = this.games.get(gameId);
+    if (!game) return;
+
+    const player = game.players.get(playerId);
+    if (!player || !player.ws || player.ws.readyState !== WebSocket.OPEN) return;
+
+    const state = serializeGameState(game.physics);
+    const snapshot = createServerMessage({
+      type: "full_state_snapshot",
+      data: {
+        gameId,
+        ...state,
+        status: game.status,
+        players: Array.from(game.players.values()).map((p) => ({
+          playerId: p.playerId,
+          nickname: p.nickname,
+          playerNumber: p.playerNumber,
+          isConnected: p.disconnectedAt === null,
+        })),
+        timestamp: Date.now(),
+      },
+    });
+
+    player.ws.send(snapshot);
+  }
+
+  /**
+   * Handle player disconnect (called when websocket closes)
+   */
+  handlePlayerDisconnect(playerId: string): void {
+    const gameId = this.playerToGame.get(playerId);
+    if (!gameId) return;
+
+    const game = this.games.get(gameId);
+    if (!game) return;
+
+    const player = game.players.get(playerId);
+    if (!player) return;
+
+    // Don't remove immediately, mark as disconnected
+    player.disconnectedAt = Date.now();
+    player.ws = null;
+
+    console.log(`[StateManager] Player ${playerId} disconnected from game ${gameId}, waiting for reconnect...`);
+
+    // Pause game if playing
+    if (game.status === "playing") {
+      game.status = "paused";
+      setPaused(game.physics, true);
+
+      // Notify other players
+      this.broadcastToGame(gameId, {
+        type: "player_disconnected",
+        data: {
+          gameId,
+          playerId,
+          playerNumber: player.playerNumber,
+          message: "Opponent disconnected, waiting for reconnect...",
+          reconnectTimeoutMs: RECONNECT_TIMEOUT_MS,
+        },
+      });
+    }
   }
 
   /**
@@ -350,7 +484,7 @@ export class GameStateManager {
     if (!game) return;
 
     for (const player of game.players.values()) {
-      if (player.ws.readyState === WebSocket.OPEN) {
+      if (player.ws && player.ws.readyState === WebSocket.OPEN) {
         player.ws.send(message);
       }
     }
@@ -367,7 +501,7 @@ export class GameStateManager {
     if (!game) return false;
 
     const player = game.players.get(playerId);
-    if (!player || player.ws.readyState !== WebSocket.OPEN) return false;
+    if (!player || !player.ws || player.ws.readyState !== WebSocket.OPEN) return false;
 
     const raw = typeof message === "string" ? message : createServerMessage(message);
     player.ws.send(raw);
@@ -416,5 +550,54 @@ export class GameStateManager {
         this.deleteGame(gameId);
       }
     }
+  }
+
+  /**
+   * Check for disconnected players that have exceeded reconnect timeout
+   * Call this periodically (e.g., every 5 seconds)
+   */
+  checkReconnectTimeouts(): void {
+    const now = Date.now();
+
+    for (const [gameId, game] of this.games.entries()) {
+      // Skip finished games
+      if (game.status === "finished") continue;
+
+      for (const [playerId, player] of game.players.entries()) {
+        // Check if player has been disconnected too long
+        if (player.disconnectedAt !== null) {
+          const timeSinceDisconnect = now - player.disconnectedAt;
+
+          if (timeSinceDisconnect > RECONNECT_TIMEOUT_MS) {
+            console.log(`[StateManager] Player ${playerId} reconnect timeout - ending game ${gameId}`);
+
+            // Player failed to reconnect in time - end game as forfeit
+            this.broadcastToGame(gameId, {
+              type: "player_timeout",
+              data: {
+                gameId,
+                playerId,
+                playerNumber: player.playerNumber,
+                message: "Player failed to reconnect in time",
+              },
+            });
+
+            // End game with disconnected player losing
+            this.endGame(gameId, "disconnect");
+            break; // Move to next game
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Start background cleanup interval (call on manager init)
+   */
+  startCleanupInterval(intervalMs: number = 5000): NodeJS.Timeout {
+    return setInterval(() => {
+      this.checkReconnectTimeouts();
+      this.cleanupOldGames();
+    }, intervalMs);
   }
 }

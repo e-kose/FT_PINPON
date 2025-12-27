@@ -173,10 +173,10 @@ export function validateBio(bio: string): { isValid: boolean; message: string } 
 // Şifre validasyonu
 export function validatePassword(password: string): { isValid: boolean; message: string } {
 	if (!password || typeof password !== 'string') {
-		return { isValid: false, message: t("validation_password_required") };
+		return { isValid: false, message: t("security_settings_password_requirements_error") };
 	}
 	
-	// SQL injection koruması (XSS koruması şifreler için gerekli değil)
+
 	const sanitized = sanitizeSqlChars(password);
 	
 	if (sanitized.length < 6) {

@@ -1,6 +1,7 @@
 import { setUser, clearUser, getUser } from "../store/UserStore";
 import { router } from "../router/Router";
 import type { UserLogin } from "../types/AuthType";
+import { initializeNotifications } from "./NotificationService";
 
 
 
@@ -29,7 +30,7 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 					}
 				}
 			}
-			
+
 			return responseData;
 		}).catch((error) => {
 			throw error;
@@ -37,7 +38,6 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 }
 
 export async function 	fetchUser(token: string): Promise<boolean> {
-	console.log("-------------------------- Fetch USER -------------------------- ");
 	const res = await fetch("http://localhost:3000/auth/me", {
 		method: "GET",
 		headers: {
@@ -52,6 +52,7 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	const data = await res.json();
 	if (data.success) {
 		setUser(data.user, token);
+		await initializeNotifications();
 		return true;
 	}
 	return false;
@@ -173,9 +174,10 @@ export async function enable2Fa(code: string): Promise<boolean> {
 	if (res.ok) {
 		const data = await res.json();
 		if (data.success) {
-			handleLogin();
-			console.log("2FA enabled successfully-------------------:", getUser()?.is_2fa_enabled);
-			return data.success;
+			await handleLogin();
+			const updatedUser = getUser();
+			console.log("2FA enabled successfully-------------------:", updatedUser?.is_2fa_enabled);
+			return true;
 		}
 	}
 	return false;
@@ -199,9 +201,10 @@ export async function disable2FA(): Promise<boolean> {
 	if (res.ok) {
 		const data = await res.json();
 		if (data.success) {
-			handleLogin();
-			console.log("2FA disabled successfully:", getUser()?.is_2fa_enabled);
-			return data.success;
+			await handleLogin();
+			const updatedUser = getUser();
+			console.log("2FA disabled successfully:", updatedUser?.is_2fa_enabled);
+			return true;
 		}
 	}
 	return false;
@@ -209,9 +212,9 @@ export async function disable2FA(): Promise<boolean> {
 
 export function removeUndefinedKey(data:any): void {
 	Object.keys(data).forEach(key => {
-		if (data[key] && typeof data[key] === 'object') 
+		if (data[key] && typeof data[key] === 'object')
 			removeUndefinedKey(data[key]);
-		else if (data[key] === undefined) 
+		else if (data[key] === undefined)
 			delete data[key];
 	});
 }

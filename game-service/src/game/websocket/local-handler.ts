@@ -14,7 +14,7 @@ import {
 // ============================================================================
 
 export class LocalGameHandler {
-  constructor(private stateManager: GameStateManager) {}
+  constructor(private stateManager: GameStateManager, private wsClients?: Map<string, Set<any>>) {}
 
   /**
    * Handle WebSocket connection for local game

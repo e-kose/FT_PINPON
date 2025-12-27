@@ -1,6 +1,9 @@
 import { Settings } from "./Settings";
 import { getUser } from "../../../store/UserStore";
 import { t } from "../../../i18n/lang";
+import { deleteUser } from "../../../services/SettingsService";
+import { logout } from "../../../services/AuthService";
+import { router } from "../../../router/Router";
 
 const MESSAGE_CONTAINER = ".account-message-container";
 
@@ -130,11 +133,33 @@ class AccountSettings extends Settings {
 	private deleteAccount(): void {
 		console.log(t("account_settings_delete_log"));
 		this.hideDeleteAccountModal();
-		this.showErrorMessage(
-			t("account_settings_delete_info_title"),
-			t("account_settings_delete_info_message"),
-			MESSAGE_CONTAINER
-		);
+		
+		deleteUser()
+			.then((response) => {
+				if (response.success) {
+					// Başarılı silme - Kullanıcıya bilgilendirme göster
+					this.showSuccessMessage(
+						t("account_settings_delete_success_title"),
+						t("account_settings_delete_success_message"),
+						MESSAGE_CONTAINER
+					);
+					
+					// 3 saniye sonra logout yap ve ana sayfaya yönlendir
+					setTimeout(async () => {
+						await logout();
+						router.navigate("/");
+					}, 3000);
+				} else {
+					// Silme başarısız
+					this.handleApiResponse(response.status, MESSAGE_CONTAINER);
+				}
+			})
+			.catch((error) => {
+				console.error(t("account_settings_delete_error_log"), error);
+				const status = error?.status || 0;
+				const info = this.getUserResponseMessage(status);
+				this.showErrorMessage(info.title, info.message, MESSAGE_CONTAINER);
+			});
 	}
 }
 

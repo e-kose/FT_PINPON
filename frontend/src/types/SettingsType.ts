@@ -8,11 +8,6 @@ export type UserCredentialsUpdate = {
 	};
 }
 
-export type UserPasswordUpdate = {
-	oldPass: string;
-	newPass: string;
-}
-
-export type UserAvatarUpdate = {
-	avatar: string;
-}
+export type AuthValidationResult = 
+	| { success: true; accessToken: string; userId: string }
+	| { success: false; message: string; status: number };

@@ -8,6 +8,9 @@ import type { TournamentRepository } from "../game/repository/tournament.reposit
 import type { TournamentService } from "../game/service/tournament.service.js";
 import type { StatsRepository } from "../game/repository/stats.repository.js";
 import type { StatsService } from "../game/service/stats.service.js";
+import type { InviteRepository } from "../game/repository/invite.repository.js";
+import type { InviteService } from "../game/service/invite.service.js";
+import type { GameStateManager } from "../game/websocket/state-manager.js";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -20,5 +23,9 @@ declare module "fastify" {
     tournamentService: TournamentService;
     statsRepo: StatsRepository;
     statsService: StatsService;
+    inviteRepo: InviteRepository;
+    inviteService: InviteService;
+    stateManager: GameStateManager;
+    wsClients: Map<string, Set<any>>;
   }
 }

@@ -1,358 +1,1494 @@
 {
-    "info": {
-        "_postman_id": "d4e8c1b2-a9f6-4b10-8654-abcdef123456",
-        "name": "Full Project API (All Services)",
-        "description": "Comprehensive collection for all microservices in the project. Features automated JWT token handling for authenticated endpoints.",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Game Service API",
+    "description": "Pong game service - local, online and tournament modes",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+
+    }
+  },
+  "paths": {
+    "/game/local/create": {
+      "post": {
+        "tags": [
+          "game"
+        ],
+        "description": "Create a local game with guest players",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "player1_nickname",
+                  "player2_nickname"
+                ],
+                "properties": {
+                  "player1_nickname": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20
+                  },
+                  "player2_nickname": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 20
+                  },
+                  "max_score": {
+                    "type": "number",
+                    "minimum": 5,
+                    "maximum": 21,
+                    "default": 11
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Game created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Game created successfully",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
-    "item": [
-        {
-            "name": "1. Authentication Service",
-            "item": [
-                {
-                    "name": "Login and Globally Save Token",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    const responseBody = pm.response.json();",
-                                    "    if (responseBody && responseBody.accessToken) {",
-                                    "        pm.collectionVariables.set(\"jwt_token\", responseBody.accessToken);",
-                                    "        console.log(\"Access Token saved globally.\");",
-                                    "    } else {",
-                                    "        console.error(\"Response did not contain 'accessToken'.\");",
-                                    "    }",
-                                    "} else {",
-                                    "    console.error(\"Login failed with status: \" + pm.response.code);",
-                                    "}"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
-                        },
-                        "url": {
-                            "raw": "http://localhost:3000/auth/login",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "auth",
-                                "login"
-                            ]
-                        },
-                        "description": "Log in with a user to get a JWT. The script will save the token for all other requests in this collection."
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Register New User",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
-                        },
-                        "url": {
-                            "raw": "http://localhost:3000/auth/register",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "auth",
-                                "register"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Swagger Docs",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/auth/docs",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "auth",
-                                "docs"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "2. User Service",
-            "item": [
-                {
-                    "name": "Get My Profile",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/user/me",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "user",
-                                "me"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get User by ID",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/user/:userId",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "user",
-                                ":userId"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "userId",
-                                    "value": "some-user-id"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Send Friend Request",
-                    "request": {
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/user/friends/add/:userId",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "user",
-                                "friends",
-                                "add",
-                                ":userId"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "userId",
-                                    "value": "friend-user-id"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ],
-            "auth": {
-                "type": "bearer",
-                "bearer": [
-                    {
-                        "key": "token",
-                        "value": "{{jwt_token}}",
-                        "type": "string"
-                    }
-                ]
-            }
-        },
-        {
-            "name": "3. Chat Service",
-            "item": [
-                {
-                    "name": "Get My Messages",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/chat/messages",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "chat",
-                                "messages"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Send Message",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"receiverId\": \"some-friend-id\",\n    \"content\": \"Hello from Postman!\"\n}"
-                        },
-                        "url": {
-                            "raw": "http://localhost:3000/chat/send",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "chat",
-                                "send"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ],
-            "auth": {
-                "type": "bearer",
-                "bearer": [
-                    {
-                        "key": "token",
-                        "value": "{{jwt_token}}",
-                        "type": "string"
-                    }
-                ]
-            }
-        },
-        {
-            "name": "4. Game Service",
-            "item": [
-                {
-                    "name": "Health Check",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/game/health",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "game",
-                                "health"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Join Matchmaking",
-                    "request": {
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/game/matchmaking/join",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "game",
-                                "matchmaking",
-                                "join"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get User Stats",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "http://localhost:3000/game/stats/:userId",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "3000",
-                            "path": [
-                                "game",
-                                "stats",
-                                ":userId"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "userId",
-                                    "value": "some-user-id"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ],
-            "auth": {
-                "type": "bearer",
-                "bearer": [
-                    {
-                        "key": "token",
-                        "value": "{{jwt_token}}",
-                        "type": "string"
-                    }
-                ]
-            }
+    "/game/": {
+      "get": {
+        "tags": [
+          "game"
+        ],
+        "description": "Get all games with optional filters",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "waiting",
+                "ready",
+                "playing",
+                "finished",
+                "cancelled"
+              ]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "local",
+                "online",
+                "tournament"
+              ]
+            },
+            "in": "query",
+            "name": "game_mode",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "in": "query",
+            "name": "offset",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
         }
-    ],
-    "variable": [
-        {
-            "key": "jwt_token",
-            "value": "",
-            "description": "This variable is automatically set by the script in the 'Login and Globally Save Token' request."
+      }
+    },
+    "/game/active": {
+      "get": {
+        "tags": [
+          "game"
+        ],
+        "description": "Get all active games",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "total_active": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-    ]
+      }
+    },
+    "/game/{id}": {
+      "get": {
+        "tags": [
+          "game"
+        ],
+        "description": "Get game details by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "game"
+        ],
+        "description": "Delete a game",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Game deleted successfully"
+          }
+        }
+      }
+    },
+    "/game/history/{userId}": {
+      "get": {
+        "tags": [
+          "game"
+        ],
+        "description": "Get player's game history",
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "in": "query",
+            "name": "offset",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "userId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/{id}/start": {
+      "post": {
+        "tags": [
+          "game"
+        ],
+        "description": "Start a game",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/{id}/score": {
+      "patch": {
+        "tags": [
+          "game"
+        ],
+        "description": "Update game score",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "player1_score",
+                  "player2_score"
+                ],
+                "properties": {
+                  "player1_score": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "player2_score": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/{id}/finish": {
+      "post": {
+        "tags": [
+          "game"
+        ],
+        "description": "Finish a game and determine winner",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/{id}/cancel": {
+      "post": {
+        "tags": [
+          "game"
+        ],
+        "description": "Cancel a game",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/matchmaking/join": {
+      "post": {
+        "tags": [
+          "matchmaking"
+        ],
+        "description": "Join matchmaking queue to find an opponent",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully joined matchmaking queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Successfully joined matchmaking queue",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "position": {
+                          "type": "number"
+                        },
+                        "estimatedWait": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Bad request",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/matchmaking/leave": {
+      "post": {
+        "tags": [
+          "matchmaking"
+        ],
+        "description": "Leave matchmaking queue",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully left matchmaking queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Successfully left matchmaking queue",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/matchmaking/status": {
+      "get": {
+        "tags": [
+          "matchmaking"
+        ],
+        "description": "Get current matchmaking queue status",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matchmaking status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Matchmaking status",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "inQueue": {
+                          "type": "boolean"
+                        },
+                        "position": {
+                          "type": "number"
+                        },
+                        "queueLength": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/invite/send": {
+      "post": {
+        "tags": [
+          "invite"
+        ],
+        "description": "Send a game invite to another player",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "toUserId"
+                ],
+                "properties": {
+                  "toUserId": {
+                    "type": "number"
+                  },
+                  "toNickname": {
+                    "type": "string"
+                  },
+                  "maxScore": {
+                    "type": "number",
+                    "minimum": 5,
+                    "maximum": 21,
+                    "default": 11
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-nickname",
+            "required": false
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Invite sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Invite sent successfully",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/invite/{inviteId}/accept": {
+      "post": {
+        "tags": [
+          "invite"
+        ],
+        "description": "Accept a game invite and start the game",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "inviteId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invite accepted and game created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Invite accepted and game created",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "invite": {
+                          "type": "object"
+                        },
+                        "game": {
+                          "type": "object"
+                        },
+                        "notification": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/invite/{inviteId}/decline": {
+      "post": {
+        "tags": [
+          "invite"
+        ],
+        "description": "Decline a game invite",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "inviteId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/invite/{inviteId}/cancel": {
+      "post": {
+        "tags": [
+          "invite"
+        ],
+        "description": "Cancel a sent game invite",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "inviteId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/invite/pending": {
+      "get": {
+        "tags": [
+          "invite"
+        ],
+        "description": "Get pending invites for current user",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pending invites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "List of pending invites",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array"
+                    },
+                    "count": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/invite/sent": {
+      "get": {
+        "tags": [
+          "invite"
+        ],
+        "description": "Get invites sent by current user",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "x-user-id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sent invites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "List of sent invites",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array"
+                    },
+                    "count": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/leaderboard": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "description": "Get player leaderboard",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "rank_points",
+                "wins",
+                "win_streak"
+              ],
+              "default": "rank_points"
+            },
+            "in": "query",
+            "name": "sort_by",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "in": "query",
+            "name": "offset",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "sort_by": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/stats/{userId}": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "description": "Get user statistics",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "userId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/stats/{userId}/ranking": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "description": "Get user's ranking position",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "userId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user_id": {
+                          "type": "number"
+                        },
+                        "position": {
+                          "type": "number"
+                        },
+                        "rank_points": {
+                          "type": "number"
+                        },
+                        "rank_tier": {
+                          "type": "string"
+                        },
+                        "rank_tier_name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/create": {
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Create a new tournament with 4 or 8 player aliases",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "aliases"
+                ],
+                "properties": {
+                  "aliases": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 2,
+                      "maxLength": 20
+                    },
+                    "minItems": 4,
+                    "maxItems": 8,
+                    "description": "List of player aliases (4 or 8 players)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 100
+                  },
+                  "maxScore": {
+                    "type": "number",
+                    "minimum": 5,
+                    "maximum": 21,
+                    "default": 11
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tournament created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Tournament created successfully",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Get all tournaments with optional filters",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "registration",
+                "in_progress",
+                "finished",
+                "cancelled"
+              ]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "in": "query",
+            "name": "offset",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tournaments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "List of tournaments",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array"
+                    },
+                    "count": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/{id}": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Get tournament details with bracket",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tournament details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Tournament details",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/{id}/next-match": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Get the next match to be played in the tournament",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Next match details or null if finished",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Next match details or null if finished",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/{id}/bracket": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Get the full tournament bracket",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tournament bracket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Tournament bracket",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/{id}/match/{matchId}/start": {
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Start a specific tournament match",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "matchId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Match started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Match started",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/{id}/match/{matchId}/result": {
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Report the result of a match",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "winnerAlias",
+                  "player1Score",
+                  "player2Score"
+                ],
+                "properties": {
+                  "winnerAlias": {
+                    "type": "string"
+                  },
+                  "player1Score": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "player2Score": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "matchId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Match result recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Match result recorded",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/tournament/{id}/cancel": {
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "description": "Cancel a tournament",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tournament cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Tournament cancelled",
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/ws/stats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/game/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:",
+      "description": "Development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "game",
+      "description": "Game endpoints"
+    },
+    {
+      "name": "matchmaking",
+      "description": "Matchmaking endpoints"
+    },
+    {
+      "name": "stats",
+      "description": "Statistics endpoints"
+    },
+    {
+      "name": "tournament",
+      "description": "Tournament endpoints"
+    }
+  ]
 }

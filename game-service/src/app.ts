@@ -13,15 +13,21 @@ import fastifyWebsocket from "@fastify/websocket";
 import { GameRepository } from "./game/repository/game.repository.js";
 import { StatsRepository } from "./game/repository/stats.repository.js";
 import { TournamentRepository } from "./game/repository/tournament.repository.js";
+import { InviteRepository } from "./game/repository/invite.repository.js";
 
 // Import services
 import { GameService } from "./game/service/game.service.js";
 import { StatsService } from "./game/service/stats.service.js";
+import { MatchmakingService } from "./game/service/matchmaking.service.js";
+import { MatchmakingServiceRedis } from "./game/service/matchmaking-redis.service.js";
+import { InviteService } from "./game/service/invite.service.js";
+import { TournamentService } from "./game/service/tournament.service.js";
 
 // Import routes
 import { gameRoutes } from "./game/routes/game.routes.js";
 import { statsRoutes } from "./game/routes/stats.routes.js";
 import { websocketRoutes } from "./game/websocket/handler.js";
+import { tournamentRoutes } from "./game/routes/tournament.routes.js";
 
 dotenv.config();
 
@@ -34,6 +40,16 @@ const app = fastify({ logger: true });
 app.register(fastifyWebsocket);
 app.register(dbPlug);
 
+// Lightweight CORS handling for browser preflight (avoids adding dependency)
+app.addHook('onRequest', async (request, reply) => {
+  reply.header('access-control-allow-origin', '*');
+  reply.header('access-control-allow-methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+  reply.header('access-control-allow-headers', 'Content-Type, Authorization, x-user-id');
+  if (request.raw.method === 'OPTIONS') {
+    reply.code(204).send();
+  }
+});
+
 app.register(redisPlugin);
 app.register(loggerPlugin);
 app.register(fastifySensible);
@@ -45,24 +61,36 @@ app.after(() => {
   const gameRepo = new GameRepository(app.db);
   const statsRepo = new StatsRepository(app.db);
   const tournamentRepo = new TournamentRepository(app.db);
+  const inviteRepo = new InviteRepository(app.db);
   app.decorate("gameRepo", gameRepo);
   app.decorate("statsRepo", statsRepo);
   app.decorate("tournamentRepo", tournamentRepo);
+  app.decorate("inviteRepo", inviteRepo);
 
   // Initialize services
   const gameService = new GameService(app.gameRepo, app.statsRepo);
   const statsService = new StatsService(app.statsRepo);
+  // Prefer Redis-backed matchmaking when redis is available
+  let matchmakingService: any;
+  if ((app as any).redis) {
+    matchmakingService = new MatchmakingServiceRedis((app as any).redis, gameService);
+  } else {
+    matchmakingService = new MatchmakingService(gameService);
+  }
+  const inviteService = new InviteService(inviteRepo, gameService);
+  const tournamentService = new TournamentService(tournamentRepo, gameService);
+
   app.decorate("gameService", gameService);
   app.decorate("statsService", statsService);
-
-  // Decorate placeholder services
-  app.decorate("matchmakingService", {});
-  app.decorate("tournamentService", {});
+  app.decorate("matchmakingService", matchmakingService);
+  app.decorate("inviteService", inviteService);
+  app.decorate("tournamentService", tournamentService);
 });
 
 // Register routes
 app.register(gameRoutes, { prefix: "/game" });
 app.register(statsRoutes, { prefix: "/game" });
+app.register(tournamentRoutes, { prefix: "/game/tournament" });
 app.register(websocketRoutes, { prefix: "/game" });
 app.register(healthCheckRoutes, { prefix: "/game" });
 

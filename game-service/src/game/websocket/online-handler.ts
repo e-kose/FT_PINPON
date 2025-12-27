@@ -18,7 +18,7 @@ import type { JWTPayload } from "../types/game.types.js";
 export class OnlineGameHandler {
   private connectionToPlayer: Map<WebSocket, string> = new Map(); // ws -> playerId
 
-  constructor(private stateManager: GameStateManager) {}
+  constructor(private stateManager: GameStateManager, private wsClients?: Map<string, Set<WebSocket>>) {}
 
   /**
    * Handle WebSocket connection for online game
@@ -35,6 +35,13 @@ export class OnlineGameHandler {
         userPayload = verifyToken(token);
         userId = userPayload.sub;
         console.log(`[OnlineGame] Authenticated user: ${userId}`);
+
+        // register ws in global clients map for notifications
+        if (userId && this.wsClients) {
+          const set = this.wsClients.get(userId) || new Set<WebSocket>();
+          set.add(ws as any);
+          this.wsClients.set(userId, set);
+        }
       } catch (error) {
         console.error("[OnlineGame] JWT verification failed:", error);
         ws.send(createErrorMessage("AUTH_FAILED", "Invalid or expired token"));
@@ -100,6 +107,14 @@ export class OnlineGameHandler {
       console.log("[OnlineGame] Connection closed");
       if (userId) {
         this.handleDisconnect(userId);
+        // remove from global clients
+        if (userId && this.wsClients) {
+          const set = this.wsClients.get(userId);
+          if (set) {
+            set.delete(ws as any);
+            if (set.size === 0) this.wsClients.delete(userId);
+          }
+        }
       }
       this.connectionToPlayer.delete(ws);
     });

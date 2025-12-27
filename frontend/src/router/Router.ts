@@ -4,7 +4,7 @@ import "../components/forms/UserForm";
 import "../components/sideBarComponents/Dashboard";
 import "../components/utils/MyProfile";
 import "../components/utils/TwoFaAuth";
-import "../components/forms/twoFaLogin";
+import "../components/forms/TwoFaLogin";
 import "../components/sideBarComponents/Settings/Settings";
 import "../components/sideBarComponents/Play";
 import "../components/sideBarComponents/Tournament";

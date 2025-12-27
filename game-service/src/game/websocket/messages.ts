@@ -192,6 +192,79 @@ export const PongSchema = z.object({
 });
 
 // ============================================================================
+// RECONNECTION & DISCONNECTION SCHEMAS
+// ============================================================================
+
+// Player disconnected notification (with reconnect window)
+export const PlayerDisconnectedSchema = z.object({
+  type: z.literal("player_disconnected"),
+  data: z.object({
+    gameId: z.string(),
+    playerId: z.string(),
+    playerNumber: z.enum(["player1", "player2"]),
+    message: z.string(),
+    reconnectTimeoutMs: z.number(),
+  }),
+});
+
+// Player timeout notification (failed to reconnect)
+export const PlayerTimeoutSchema = z.object({
+  type: z.literal("player_timeout"),
+  data: z.object({
+    gameId: z.string(),
+    playerId: z.string(),
+    playerNumber: z.enum(["player1", "player2"]),
+    message: z.string(),
+  }),
+});
+
+// Full state snapshot (sent on reconnect)
+export const FullStateSnapshotSchema = z.object({
+  type: z.literal("full_state_snapshot"),
+  data: z.object({
+    gameId: z.string(),
+    ball: z.object({
+      x: z.number(),
+      y: z.number(),
+      vx: z.number(),
+      vy: z.number(),
+      radius: z.number(),
+    }),
+    paddle1: z.object({
+      y: z.number(),
+      height: z.number(),
+      width: z.number(),
+    }),
+    paddle2: z.object({
+      y: z.number(),
+      height: z.number(),
+      width: z.number(),
+    }),
+    score: z.object({
+      player1: z.number(),
+      player2: z.number(),
+    }),
+    status: z.enum(["waiting", "ready", "playing", "paused", "finished"]),
+    players: z.array(z.object({
+      playerId: z.string(),
+      nickname: z.string(),
+      playerNumber: z.enum(["player1", "player2"]),
+      isConnected: z.boolean(),
+    })),
+    timestamp: z.number(),
+  }),
+});
+
+// Game resumed notification
+export const GameResumedSchema = z.object({
+  type: z.literal("game_resumed"),
+  data: z.object({
+    gameId: z.string(),
+    message: z.string(),
+  }),
+});
+
+// ============================================================================
 // UNION TYPES
 // ============================================================================
 
@@ -216,6 +289,10 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
   PlayerLeftSchema,
   ErrorMessageSchema,
   PingSchema, // Server pings client
+  PlayerDisconnectedSchema,
+  PlayerTimeoutSchema,
+  FullStateSnapshotSchema,
+  GameResumedSchema,
 ]);
 
 // ============================================================================
@@ -238,6 +315,10 @@ export type PlayerLeft = z.infer<typeof PlayerLeftSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
 export type Ping = z.infer<typeof PingSchema>;
 export type Pong = z.infer<typeof PongSchema>;
+export type PlayerDisconnected = z.infer<typeof PlayerDisconnectedSchema>;
+export type PlayerTimeout = z.infer<typeof PlayerTimeoutSchema>;
+export type FullStateSnapshot = z.infer<typeof FullStateSnapshotSchema>;
+export type GameResumed = z.infer<typeof GameResumedSchema>;
 
 export type ClientMessage = z.infer<typeof ClientMessageSchema>;
 export type ServerMessage = z.infer<typeof ServerMessageSchema>;

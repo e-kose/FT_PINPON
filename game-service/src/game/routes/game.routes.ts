@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { GameController } from "../controller/game.controller.js";
 
 export async function gameRoutes(app: FastifyInstance) {
-  const controller = new GameController(app.gameService);
+  const controller = new GameController(app.gameService, app.matchmakingService, app.inviteService);
 
   // Create local game
   app.post(
@@ -231,5 +231,315 @@ export async function gameRoutes(app: FastifyInstance) {
       },
     },
     controller.deleteGame.bind(controller)
+  );
+
+  // ============================================================================
+  // MATCHMAKING ENDPOINTS
+  // ============================================================================
+
+  // Join matchmaking queue
+  app.post(
+    "/matchmaking/join",
+    {
+      schema: {
+        description: "Join matchmaking queue to find an opponent",
+        tags: ["matchmaking"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        response: {
+          200: {
+            description: "Successfully joined matchmaking queue",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: {
+                type: "object",
+                properties: {
+                  position: { type: "number" },
+                  estimatedWait: { type: "number" },
+                },
+              },
+            },
+          },
+          400: {
+            description: "Bad request",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    controller.joinMatchmaking.bind(controller)
+  );
+
+  // Leave matchmaking queue
+  app.post(
+    "/matchmaking/leave",
+    {
+      schema: {
+        description: "Leave matchmaking queue",
+        tags: ["matchmaking"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        response: {
+          200: {
+            description: "Successfully left matchmaking queue",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    controller.leaveMatchmaking.bind(controller)
+  );
+
+  // Get matchmaking status
+  app.get(
+    "/matchmaking/status",
+    {
+      schema: {
+        description: "Get current matchmaking queue status",
+        tags: ["matchmaking"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        response: {
+          200: {
+            description: "Matchmaking status",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: {
+                type: "object",
+                properties: {
+                  inQueue: { type: "boolean" },
+                  position: { type: "number" },
+                  queueLength: { type: "number" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    controller.getMatchmakingStatus.bind(controller)
+  );
+
+  // ============================================================================
+  // INVITE ENDPOINTS (Chat → Game)
+  // ============================================================================
+
+  // Send game invite
+  app.post(
+    "/invite/send",
+    {
+      schema: {
+        description: "Send a game invite to another player",
+        tags: ["invite"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+            "x-user-nickname": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        body: {
+          type: "object",
+          required: ["toUserId"],
+          properties: {
+            toUserId: { type: "number" },
+            toNickname: { type: "string" },
+            maxScore: { type: "number", minimum: 5, maximum: 21, default: 11 },
+          },
+        },
+        response: {
+          201: {
+            description: "Invite sent successfully",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: { type: "object" },
+            },
+          },
+        },
+      },
+    },
+    controller.sendInvite.bind(controller)
+  );
+
+  // Accept game invite
+  app.post(
+    "/invite/:inviteId/accept",
+    {
+      schema: {
+        description: "Accept a game invite and start the game",
+        tags: ["invite"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        params: {
+          type: "object",
+          properties: {
+            inviteId: { type: "string" },
+          },
+        },
+        response: {
+          200: {
+            description: "Invite accepted and game created",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: {
+                type: "object",
+                properties: {
+                  invite: { type: "object" },
+                  game: { type: "object" },
+                  notification: { type: "object" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    controller.acceptInvite.bind(controller)
+  );
+
+  // Decline game invite
+  app.post(
+    "/invite/:inviteId/decline",
+    {
+      schema: {
+        description: "Decline a game invite",
+        tags: ["invite"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        params: {
+          type: "object",
+          properties: {
+            inviteId: { type: "string" },
+          },
+        },
+      },
+    },
+    controller.declineInvite.bind(controller)
+  );
+
+  // Cancel sent invite
+  app.post(
+    "/invite/:inviteId/cancel",
+    {
+      schema: {
+        description: "Cancel a sent game invite",
+        tags: ["invite"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        params: {
+          type: "object",
+          properties: {
+            inviteId: { type: "string" },
+          },
+        },
+      },
+    },
+    controller.cancelInvite.bind(controller)
+  );
+
+  // Get pending invites
+  app.get(
+    "/invite/pending",
+    {
+      schema: {
+        description: "Get pending invites for current user",
+        tags: ["invite"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        response: {
+          200: {
+            description: "List of pending invites",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: { type: "array" },
+              count: { type: "number" },
+            },
+          },
+        },
+      },
+    },
+    controller.getPendingInvites.bind(controller)
+  );
+
+  // Get sent invites
+  app.get(
+    "/invite/sent",
+    {
+      schema: {
+        description: "Get invites sent by current user",
+        tags: ["invite"],
+        headers: {
+          type: "object",
+          properties: {
+            "x-user-id": { type: "string" },
+          },
+          required: ["x-user-id"],
+        },
+        response: {
+          200: {
+            description: "List of sent invites",
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              data: { type: "array" },
+              count: { type: "number" },
+            },
+          },
+        },
+      },
+    },
+    controller.getSentInvites.bind(controller)
   );
 }

@@ -10,8 +10,8 @@ export default fp(async (app: FastifyInstance) => {
   await app.register(fastifySwagger, {
     openapi: {
       info: {
-        title: "Auth API",
-        description: "Kullanıcı servisinin dökümantasyonu",
+        title: "Notification API",
+        description: "Notification service API documentation",
         version: "1.0.0",
       },
       servers: [
@@ -33,7 +33,7 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   await app.register(fastifySwaggerUi, {
-    routePrefix: "/user/docs",
+    routePrefix: "/notification/docs",
     uiConfig: {
       docExpansion: "full",
       deepLinking: false,

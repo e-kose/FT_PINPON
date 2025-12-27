@@ -8,10 +8,33 @@ import { OnlineGameHandler } from "./online-handler.js";
 // ============================================================================
 
 export async function websocketRoutes(fastify: FastifyInstance) {
-  // Create state manager (singleton)
-  const stateManager = new GameStateManager();
-  const localHandler = new LocalGameHandler(stateManager);
-  const onlineHandler = new OnlineGameHandler(stateManager);
+  // Ensure a shared state manager across the app
+  let stateManager: GameStateManager;
+  if ((fastify as any).stateManager) {
+    stateManager = (fastify as any).stateManager;
+  } else {
+    stateManager = new GameStateManager();
+    // decorate for other parts of app to use
+    try {
+      fastify.decorate("stateManager", stateManager);
+    } catch (e) {
+      // ignore if already decorated
+    }
+  }
+
+  // Ensure global WS clients map (userId -> Set<WebSocket>) for notifications
+  if (!(fastify as any).wsClients) {
+    try {
+      fastify.decorate("wsClients", new Map<string, Set<any>>());
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const wsClients: Map<string, Set<any>> = (fastify as any).wsClients;
+
+  const localHandler = new LocalGameHandler(stateManager, wsClients);
+  const onlineHandler = new OnlineGameHandler(stateManager, wsClients);
 
   // Cleanup old games every 10 minutes
   setInterval(() => {

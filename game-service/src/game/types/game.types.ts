@@ -98,3 +98,64 @@ export interface TournamentParticipant {
   losses: number;
   joined_at: number;
 }
+
+// Tournament Match types
+export type TournamentRound = 'quarter_final' | 'semi_final' | 'final' | 'third_place';
+export type TournamentMatchStatus = 'pending' | 'ready' | 'active' | 'finished' | 'cancelled';
+
+export interface TournamentMatch {
+  id: string;
+  tournament_id: string;
+  round: TournamentRound;
+  match_order: number;
+  player1_alias: string | null;
+  player2_alias: string | null;
+  player1_id: number | null;
+  player2_id: number | null;
+  winner_alias: string | null;
+  winner_id: number | null;
+  player1_score: number;
+  player2_score: number;
+  status: TournamentMatchStatus;
+  game_id: string | null;
+  next_match_id: string | null;
+  next_match_slot: 'player1' | 'player2' | null;
+  created_at: number;
+  started_at: number | null;
+  finished_at: number | null;
+}
+
+// Game Invite types
+export type InviteStatus = 'pending' | 'accepted' | 'declined' | 'expired' | 'cancelled';
+
+export interface GameInvite {
+  id: string;
+  from_user_id: number;
+  from_nickname: string;
+  to_user_id: number;
+  to_nickname: string | null;
+  max_score: number;
+  status: InviteStatus;
+  game_id: string | null;
+  created_at: number;
+  responded_at: number | null;
+  expires_at: number | null;
+}
+
+// Player identifier (for tournament without user management)
+export interface PlayerIdentifier {
+  alias: string;
+  userId?: number; // Optional - only if user management is enabled
+}
+
+// Tournament bracket structure
+export interface TournamentBracket {
+  tournamentId: string;
+  format: TournamentFormat;
+  rounds: {
+    name: TournamentRound;
+    matches: TournamentMatch[];
+  }[];
+  currentRound: TournamentRound;
+}
+
