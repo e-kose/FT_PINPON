@@ -10,5 +10,12 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "src/auth/types/login.userBody.d.ts", "../user-service/src/user/types/table.types/register.userBody.d.ts", "../user-service/src/plugins/sensible.plugin.ts", "../user-service/src/user/types/table.types/userDB.ts", "../user-service/src/user/types/table.types/payload.d.ts"]
+  "include": [
+    "src",
+    "src/auth/types/login.userBody.d.ts",
+    "../user-service/src/user/types/table.types/register.userBody.d.ts",
+    "../user-service/src/plugins/sensible.plugin.ts",
+    "../user-service/src/user/types/table.types/userDB.ts",
+    "../user-service/src/user/types/table.types/payload.d.ts"
+  ]
 }

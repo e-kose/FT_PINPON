@@ -2,7 +2,7 @@ import BetterSqlite3 from "better-sqlite3";
 import { CreateProfileType } from "../types/table.types/createProfile.type";
 import { registerUserBody } from "../types/table.types/register.userBody";
 import { User } from "../types/table.types/userDB";
-import { BadRequest } from "../errors/user.errors";
+import { BadRequest } from "../errors/user.errors.js";
 
 export class UserRepository {
   db: BetterSqlite3.Database;

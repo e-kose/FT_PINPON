@@ -1,0 +1,407 @@
+7<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Trans — Game Test Canvas (Full Flow)</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 12px; background: #f9f9f9; }
+    h3 { margin-bottom: 4px; }
+    .section { background: #fff; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+    .section h4 { margin-top:0; margin-bottom:8px; font-size:14px; color:#333; }
+    input, button, select { margin: 3px; padding: 6px; font-size: 13px; }
+    button { cursor: pointer; background: #007bff; color: #fff; border: none; border-radius: 3px; }
+    button:hover { background: #0056b3; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    canvas { border: 2px solid #444; display:block; background:#000; margin: 8px 0; }
+    #log { height:180px; overflow:auto; background:#111; color:#0f0; padding:8px; font-size:11px; font-family: monospace; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h3>🎮 Trans Game Service — Full Test Canvas</h3>
+  <div style="font-size:11px;color:#666;margin-bottom:8px">💡 Serve via HTTP: <code>npx http-server -p 5173</code> then open <a href="http://localhost:5173/test-game.html">http://localhost:5173/test-game.html</a></div>
+
+  <!-- AUTH SECTION -->
+  <div class="section">
+    <h4>🔐 Authentication</h4>
+    <input id="authEmail" placeholder="Email" style="width:180px" value="test@test.com" />
+    <input id="authPassword" type="password" placeholder="Password" style="width:140px" value="Test123!" />
+    <input id="authUsername" placeholder="Username" style="width:120px" value="testuser" />
+    <button id="btnRegister">Register</button>
+    <button id="btnLogin">Login</button>
+    <button id="btnGetMe">Get Me</button>
+    <br/>
+    <input id="authToken" placeholder="JWT Token (auto-filled after login)" style="width:500px" readonly />
+    <button id="btnClearToken">Clear Token</button>
+  </div>
+
+  <!-- GAME CONTROLS -->
+  <div class="section">
+    <h4>🎯 Game Controls</h4>
+    <label>API Base:</label>
+    <select id="apiBase">
+      <option value="http://localhost:3000">Gateway (localhost:3000)</option>
+      <option value="http://localhost:3005">Direct Game Service (localhost:3005)</option>
+    </select>
+    <label>User ID:</label>
+    <input id="userId" placeholder="x-user-id (auto from JWT)" style="width:80px" readonly />
+    <br/>
+    <button id="btnHealth">Health</button>
+    <button id="btnLocalGame">Create Local Game</button>
+    <button id="btnMMJoin">Join Matchmaking</button>
+    <button id="btnMMLeave">Leave Matchmaking</button>
+    <button id="btnMMStatus">MM Status</button>
+    <button id="btnActiveGames">Active Games</button>
+    <button id="btnMyStats">My Stats</button>
+    <button id="btnLeaderboard">Leaderboard</button>
+    <br/>
+    <button id="btnSendInvite">Send Invite</button>
+    <input id="inviteToUser" placeholder="To User ID" style="width:80px" value="2" />
+    <button id="btnPendingInvites">My Invites</button>
+    <button id="btnWSConnect">Connect WS</button>
+    <button id="btnWSDisconnect">Disconnect WS</button>
+    <button id="btnAutoTest">🚀 Auto Full Test</button>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="section">
+    <h4>🕹️ Game Canvas (Pong)</h4>
+    <canvas id="game" width="800" height="400"></canvas>
+    <div style="font-size:11px;color:#666">Move your mouse over canvas to control left paddle</div>
+  </div>
+
+  <!-- LOG -->
+  <div class="section">
+    <h4>📜 Log Output</h4>
+    <div id="log"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const logEl = document.getElementById('log');
+    const authTokenEl = document.getElementById('authToken');
+    const userIdEl = document.getElementById('userId');
+    const apiBaseEl = document.getElementById('apiBase');
+    const authEmailEl = document.getElementById('authEmail');
+    const authPasswordEl = document.getElementById('authPassword');
+    const authUsernameEl = document.getElementById('authUsername');
+
+    let jwtToken = localStorage.getItem('jwt_token') || '';
+    let currentUserId = localStorage.getItem('user_id') || '';
+    let ws = null;
+
+    // Restore from localStorage
+    if (jwtToken) {
+      authTokenEl.value = jwtToken;
+      userIdEl.value = currentUserId;
+      log('🔑 Token loaded from localStorage');
+    }
+
+    function log(...args){
+      const t = new Date().toISOString().substr(11,12);
+      const line = t + ' ' + args.map(a=>typeof a==='object'?JSON.stringify(a):a).join(' ');
+      logEl.innerText = line + '\n' + logEl.innerText;
+      console.log(...args);
+    }
+
+    function saveAuth(token, userId) {
+      jwtToken = token;
+      currentUserId = userId;
+      authTokenEl.value = token;
+      userIdEl.value = userId;
+      localStorage.setItem('jwt_token', token);
+      localStorage.setItem('user_id', userId);
+      log('✅ Auth saved:', userId);
+    }
+
+    function clearAuth() {
+      jwtToken = '';
+      currentUserId = '';
+      authTokenEl.value = '';
+      userIdEl.value = '';
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('user_id');
+      log('❌ Auth cleared');
+    }
+
+    // Simple pong-like local visual only (no server physics)
+    const state = {
+      paddleY: canvas.height/2 - 40,
+      paddleH: 80,
+      paddleW: 10,
+      ballX: canvas.width/2,
+      ballY: canvas.height/2,
+      ballVX: 3, ballVY: 2
+    };
+
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // ball
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(state.ballX, state.ballY, 8,0,Math.PI*2); ctx.fill();
+      // left paddle (user)
+      ctx.fillStyle = '#0f0';
+      ctx.fillRect(20, state.paddleY, state.paddleW, state.paddleH);
+      // right paddle (opponent - static for now)
+      ctx.fillStyle = '#f00';
+      ctx.fillRect(canvas.width - 30, canvas.height/2 - 40, state.paddleW, state.paddleH);
+    }
+
+    function step(){
+      state.ballX += state.ballVX; state.ballY += state.ballVY;
+      if(state.ballY <= 8 || state.ballY >= canvas.height-8) state.ballVY *= -1;
+      // left paddle collision
+      if(state.ballX <= 40 && state.ballY >= state.paddleY && state.ballY <= state.paddleY + state.paddleH){
+        state.ballVX *= -1;
+      }
+      // right paddle collision (simple)
+      if(state.ballX >= canvas.width - 40 && state.ballY >= canvas.height/2-40 && state.ballY <= canvas.height/2+40){
+        state.ballVX *= -1;
+      }
+      if(state.ballX < 0 || state.ballX > canvas.width) {
+        state.ballX = canvas.width/2;
+        state.ballY = canvas.height/2;
+      }
+      draw();
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    // mouse move to control paddle
+    canvas.addEventListener('mousemove', (e)=>{
+      const rect = canvas.getBoundingClientRect();
+      state.paddleY = e.clientY - rect.top - state.paddleH/2;
+    });
+
+    // API helpers (with JWT)
+    async function callAPI(path, opts={}){
+      const API = apiBaseEl.value.trim() || 'http://localhost:3000';
+      const headers = opts.headers || {};
+      headers['Content-Type'] = 'application/json';
+      if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
+      if (currentUserId) headers['x-user-id'] = currentUserId;
+
+      try{
+        const res = await fetch(API + path, {...opts, headers, mode: 'cors'});
+        const text = await res.text();
+        let body;
+        try{ body = JSON.parse(text); } catch(e){ body = text; }
+
+        if(res.ok) {
+          log('✅', opts.method || 'GET', path, res.status, body);
+        } else {
+          log('❌', opts.method || 'GET', path, res.status, body);
+        }
+        return {status: res.status, body, ok: res.ok};
+      } catch(err){
+        log('💥', opts.method || 'GET', path, 'ERR', err.message || err);
+        return {status:0, body: String(err), ok: false};
+      }
+    }
+
+    async function callAuth(path, opts={}){
+      const API = 'http://localhost:3000'; // Always via gateway
+      const headers = opts.headers || {};
+      headers['Content-Type'] = 'application/json';
+      try{
+        const res = await fetch(API + path, {...opts, headers, mode: 'cors'});
+        const text = await res.text();
+        let body;
+        try{ body = JSON.parse(text); } catch(e){ body = text; }
+
+        if(res.ok) {
+          log('✅ AUTH', opts.method || 'GET', path, res.status);
+        } else {
+          log('❌ AUTH', opts.method || 'GET', path, res.status, body);
+        }
+        return {status: res.status, body, ok: res.ok};
+      } catch(err){
+        log('💥 AUTH', opts.method || 'GET', path, 'ERR', err.message || err);
+        return {status:0, body: String(err), ok: false};
+      }
+    }
+
+    // Auth API calls
+    async function callAuthRegister(){
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const username = document.getElementById('authUsername').value.trim();
+      if(!email || !password || !username) { log('❌','Fill email, password, username'); return; }
+
+      const r = await callAuth('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({email, password, username})
+      });
+      if(r.ok && r.body.token) {
+        saveAuth(r.body.token, r.body.id);
+        log('✅ Registered:', r.body.username);
+      }
+    }
+
+    async function callAuthLogin(){
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      if(!email || !password) { log('❌','Fill email + password'); return; }
+
+      const r = await callAuth('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({email, password})
+      });
+      if(r.ok && r.body.token) {
+        saveAuth(r.body.token, r.body.id);
+        log('✅ Logged in:', r.body.username);
+      }
+    }
+
+    async function callAuthMe(){
+      if(!jwtToken){ log('❌','No JWT token'); return; }
+      const r = await callAuth('/auth/me', {
+        method: 'GET',
+        headers: {'Authorization': `Bearer ${jwtToken}`}
+      });
+      if(r.ok) {
+        log('✅ Current user:', r.body);
+      }
+    }
+
+    // Game API calls
+    async function createLocalGame(){
+      const p1 = prompt('Player 1 nickname:', 'Guest1');
+      const p2 = prompt('Player 2 nickname:', 'Guest2');
+      if(!p1 || !p2){ log('❌','Need 2 nicknames'); return; }
+      const r = await callAPI('/game/local/create', {
+        method: 'POST',
+        body: JSON.stringify({player1Nickname: p1, player2Nickname: p2})
+      });
+      if(r.ok) log('✅ Local game created:', r.body);
+    }
+
+    async function joinMatchmaking(){
+      if(!currentUserId){ log('❌','Login first'); return; }
+      const r = await callAPI('/game/matchmaking/join', {method: 'POST', body: '{}'});
+      if(r.ok) log('✅ Joined matchmaking queue');
+    }
+
+    async function leaveMatchmaking(){
+      if(!currentUserId){ log('❌','Login first'); return; }
+      const r = await callAPI('/game/matchmaking/leave', {method: 'POST', body: '{}'});
+      if(r.ok) log('✅ Left matchmaking queue');
+    }
+
+    async function checkMMStatus(){
+      if(!currentUserId){ log('❌','Login first'); return; }
+      const r = await callAPI('/game/matchmaking/status', {method: 'GET'});
+      if(r.ok) log('✅ MM Status:', r.body);
+    }
+
+    async function getActiveGames(){
+      const r = await callAPI('/game/active', {method: 'GET'});
+      if(r.ok) log('✅ Active games:', r.body);
+    }
+
+    async function getMyStats(){
+      if(!currentUserId){ log('❌','Login first'); return; }
+      const r = await callAPI(`/game/stats/${currentUserId}`, {method: 'GET'});
+      if(r.ok) log('✅ My stats:', r.body);
+    }
+
+    async function getLeaderboard(){
+      const r = await callAPI('/game/leaderboard', {method: 'GET'});
+      if(r.ok) log('✅ Leaderboard:', r.body);
+    }
+
+    async function sendGameInvite(){
+      const targetId = prompt('Enter target user ID:');
+      if(!targetId){ log('❌','Need target user ID'); return; }
+      const r = await callAPI('/game/invite/send', {
+        method: 'POST',
+        body: JSON.stringify({targetUserId: targetId})
+      });
+      if(r.ok) log('✅ Invite sent:', r.body);
+    }
+
+    async function getPendingInvites(){
+      if(!currentUserId){ log('❌','Login first'); return; }
+      const r = await callAPI('/game/invite/pending', {method: 'GET'});
+      if(r.ok) log('✅ Pending invites:', r.body);
+    }
+
+    // WebSocket
+    async function connectWS(){
+      if(ws){ log('❌','Already connected'); return; }
+      if(!currentUserId){ log('❌','Login first'); return; }
+
+      const wsUrl = `ws://localhost:3005/game/ws?x-user-id=${currentUserId}`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = ()=> log('✅ WebSocket connected');
+      ws.onmessage = (e)=> log('📩 WS:', e.data);
+      ws.onerror = (e)=> log('❌ WS Error:', e);
+      ws.onclose = ()=> { log('⚠️ WS Closed'); ws = null; };
+    }
+
+    function disconnectWS(){
+      if(ws){ ws.close(); ws = null; log('✅ WS Disconnected'); }
+    }
+
+    // Auto Full Test
+    async function autoFullTest(){
+      log('🚀 Starting full test scenario...');
+
+      // 1. Register (if not logged in)
+      if(!jwtToken){
+        const randEmail = `test${Date.now()}@example.com`;
+        document.getElementById('authEmail').value = randEmail;
+        document.getElementById('authPassword').value = 'TestPass123!';
+        document.getElementById('authUsername').value = `User${Date.now()}`;
+        await callAuthRegister();
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
+      // 2. Get my info
+      await callAuthMe();
+      await new Promise(r => setTimeout(r, 500));
+
+      // 3. Create local game
+      await createLocalGame();
+      await new Promise(r => setTimeout(r, 500));
+
+      // 4. Get active games
+      await getActiveGames();
+      await new Promise(r => setTimeout(r, 500));
+
+      // 5. Get my stats
+      await getMyStats();
+      await new Promise(r => setTimeout(r, 500));
+
+      // 6. Get leaderboard
+      await getLeaderboard();
+      await new Promise(r => setTimeout(r, 500));
+
+      log('✅ Full test completed!');
+    }
+
+    // Wire buttons
+    document.getElementById('btnRegister').onclick = callAuthRegister;
+    document.getElementById('btnLogin').onclick = callAuthLogin;
+    document.getElementById('btnGetMe').onclick = callAuthMe;
+    document.getElementById('btnClearToken').onclick = clearAuth;
+
+    document.getElementById('btnHealth').onclick = ()=> callAPI('/game/health', {method: 'GET'});
+    document.getElementById('btnLocalGame').onclick = createLocalGame;
+    document.getElementById('btnMMJoin').onclick = joinMatchmaking;
+    document.getElementById('btnMMLeave').onclick = leaveMatchmaking;
+    document.getElementById('btnMMStatus').onclick = checkMMStatus;
+    document.getElementById('btnActiveGames').onclick = getActiveGames;
+    document.getElementById('btnMyStats').onclick = getMyStats;
+    document.getElementById('btnLeaderboard').onclick = getLeaderboard;
+    document.getElementById('btnSendInvite').onclick = sendGameInvite;
+    document.getElementById('btnPendingInvites').onclick = getPendingInvites;
+    document.getElementById('btnWSConnect').onclick = connectWS;
+    document.getElementById('btnWSDisconnect').onclick = disconnectWS;
+    document.getElementById('btnAutoTest').onclick = autoFullTest;
+
+    log('🎮 Game Service Test Page Ready');
+  </script>
+</body>
+</html>

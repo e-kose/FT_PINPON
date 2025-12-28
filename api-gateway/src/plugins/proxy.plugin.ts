@@ -13,7 +13,7 @@ export default fp(async (app: FastifyInstance) => {
       if (req.url.startsWith("/auth/static/")) {
         return;
       }
-      
+
       if (
         req.url.startsWith("/auth/2fa/setup") ||
         req.url.startsWith("/auth/2fa/enable") ||
@@ -24,6 +24,7 @@ export default fp(async (app: FastifyInstance) => {
         if (req.user) {
           req.headers["x-user-id"] = (req.user as any).id;
           req.headers["x-user-email"] = (req.user as any).email;
+
         }
       }
     },
@@ -38,7 +39,7 @@ export default fp(async (app: FastifyInstance) => {
       if (req.url.startsWith("/user/static/avatars/")) {
         return;
       }
-      
+
       if (req.url.startsWith("/user") && !req.url.startsWith("/user/docs")) {
         await app.jwtAuth(req, reply);
         if (req.user) {
@@ -67,10 +68,16 @@ export default fp(async (app: FastifyInstance) => {
   prefix: "/notification",
   rewritePrefix: "/notification",
   preHandler: async (req, reply) => {
-    await app.jwtAuth(req, reply);
-    if (req.user) {
-      req.headers["x-user-id"] = (req.user as any).id;
-      req.headers["x-user-email"] = (req.user as any).email;
+    // Allow public access for docs and health
+    const publicPaths = ["/notification/docs", "/notification/health"];
+    const isPublic = publicPaths.some(path => req.url.startsWith(path));
+
+    if (!isPublic) {
+      await app.jwtAuth(req, reply);
+      if (req.user) {
+        req.headers["x-user-id"] = (req.user as any).id;
+        req.headers["x-user-email"] = (req.user as any).email;
+      }
     }
   },
 });
@@ -85,6 +92,26 @@ export default fp(async (app: FastifyInstance) => {
         !req.url.startsWith("/chat/docs") &&
         !req.url.startsWith("/chat/notify-tournament")
       ) {
+        await app.jwtAuth(req, reply);
+        if (req.user) {
+          req.headers["x-user-id"] = (req.user as any).id;
+          req.headers["x-user-email"] = (req.user as any).email;
+        }
+      }
+    },
+  });
+
+  app.register(proxy, {
+    upstream: process.env.GAME_SERVICE_URL || "http://localhost:3005",
+    prefix: "/game",
+    rewritePrefix: "/game",
+    preHandler: async (req, reply) => {
+      console.log("aaaaaaa");
+      // Public endpoints: health, docs, local games
+      const publicPaths = ["/game/docs", "/game/health"];
+      const isPublic = publicPaths.some(path => req.url.startsWith(path));
+
+      if (!isPublic) {
         await app.jwtAuth(req, reply);
         if (req.user) {
           req.headers["x-user-id"] = (req.user as any).id;
