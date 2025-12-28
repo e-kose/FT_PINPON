@@ -56,6 +56,7 @@ const start = async () => {
       })
       app.logger.info(`The auth service has been started on port ${host}:${port}.`)
   } catch (error: any) {
+    app.logger.error(error)
     startLogError(app, error)
     process.exit(1);
   }

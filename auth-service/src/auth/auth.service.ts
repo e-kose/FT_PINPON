@@ -107,7 +107,6 @@ export async function logoutService(req: FastifyRequest) {
 export async function getMeService(req: FastifyRequest) {
   const userId = req.headers["x-user-id"];
   const user = await checkUserExist(userService + `/user/id/${userId}`);
-  console.log(user);
   return user;
 }
 
@@ -191,9 +190,9 @@ export async function OAuthRegister(
   userName: string,
   user: any
 ) {
-  // Download Google avatar and save locally
+  const baseUrl = process.env.API_GATEWAY_URL || "http://localhost:3000";
   let avatarUrl =
-    process.env.API_GATEWAY_URL + "/auth/static/default-profile.png";
+    baseUrl + "/auth/static/default-profile.png";
 
   if (user.picture) {
     try {
@@ -210,11 +209,10 @@ export async function OAuthRegister(
         await fs.mkdir(avatarsDir, { recursive: true });
         await fs.writeFile(filePath, Buffer.from(buffer));
 
-        avatarUrl = `${process.env.API_GATEWAY_URL}/auth/static/${fileName}`;
+        avatarUrl = `${baseUrl}/auth/static/${fileName}`;
       }
     } catch (error) {
       console.error("Failed to download Google avatar:", error);
-      // Use default avatar if download fails
     }
   }
 
