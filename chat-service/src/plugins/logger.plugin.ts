@@ -5,7 +5,7 @@ import pino from "pino";
 
 export default fp(async function logger(app: FastifyInstance) {
   const serviceName = process.env.SERVICE_NAME || "chat-service";
-  const logstashHost = process.env.LOGSTASH_HOST || "logstash";
+  const logstashHost = process.env.LOGSTASH_HOST || "localhost";
   const logLevel = process.env.LOG_LEVEL || "info";
   const logstashPort = +(process.env.LOGSTAH_PORT || "5044");
 

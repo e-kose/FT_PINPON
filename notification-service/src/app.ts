@@ -22,7 +22,7 @@ dotenv.config();
 
 // Environment variables with defaults
 const host = process.env.HOST || "localhost";
-const port = +(process.env.PORT || "3003");
+const port = +(process.env.PORT || "3004");
 const nodeEnv = process.env.NODE_ENV || "development";
 const logLevel = process.env.LOG_LEVEL || "info";
 const dbPath = process.env.DB_PATH || "./db/notifications.db";

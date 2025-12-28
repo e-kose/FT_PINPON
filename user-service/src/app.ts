@@ -25,7 +25,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const host = process.env.HOST || "localhost";
-const port = +(process.env.PORT || "3003");
+const port = +(process.env.PORT || "3002");
 const app = fastify({ logger: true });
 
 app.register(loggerPlugin);
@@ -53,7 +53,10 @@ app.after(() => {
   app.userRepo = new UserRepository(app.db);
   app.userService = new UserService(app.userRepo);
   (app as any).friendshipRepo = new FriendshipRepository(app.db);
-  (app as any).friendshipService = new FriendshipService((app as any).friendshipRepo, (app as any).userRepo);
+  (app as any).friendshipService = new FriendshipService(
+    (app as any).friendshipRepo,
+    (app as any).userRepo
+  );
 });
 app.register(friendshipRoute);
 
@@ -63,7 +66,9 @@ const start = async () => {
       host,
       port,
     });
-    app.logger.info(`The user service has been started on port ${host}:${port}.`);
+    app.logger.info(
+      `The user service has been started on port ${host}:${port}.`
+    );
   } catch (error: any) {
     startLogError(app, error);
     process.exit(1);
