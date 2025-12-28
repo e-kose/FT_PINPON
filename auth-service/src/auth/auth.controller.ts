@@ -13,12 +13,15 @@ import {
   twoFactorEnableService,
   twoFactorDisableService,
   getAuthTable,
+  deleteAuthDataService,
+  registeUserService,
 } from "./auth.service.js";
 import { refreshToken } from "./types/refresh.token.js";
 import * as dotenv from "dotenv";
 import axios from "axios";
 import { loginUserBody } from "./types/login.userBody.js";
 import {
+  AuthDataNotFound,
   Forbidden,
   InvalidCredentials,
   InvalidToken,
@@ -48,6 +51,7 @@ export async function register(req: FastifyRequest<{ Body: registerUserBody }>, 
       req.body,
       headers
     );
+    await registeUserService(result.data.userId, req);
     return reply.code(result.status).send(result.data);
   } catch (error: any) {
     logError(req.server, req, error);
@@ -288,5 +292,24 @@ export async function twoFactorDisable(
   } catch (error) {
     logError(req.server, req, error);
     return reply.internalServerError("An error has occurred");
+  }
+}
+
+export async function deleteAuthData(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const result = await deleteAuthDataService(req);
+    return reply.code(200).send(result);
+  } catch (error) {
+    logError(req.server, req, error);
+    if (error instanceof AuthDataNotFound)
+    return reply
+      .code(404)
+      .send({ success: false, message: "Auth data not found" });
+    return reply
+      .code(500)
+      .send({ success: false, message: "An error has occurred" });
   }
 }

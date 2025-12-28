@@ -2,6 +2,7 @@ import BetterSqlite3 from "better-sqlite3";
 import { CreateProfileType } from "../types/table.types/createProfile.type";
 import { registerUserBody } from "../types/table.types/register.userBody";
 import { User } from "../types/table.types/userDB";
+import { BadRequest } from "../errors/user.errors";
 
 export class UserRepository {
   db: BetterSqlite3.Database;
@@ -62,10 +63,10 @@ export class UserRepository {
     const keys = Object.keys(data);
     if (keys.length === 0) return 0;
 
-     const setClause = keys.map((key) => `${key} = ?`).join(", ");
+    const setClause = keys.map((key) => `${key} = ?`).join(", ");
     const values = keys.map((key) => {
       const value = data[key];
-      if (typeof value === 'boolean') {
+      if (typeof value === "boolean") {
         return value ? 1 : 0;
       }
       return value;
@@ -77,6 +78,7 @@ export class UserRepository {
       return stmt.run(...values, id);
     } catch (err) {
       console.log(err);
+      throw BadRequest();
     }
   }
 
@@ -135,8 +137,25 @@ export class UserRepository {
   }
 
   deleteUser(id: number) {
-    const stmt = this.db.prepare("DELETE FROM users WHERE id = ?");
-    return stmt.run(id);
+    const tx = this.db.transaction((userId: number) => {
+      this.db
+        .prepare("DELETE FROM user_profiles   WHERE user_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM friendships     WHERE user_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM friendships     WHERE friend_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM blocked_users   WHERE blocker_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM blocked_users   WHERE blocked_id = ?")
+        .run(userId);
+      return this.db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+    });
+    return tx(id);
   }
 
   getProfileById(id: number) {
@@ -155,7 +174,6 @@ export class UserRepository {
     );
     return stmt.get(id);
   }
-
 
   listUsers() {
     const stmt = this.db.prepare("SELECT * FROM users");
@@ -176,11 +194,11 @@ export class UserRepository {
 
   getUserAll(id: number) {
     const stmt = this.db.prepare(`
-    SELECT u.*, p*,
-    FROM users u
-    LEFT JOIN user_profiles p ON u.id = p.user_id
-    WHERE u.id = ?
-  `);
+      SELECT u.*, p.*
+      FROM users u
+      LEFT JOIN user_profiles p ON u.id = p.user_id
+      WHERE u.id = ?
+    `);
     return stmt.get(id);
   }
 }

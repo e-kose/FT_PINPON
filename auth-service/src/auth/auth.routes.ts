@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import {
+  deleteAuthData,
   googleAuth,
   login,
   logout,
@@ -21,6 +22,7 @@ import {
   twoFacEnableSchema,
   twoFacSetupSchema,
 } from "./schemas/2FA.schema.js";
+import { deleteAuthSchema } from "./schemas/deleteAuth.schema.js";
 
 const createSchema = (summary: string, schema: any) => ({
   tags: ["Auth"],
@@ -96,5 +98,11 @@ export async function authRoutes(app: FastifyInstance) {
     "/google/callback",
     createSchema("Login user", OAuthSchema),
     googleAuth
+  );
+
+  app.delete(
+    "/internal/delete-account",
+    { schema: createSchema("Delete auth data", deleteAuthSchema) },
+    deleteAuthData
   );
 }

@@ -35,3 +35,9 @@ export const Forbidden = createError (
   'Forbidden',
   403
 )
+
+export const AuthDataNotFound = createError(
+  'AUTH_DATA_NOT_FOUND',
+  'Auth data not found',
+  404
+);

@@ -9,6 +9,7 @@ import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import { auth_tableDb } from "./types/authDb.js";
 import {
+  AuthDataNotFound,
   InvalidCredentials,
   InvalidToken,
   InvalidTwaFacToken,
@@ -30,6 +31,14 @@ const headers = {
     "X-Internal-Secret": process.env.INTERNAL_API_KEY,
   },
 };
+
+export async function registeUserService(userId: number, req: FastifyRequest) {
+  const db = req.server.db;
+  const result = db
+    .prepare("INSERT INTO auth_table (user_id) VALUES(?)")
+    .run(userId);
+  return result;
+}
 
 export async function loginUserService(response: any, req: FastifyRequest) {
   const body = req.body as loginUserBody;
@@ -183,23 +192,24 @@ export async function OAuthRegister(
   user: any
 ) {
   // Download Google avatar and save locally
-  let avatarUrl = process.env.API_GATEWAY_URL + "/auth/static/default-profile.png";
-  
+  let avatarUrl =
+    process.env.API_GATEWAY_URL + "/auth/static/default-profile.png";
+
   if (user.picture) {
     try {
       const avatarResponse = await fetch(user.picture);
       if (avatarResponse.ok) {
         const buffer = await avatarResponse.arrayBuffer();
         const fileName = `google-${user.id}-${Date.now()}.jpg`;
-        
+
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
         const avatarsDir = path.join(__dirname, "../../public");
         const filePath = path.join(avatarsDir, fileName);
-        
+
         await fs.mkdir(avatarsDir, { recursive: true });
         await fs.writeFile(filePath, Buffer.from(buffer));
-        
+
         avatarUrl = `${process.env.API_GATEWAY_URL}/auth/static/${fileName}`;
       }
     } catch (error) {
@@ -207,7 +217,7 @@ export async function OAuthRegister(
       // Use default avatar if download fails
     }
   }
-  
+
   const result = await userServicePost(userService + `/internal/user`, {
     username: userName,
     email: user.email,
@@ -327,4 +337,20 @@ export function findRefreshTokensUserId(db: Database, id: number) {
     .get(id) as refreshTokenDB;
   if (tokenRecord) return { success: true, tokenRecord };
   return { success: false, tokenRecord: null };
+}
+
+export async function deleteAuthDataService(req: FastifyRequest) {
+  const db = req.server.db;
+  const userId = Number(req.headers["x-user-id"]);
+  
+  const result = db.transaction((userId: number) => {
+    db.prepare("DELETE FROM refresh_tokens WHERE user_id = ?").run(userId);
+    return db.prepare("DELETE FROM auth_table WHERE user_id = ?").run(userId);
+  })(userId);
+  
+  if (result.changes > 0) {
+    return { success: true, message: "Auth data deleted" };
+  } else {
+    throw new AuthDataNotFound();
+  }
 }
