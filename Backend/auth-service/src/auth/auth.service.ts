@@ -12,7 +12,7 @@ import {
   AuthDataNotFound,
   InvalidCredentials,
   InvalidToken,
-  InvalidTwoFacToken,
+  InvalidTwaFacToken,
   RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
@@ -54,7 +54,7 @@ export async function loginUserService(response: any, req: FastifyRequest) {
       token: body.token,
       window: 1,
     });
-    if (!verified) throw new InvalidTwoFacToken();
+    if (!verified) throw new InvalidTwaFacToken();
   }
   const payload: payload = {
     id: response.data.id,

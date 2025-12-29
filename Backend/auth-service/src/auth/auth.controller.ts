@@ -25,7 +25,7 @@ import {
   Forbidden,
   InvalidCredentials,
   InvalidToken,
-  InvalidTwoFacToken,
+  InvalidTwaFacToken,
   RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
@@ -86,7 +86,7 @@ export async function login(
       error instanceof InvalidToken ||
       error instanceof InvalidCredentials ||
       error instanceof Forbidden ||
-      error instanceof InvalidTwoFacToken ||
+      error instanceof InvalidTwaFacToken ||
       error instanceof RequiredToken
     )
       return reply

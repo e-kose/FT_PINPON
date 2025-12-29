@@ -35,16 +35,10 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      auth-service:
-        condition: service_started
-      user-service:
-        condition: service_started
-      chat-service:
-        condition: service_started
-      notification-service:
-        condition: service_started
-      logstash:
-        condition: service_healthy
+      - auth-service
+      - user-service
+      - chat-service
+      - notification-service
     env_file:
       - ./api-gateway/.env
     networks:
@@ -60,9 +54,6 @@ services:
       - ./auth-service/db:/app/db
     env_file:
       - ./auth-service/.env
-    depends_on:
-      logstash:
-        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -76,9 +67,6 @@ services:
       - ./user-service/db:/app/db
     env_file:
       - ./user-service/.env
-    depends_on:
-      logstash:
-        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -92,9 +80,6 @@ services:
       - ./chat-service/db:/app/db
     env_file:
       - ./chat-service/.env
-    depends_on:
-      logstash:
-        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -203,9 +188,6 @@ services:
       - ./notification-service/db:/app/db
     env_file:
       - ./notification-service/.env
-    depends_on:
-      logstash:
-        condition: service_healthy
     networks:
       - internal-network
     # healthcheck:

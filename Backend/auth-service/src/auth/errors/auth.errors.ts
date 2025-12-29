@@ -12,7 +12,7 @@ export const InvalidToken = createError(
   401
 );
 
-export const InvalidTwoFacToken = createError(
+export const InvalidTwaFacToken = createError(
   'INVALID_2FA_TOKEN',
   '2FA_Token is invalid',
   401
