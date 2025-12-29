@@ -1,7 +1,7 @@
 export const registerUserSchema = {
   body: {
     type: "object",
-    required: ["username", "password", "email"],
+    required: ["username", "password", "email", "profile"],
     additionalProperties: false,
     properties: {
       email: {
@@ -20,6 +20,22 @@ export const registerUserSchema = {
         minLength: 6,
         maxLength: 64,
         pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
+      },
+      
+      profile: {
+        type: "object",
+        required: ["full_name"],
+        properties: {
+          full_name: {
+            type: "string",
+            minLength: 1,
+            maxLength: 100,
+          },
+          avatar_url: {
+            type: "string",
+            format: "uri",
+          },
+        },
       },
     },
   },

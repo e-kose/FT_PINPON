@@ -308,6 +308,8 @@
   "signup_form_title": "Hesap Oluştur",
   "signup_form_username_label": "Kullanıcı Adı",
   "signup_form_username_placeholder": "Kullanıcı Adı",
+  "signup_form_fullname_label": "Tam Ad",
+  "signup_form_fullname_placeholder": "Tam adınızı girin",
   "signup_google_button_full": "Google ile bağlan",
   "signup_google_button_short": "Google",
   "signup_hero_subtitle": "Efsanevi Pong dünyasına katılın",

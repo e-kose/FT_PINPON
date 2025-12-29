@@ -9,7 +9,6 @@ import {
 import { UserRepository } from "../repository/user.repository.js";
 import { registerUserBody } from "../types/table.types/register.userBody.js";
 import { checkHash, hashTransaction } from "../utils/hash.utils.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
 import * as path from "path";

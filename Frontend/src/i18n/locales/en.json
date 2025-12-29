@@ -308,6 +308,8 @@
   "signup_form_title": "Create Account",
   "signup_form_username_label": "Username",
   "signup_form_username_placeholder": "Username",
+  "signup_form_fullname_label": "Full Name",
+  "signup_form_fullname_placeholder": "Enter your full name",
   "signup_google_button_full": "Continue with Google",
   "signup_google_button_short": "Google",
   "signup_hero_subtitle": "Join the legendary Pong universe",

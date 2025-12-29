@@ -222,6 +222,7 @@ export async function OAuthRegister(
     password: null,
     profile: {
       avatar_url: avatarUrl,
+      full_name: user.name || userName,
     },
   });
   app.db

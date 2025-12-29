@@ -7,6 +7,9 @@ interface UserSignup {
 	email: string;
 	username: string;
 	password: string;
+	profile: {
+		full_name: string;
+	}
 }
 
 export default class SignupForm extends UserForm {
@@ -35,6 +38,10 @@ export default class SignupForm extends UserForm {
 	protected createFormContent(): string {
 		return `
 			<form class="space-y-3 sm:space-y-4 md:space-y-5" action="#">
+				<div>
+					<label for="fullName" class="block mb-1.5 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">${t("signup_form_fullname_label")}</label>
+					<input type="text" name="fullName" id="fullName" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 sm:p-3 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" placeholder="${t("signup_form_fullname_placeholder")}" required>
+				</div>
 				<div>
 					<label for="username" class="block mb-1.5 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">${t("signup_form_username_label")}</label>
 					<input type="text" name="username" id="username" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 sm:p-3 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" placeholder="${t("signup_form_username_placeholder")}" required>
@@ -97,11 +104,19 @@ export default class SignupForm extends UserForm {
 		const userData: UserSignup = {
 			email: this.sanitizeInput(formData.get("email") as string || ""),
 			username: this.sanitizeInput(formData.get("username") as string || ""),
-			password: this.sanitizeInput(formData.get("password") as string || "")
+			password: this.sanitizeInput(formData.get("password") as string || ""),
+			profile: {
+				full_name: this.sanitizeInput(formData.get("fullName") as string || "")
+			}
 		};
 
 		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/;
 		if (!this.checkInput(emailPattern, '#email', 'label[for="email"]', "signup_form_email_label")) {
+			return;
+		}
+
+		const fullNamePattern = /^[a-zA-Z\s]+$/;
+		if (!this.checkInput(fullNamePattern, '#fullName', 'label[for="fullName"]', "signup_form_fullname_label")) {
 			return;
 		}
 
