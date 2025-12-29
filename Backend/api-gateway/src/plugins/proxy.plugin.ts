@@ -50,11 +50,7 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   app.register(proxy, {
-<<<<<<< HEAD:Backend/api-gateway/src/plugins/proxy.plugin.ts
   upstream: process.env.USER_SERVICE_URL || "http://user-service:3002",
-=======
-  upstream: process.env.USER_SERVICE_URL || "http://localhost:3002",
->>>>>>> origin/main:api-gateway/src/plugins/proxy.plugin.ts
   prefix: "/friend",
   rewritePrefix: "/friend",
   preHandler: async (req, reply) => {
@@ -67,11 +63,7 @@ export default fp(async (app: FastifyInstance) => {
 });
 
   app.register(proxy, {
-<<<<<<< HEAD:Backend/api-gateway/src/plugins/proxy.plugin.ts
-  upstream: process.env.NOTIFICATION_SERVICE_URL || "http://notification-service:3003",
-=======
-  upstream: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3004",
->>>>>>> origin/main:api-gateway/src/plugins/proxy.plugin.ts
+  upstream: process.env.NOTIFICATION_SERVICE_URL || "http://notification-service:3004",
   prefix: "/notification",
   rewritePrefix: "/notification",
   preHandler: async (req, reply) => {
@@ -84,11 +76,7 @@ export default fp(async (app: FastifyInstance) => {
 });
 
   app.register(proxy, {
-<<<<<<< HEAD:Backend/api-gateway/src/plugins/proxy.plugin.ts
     upstream: process.env.CHAT_SERVICE_URL || "http://chat-service:3003",
-=======
-    upstream: process.env.CHAT_SERVICE_URL || "http://localhost:3003",
->>>>>>> origin/main:api-gateway/src/plugins/proxy.plugin.ts
     prefix: "/chat",
     rewritePrefix: "/chat",
     preHandler: async (req, reply) => {

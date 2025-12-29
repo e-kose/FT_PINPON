@@ -25,7 +25,7 @@ import {
   Forbidden,
   InvalidCredentials,
   InvalidToken,
-  InvalidTwaFacToken,
+  InvalidTwoFacToken,
   RequiredToken,
   twoFacNotInit,
 } from "./errors/auth.errors.js";
@@ -33,14 +33,8 @@ import { registerUserBody } from "./types/register.userBody.js";
 import { logError } from "./utils/log.utils.js";
 
 dotenv.config();
-<<<<<<< HEAD:Backend/auth-service/src/auth/auth.controller.ts
-const DEFAULT_AVATAR = process.env.NODE_ENV === 'production' && process.env.R2_PUBLIC_URL
-  ? `${process.env.R2_PUBLIC_URL}/default-profile.png`
-  : `http://localhost:${process.env.PORT || 3001}/static/default-profile.png`;
-=======
 const API_GATEWAY_URL = process.env.API_GATEWAY_URL || "http://localhost:3000";
 const DEFAULT_AVATAR = `${API_GATEWAY_URL}/auth/static/default-profile.png`;
->>>>>>> origin/main:auth-service/src/auth/auth.controller.ts
 const userService = process.env.USER_SERVICE || "http://localhost:3002";
 const headers = {
   headers: {
@@ -92,7 +86,7 @@ export async function login(
       error instanceof InvalidToken ||
       error instanceof InvalidCredentials ||
       error instanceof Forbidden ||
-      error instanceof InvalidTwaFacToken ||
+      error instanceof InvalidTwoFacToken ||
       error instanceof RequiredToken
     )
       return reply

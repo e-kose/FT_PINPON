@@ -44,8 +44,6 @@ dist/
 
 *.log
 
-<<<<<<< HEAD
-
 node_modules/
 dist/
 build/
@@ -83,5 +81,3 @@ dist/
 .env
 
 *.log
-=======
->>>>>>> origin/main

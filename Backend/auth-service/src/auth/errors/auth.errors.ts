@@ -9,15 +9,12 @@ export const InvalidCredentials = createError(
 export const InvalidToken = createError(
   'INVALID_TOKEN',
   '2FA token is required',
-<<<<<<< HEAD:Backend/auth-service/src/auth/errors/auth.errors.ts
-=======
   401
 );
 
-export const InvalidTwaFacToken = createError(
+export const InvalidTwoFacToken = createError(
   'INVALID_2FA_TOKEN',
   '2FA_Token is invalid',
->>>>>>> origin/main:auth-service/src/auth/errors/auth.errors.ts
   401
 );
 

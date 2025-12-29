@@ -35,10 +35,16 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - auth-service
-      - user-service
-      - chat-service
-      - notification-service
+      auth-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      chat-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      logstash:
+        condition: service_healthy
     env_file:
       - ./api-gateway/.env
     networks:
@@ -54,6 +60,9 @@ services:
       - ./auth-service/db:/app/db
     env_file:
       - ./auth-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -67,6 +76,9 @@ services:
       - ./user-service/db:/app/db
     env_file:
       - ./user-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -80,6 +92,9 @@ services:
       - ./chat-service/db:/app/db
     env_file:
       - ./chat-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -128,10 +143,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - LOGSTASH_WRITER_USER=${LOGSTASH_WRITER_USER}
       - LOGSTASH_WRITER_PASSWORD=${LOGSTASH_WRITER_PASSWORD}
-<<<<<<< HEAD:Backend/docker-compose.yml
-=======
       - LOG_LEVEL=${LOG_LEVEL:-info}
->>>>>>> origin/main:docker-compose.yml
     env_file:
       - ./elastic-search/.env
     volumes:
@@ -191,25 +203,9 @@ services:
       - ./notification-service/db:/app/db
     env_file:
       - ./notification-service/.env
-    networks:
-      - internal-network
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
-    restart: always
-
-  notification-service:
-    build:
-      context: ./notification-service
-    expose:
-      - "3004"
-    volumes:
-      - ./notification-service/db:/app/db
-    env_file:
-      - ./notification-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     # healthcheck:

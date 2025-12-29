@@ -42,11 +42,7 @@ app.register(errorHandlerPlugin);
 // Static file server for default avatar
 app.register(fastifyStatic, {
   root: path.join(__dirname, "../public"),
-<<<<<<< HEAD:Backend/auth-service/src/app.ts
-  prefix: "/static/",
-=======
   prefix: "/auth/static/",
->>>>>>> origin/main:auth-service/src/app.ts
 });
 
 app.register(authRoutes, { prefix: "/auth" });

@@ -40,11 +40,7 @@ app.register(internalAuthPlugin);
 // Static file server for avatars
 app.register(fastifyStatic, {
   root: path.join(__dirname, "../public"),
-<<<<<<< HEAD:Backend/user-service/src/app.ts
-  prefix: "/static/",
-=======
   prefix: "/user/static/",
->>>>>>> origin/main:user-service/src/app.ts
 });
 
 app.decorate("userRepo", null);
@@ -57,14 +53,10 @@ app.after(() => {
   app.userRepo = new UserRepository(app.db);
   app.userService = new UserService(app.userRepo);
   (app as any).friendshipRepo = new FriendshipRepository(app.db);
-<<<<<<< HEAD:Backend/user-service/src/app.ts
-  (app as any).friendshipService = new FriendshipService((app as any).friendshipRepo, (app as any).userRepo);
-=======
   (app as any).friendshipService = new FriendshipService(
     (app as any).friendshipRepo,
     (app as any).userRepo
   );
->>>>>>> origin/main:user-service/src/app.ts
 });
 app.register(friendshipRoute);
 

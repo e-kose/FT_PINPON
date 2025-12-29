@@ -2,7 +2,7 @@ import BetterSqlite3 from "better-sqlite3";
 import { CreateProfileType } from "../types/table.types/createProfile.type";
 import { registerUserBody } from "../types/table.types/register.userBody";
 import { User } from "../types/table.types/userDB";
-import { BadRequest } from "../errors/user.errors";
+import { BadRequest } from "../errors/user.errors.js";
 
 export class UserRepository {
   db: BetterSqlite3.Database;
@@ -63,17 +63,10 @@ export class UserRepository {
     const keys = Object.keys(data);
     if (keys.length === 0) return 0;
 
-<<<<<<< HEAD:Backend/user-service/src/user/repository/user.repository.ts
-     const setClause = keys.map((key) => `${key} = ?`).join(", ");
-    const values = keys.map((key) => {
-      const value = data[key];
-      if (typeof value === 'boolean') {
-=======
     const setClause = keys.map((key) => `${key} = ?`).join(", ");
     const values = keys.map((key) => {
       const value = data[key];
       if (typeof value === "boolean") {
->>>>>>> origin/main:user-service/src/user/repository/user.repository.ts
         return value ? 1 : 0;
       }
       return value;
@@ -182,17 +175,6 @@ export class UserRepository {
     return stmt.get(id);
   }
 
-  getUserSummaryById(id: number) {
-    const stmt = this.db.prepare(
-      `SELECT u.id AS user_id, u.username AS username, p.full_name AS full_name, p.avatar_url AS avatar_url
-       FROM users u
-       LEFT JOIN user_profiles p ON u.id = p.user_id
-       WHERE u.id = ?`
-    );
-    return stmt.get(id);
-  }
-
-
   listUsers() {
     const stmt = this.db.prepare("SELECT * FROM users");
     return stmt.all();
@@ -212,19 +194,11 @@ export class UserRepository {
 
   getUserAll(id: number) {
     const stmt = this.db.prepare(`
-<<<<<<< HEAD:Backend/user-service/src/user/repository/user.repository.ts
-    SELECT u.*, p*,
-    FROM users u
-    LEFT JOIN user_profiles p ON u.id = p.user_id
-    WHERE u.id = ?
-  `);
-=======
       SELECT u.*, p.*
       FROM users u
       LEFT JOIN user_profiles p ON u.id = p.user_id
       WHERE u.id = ?
     `);
->>>>>>> origin/main:user-service/src/user/repository/user.repository.ts
     return stmt.get(id);
   }
 }
