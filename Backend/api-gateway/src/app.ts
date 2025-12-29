@@ -15,9 +15,9 @@ const host = process.env.HOST || "0.0.0.0";
 
 app.register(import('@fastify/cors'), {
   origin: [
-    'http://localhost:5173', // Vite dev server
-    'http://localhost:3000', // Kendi portun
-    'http://127.0.0.1:5173', // Alternatif localhost
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']

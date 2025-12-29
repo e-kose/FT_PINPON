@@ -42,7 +42,11 @@ app.register(errorHandlerPlugin);
 // Static file server for default avatar
 app.register(fastifyStatic, {
   root: path.join(__dirname, "../public"),
+<<<<<<< HEAD:Backend/auth-service/src/app.ts
   prefix: "/static/",
+=======
+  prefix: "/auth/static/",
+>>>>>>> origin/main:auth-service/src/app.ts
 });
 
 app.register(authRoutes, { prefix: "/auth" });
@@ -56,6 +60,7 @@ const start = async () => {
       })
       app.logger.info(`The auth service has been started on port ${host}:${port}.`)
   } catch (error: any) {
+    app.logger.error(error)
     startLogError(app, error)
     process.exit(1);
   }

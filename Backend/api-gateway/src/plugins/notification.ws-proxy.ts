@@ -5,7 +5,7 @@ import http from "http";
 
 export default fp(async (app: FastifyInstance) => {
   const wsProxy = httpProxy.createProxyServer({
-    target: process.env.NOTIFICATION_SERVICE_URL || "http://notification-service:3003",
+    target: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3004",
     ws: true,
   });
 

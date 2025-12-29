@@ -15,6 +15,7 @@ export class FriendshipService {
 
   sendRequest(fromId: number, toId: number) {
     if (fromId === toId) throw new FriendBadRequest('Cannot friend yourself');
+    
     const user = this.userRepo.getUserById(toId);
     if (!user) throw new FriendBadRequest('Target user not found');
     const blocked = this.friendshipRepo.isBlocked(toId, fromId);

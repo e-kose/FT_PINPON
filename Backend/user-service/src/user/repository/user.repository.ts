@@ -2,6 +2,7 @@ import BetterSqlite3 from "better-sqlite3";
 import { CreateProfileType } from "../types/table.types/createProfile.type";
 import { registerUserBody } from "../types/table.types/register.userBody";
 import { User } from "../types/table.types/userDB";
+import { BadRequest } from "../errors/user.errors";
 
 export class UserRepository {
   db: BetterSqlite3.Database;
@@ -62,10 +63,17 @@ export class UserRepository {
     const keys = Object.keys(data);
     if (keys.length === 0) return 0;
 
+<<<<<<< HEAD:Backend/user-service/src/user/repository/user.repository.ts
      const setClause = keys.map((key) => `${key} = ?`).join(", ");
     const values = keys.map((key) => {
       const value = data[key];
       if (typeof value === 'boolean') {
+=======
+    const setClause = keys.map((key) => `${key} = ?`).join(", ");
+    const values = keys.map((key) => {
+      const value = data[key];
+      if (typeof value === "boolean") {
+>>>>>>> origin/main:user-service/src/user/repository/user.repository.ts
         return value ? 1 : 0;
       }
       return value;
@@ -73,7 +81,12 @@ export class UserRepository {
 
     const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${whereColumn} = ?`;
     const stmt = this.db.prepare(sql);
-    return stmt.run(...values, id);
+    try {
+      return stmt.run(...values, id);
+    } catch (err) {
+      console.log(err);
+      throw BadRequest();
+    }
   }
 
   /**
@@ -131,12 +144,41 @@ export class UserRepository {
   }
 
   deleteUser(id: number) {
-    const stmt = this.db.prepare("DELETE FROM users WHERE id = ?");
-    return stmt.run(id);
+    const tx = this.db.transaction((userId: number) => {
+      this.db
+        .prepare("DELETE FROM user_profiles   WHERE user_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM friendships     WHERE user_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM friendships     WHERE friend_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM blocked_users   WHERE blocker_id = ?")
+        .run(userId);
+      this.db
+        .prepare("DELETE FROM blocked_users   WHERE blocked_id = ?")
+        .run(userId);
+      return this.db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+    });
+    return tx(id);
   }
 
   getProfileById(id: number) {
-    const stmt = this.db.prepare("SELECT * FROM user_profiles WHERE user_id = ?");
+    const stmt = this.db.prepare(
+      "SELECT * FROM user_profiles WHERE user_id = ?"
+    );
+    return stmt.get(id);
+  }
+
+  getUserSummaryById(id: number) {
+    const stmt = this.db.prepare(
+      `SELECT u.id AS user_id, u.username AS username, p.full_name AS full_name, p.avatar_url AS avatar_url
+       FROM users u
+       LEFT JOIN user_profiles p ON u.id = p.user_id
+       WHERE u.id = ?`
+    );
     return stmt.get(id);
   }
 
@@ -158,23 +200,31 @@ export class UserRepository {
 
   updateUser(id: number, data: Record<string, any>) {
     let profileRes, userRes;
-    const {profile, ...userFields} = data;
+    const { profile, ...userFields } = data;
     if (profile && Object.keys(profile).length > 0) {
-      profileRes =  this.updateTable("user_profiles", id, profile, "user_id");
+      profileRes = this.updateTable("user_profiles", id, profile, "user_id");
     }
-    if (userFields && Object.keys(userFields).length > 0){
+    if (userFields && Object.keys(userFields).length > 0) {
       userRes = this.updateTable("users", id, userFields, "id");
     }
-    return {userRes, profileRes};
+    return { userRes, profileRes };
   }
 
   getUserAll(id: number) {
     const stmt = this.db.prepare(`
+<<<<<<< HEAD:Backend/user-service/src/user/repository/user.repository.ts
     SELECT u.*, p*,
     FROM users u
     LEFT JOIN user_profiles p ON u.id = p.user_id
     WHERE u.id = ?
   `);
+=======
+      SELECT u.*, p.*
+      FROM users u
+      LEFT JOIN user_profiles p ON u.id = p.user_id
+      WHERE u.id = ?
+    `);
+>>>>>>> origin/main:user-service/src/user/repository/user.repository.ts
     return stmt.get(id);
   }
 }

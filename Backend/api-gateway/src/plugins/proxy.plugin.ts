@@ -3,11 +3,17 @@ import fp from "fastify-plugin";
 import proxy from "@fastify/http-proxy";
 
 export default fp(async (app: FastifyInstance) => {
+  // Auth service proxy (API endpoints)
   app.register(proxy, {
     upstream: process.env.AUTH_SERVICE_URL || "http://localhost:3001",
     prefix: "/auth",
     rewritePrefix: "/auth",
     preHandler: async (req, reply) => {
+      // Skip JWT for static files
+      if (req.url.startsWith("/auth/static/")) {
+        return;
+      }
+      
       if (
         req.url.startsWith("/auth/2fa/setup") ||
         req.url.startsWith("/auth/2fa/enable") ||
@@ -28,6 +34,11 @@ export default fp(async (app: FastifyInstance) => {
     prefix: "/user",
     rewritePrefix: "/user",
     preHandler: async (req, reply) => {
+      // Skip JWT for static avatar files
+      if (req.url.startsWith("/user/static/avatars/")) {
+        return;
+      }
+      
       if (req.url.startsWith("/user") && !req.url.startsWith("/user/docs")) {
         await app.jwtAuth(req, reply);
         if (req.user) {
@@ -39,7 +50,11 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   app.register(proxy, {
+<<<<<<< HEAD:Backend/api-gateway/src/plugins/proxy.plugin.ts
   upstream: process.env.USER_SERVICE_URL || "http://user-service:3002",
+=======
+  upstream: process.env.USER_SERVICE_URL || "http://localhost:3002",
+>>>>>>> origin/main:api-gateway/src/plugins/proxy.plugin.ts
   prefix: "/friend",
   rewritePrefix: "/friend",
   preHandler: async (req, reply) => {
@@ -52,7 +67,11 @@ export default fp(async (app: FastifyInstance) => {
 });
 
   app.register(proxy, {
+<<<<<<< HEAD:Backend/api-gateway/src/plugins/proxy.plugin.ts
   upstream: process.env.NOTIFICATION_SERVICE_URL || "http://notification-service:3003",
+=======
+  upstream: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3004",
+>>>>>>> origin/main:api-gateway/src/plugins/proxy.plugin.ts
   prefix: "/notification",
   rewritePrefix: "/notification",
   preHandler: async (req, reply) => {
@@ -65,7 +84,11 @@ export default fp(async (app: FastifyInstance) => {
 });
 
   app.register(proxy, {
+<<<<<<< HEAD:Backend/api-gateway/src/plugins/proxy.plugin.ts
     upstream: process.env.CHAT_SERVICE_URL || "http://chat-service:3003",
+=======
+    upstream: process.env.CHAT_SERVICE_URL || "http://localhost:3003",
+>>>>>>> origin/main:api-gateway/src/plugins/proxy.plugin.ts
     prefix: "/chat",
     rewritePrefix: "/chat",
     preHandler: async (req, reply) => {

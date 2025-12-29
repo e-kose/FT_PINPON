@@ -26,6 +26,13 @@ docker-compose.override.yml
 *.sqlite
 *.sqlite3
 
+# SQLite database files
+*.db
+auth-service/db/*.db
+user-service/db/*.db
+notification-service/db/*.db
+chat-service/db/*.db
+
 coverage/
 
 
@@ -37,6 +44,7 @@ dist/
 
 *.log
 
+<<<<<<< HEAD
 
 node_modules/
 dist/
@@ -75,3 +83,5 @@ dist/
 .env
 
 *.log
+=======
+>>>>>>> origin/main

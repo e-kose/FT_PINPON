@@ -10,6 +10,9 @@ import {
 import { userParam } from "../types/req.type/params.types.js";
 import { UserRepository } from "../repository/user.repository.js";
 import { logError } from "../utils/log.utils.js";
+import axios from "axios";
+
+export const authService = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
 
 export async function createUserHandler(
   req: FastifyRequest,
@@ -143,7 +146,10 @@ export async function updateUserHandler(
     const data = req.body;
     const userRepo = req.server.userRepo as UserRepository;
     const result = userRepo.updateUser(id, data);
+<<<<<<< HEAD:Backend/user-service/src/user/controller/user.controller.ts
 
+=======
+>>>>>>> origin/main:user-service/src/user/controller/user.controller.ts
     if (result) {
       return reply.send({ success: true, message: "User updated" });
     } else {
@@ -155,6 +161,10 @@ export async function updateUserHandler(
       return reply
         .code(error.statusCode)
         .send({ succcess: false, message: error.message });
+    else if (error instanceof BadRequest)
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: "Kullanıcı adı zaten kullanılıyor." });
     return reply
       .code(500)
       .send({ success: false, message: "An error has occurred" });
@@ -168,18 +178,17 @@ export async function updateAvatarHandler(
   try {
     const id = +req.headers["x-user-id"]!;
     if (!req.isMultipart()) {
-      return reply
-        .code(406)
-        .send({
-          success: false,
-          message: "Request must be multipart/form-data",
-        });
+      return reply.code(406).send({
+        success: false,
+        message: "Request must be multipart/form-data",
+      });
     }
     const user = req.server.userRepo?.getUserById(id);
     if (!user) throw new UserNotFound();
     const result = await req.server.userService!.avatarUpdateService(req, id);
     reply.send(result);
   } catch (error) {
+    console.error("❌ Avatar upload error:", error);
     logError(req.server, req, error);
     if (error instanceof BadRequest || error instanceof UserNotFound)
       return reply
@@ -187,7 +196,11 @@ export async function updateAvatarHandler(
         .send({ success: false, message: error.message });
     return reply
       .code(500)
-      .send({ success: false, message: "An error has occurred" });
+      .send({
+        success: false,
+        message: "An error has occurred",
+        error: error instanceof Error ? error.message : String(error),
+      });
   }
 }
 
@@ -200,12 +213,10 @@ export async function updateUserPassword(
     const user = req.server.userRepo?.getUserById(id);
     if (!user) throw new UserNotFound();
     const res = await req.server.userService!.updatePassword(req, id);
-    return reply
-      .code(200)
-      .send({
-        success: true,
-        message: "The password has been successfully changed.",
-      });
+    return reply.code(200).send({
+      success: true,
+      message: "The password has been successfully changed.",
+    });
   } catch (error) {
     logError(req.server, req, error);
     if (error instanceof InvalidCredentials || error instanceof UserNotFound)
@@ -227,12 +238,22 @@ export async function deleteUserHandler(
     const userRepo = req.server.userRepo as UserRepository;
     const result = userRepo.deleteUser(id);
     if (result && result.changes > 0) {
+      const axResult = await axios.delete(
+        authService + "/auth/internal/delete-account",
+        {
+          headers: {
+            "X-Internal-Secret": process.env.INTERNAL_API_KEY || "testkey",
+            "x-user-id": id.toString(),
+          },
+        }
+      )
       return reply.send({ success: true, message: "User deleted" });
     } else {
       throw new UserNotFound();
     }
   } catch (error) {
     logError(req.server, req, error);
+    console.log(error)
     if (error instanceof UserNotFound)
       return reply
         .code(error.statusCode)
