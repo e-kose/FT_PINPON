@@ -62,7 +62,7 @@ export class Settings extends HTMLElement {
 		if (response.success) {
 			messages.showMessage(
 				t("common_success"),
-				response.message || t("settings_generic_update_success"),
+				t("settings_generic_update_success"),
 				"success",
 				containerSelector
 			);

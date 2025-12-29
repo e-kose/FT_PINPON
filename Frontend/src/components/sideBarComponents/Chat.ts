@@ -172,9 +172,9 @@ class Chat extends LocalizedComponent {
 		}
 
 		return `
-			<aside class="lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-[calc(100vh-6rem)] overflow-auto">
+			<aside class="lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-auto">
 				<div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">${t("chat_sidebar_title")}</div>
-				<div class="divide-y overflow-auto max-h-[70vh]">${content}</div>
+				<div class="divide-y overflow-auto max-h-none lg:max-h-[70vh]">${content}</div>
 			</aside>
 		`;
 	}
@@ -200,7 +200,7 @@ class Chat extends LocalizedComponent {
 			`;
 
 		return `
-			<section class="lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex flex-col h-[calc(100vh-6rem)]">
+			<section class="lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex flex-col h-auto lg:h-[calc(100vh-6rem)]">
 				${conversationContent}
 			</section>
 		`;

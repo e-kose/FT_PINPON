@@ -12,6 +12,10 @@ import { LocalizedComponent } from "../base/LocalizedComponent";
 class TwoFaAuth extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
 	private qrData: string | null = null;
+	private readonly messageHostSelector = "#twofa-message-host";
+	private pendingMessage:
+		| { status: "enable" | "disable"; success: boolean; override?: { titleKey?: string; messageKey?: string; icon?: string; theme?: string } }
+		| null = null;
 
 	protected onConnected(): void {
 		if (!this.sidebarListener) {
@@ -57,9 +61,9 @@ class TwoFaAuth extends LocalizedComponent {
 									<h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">${t("twofa_page_title")}</h1>
 									<p class="text-sm text-gray-600 dark:text-gray-300">${t("twofa_page_subtitle")}</p>
 								</div>
+								<div id="twofa-message-host" class="mb-6"></div>
 								${enabled ? this.renderEnabledSection() : this.renderDisabledSection()}
 								${!enabled && this.qrData ? this.renderQrSection() : ""}
-								<div id="twofa-message-host" class="mt-4"></div>
 								<div class="mt-6 flex justify-center">
 									<button data-back class="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150 text-sm">
 										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,6 +83,11 @@ class TwoFaAuth extends LocalizedComponent {
 	protected afterRender(): void {
 		this.attachEvents();
 		this.adjustMainContentMargin(sidebarStateManager.getState().isCollapsed);
+		if (this.pendingMessage) {
+			const payload = this.pendingMessage;
+			this.pendingMessage = null;
+			messages.twoFaMessage(payload.status, payload.success, this.messageHostSelector, payload.override);
+		}
 	}
 
 	private renderEnabledSection(): string {
@@ -189,25 +198,23 @@ class TwoFaAuth extends LocalizedComponent {
 
 	private async startSetup(): Promise<void> {
 		if (this.qrData) return;
-		try {
-			const result = await set2FA();
-			if (result) {
-				this.qrData = result;
-			} else {
-				messages.twoFaMessage("enable", false);
-			}
-		} catch {
-			messages.twoFaMessage("enable", false);
-		} finally {
-			this.renderAndBind();
+		const result = await set2FA();
+		if (result.ok && result.qr) {
+			this.qrData = result.qr;
+		} else {
+			this.queueTwoFaMessage(this.getTwoFaErrorPayload(result.status, "setup"));
 		}
+		this.renderAndBind();
 	}
 
 	private submitCodeIfValid(): void {
 		const input = this.querySelector<HTMLInputElement>("#twofa-code");
 		const code = (input?.value || "").trim();
 		if (!/^[0-9]{6}$/.test(code)) {
-			alert(t("user_store_twofa_code_invalid"));
+			messages.twoFaMessage("enable", false, this.messageHostSelector, {
+				titleKey: "common_error",
+				messageKey: "user_store_twofa_code_invalid"
+			});
 			input?.focus();
 			return;
 		}
@@ -215,31 +222,85 @@ class TwoFaAuth extends LocalizedComponent {
 	}
 
 	private handleVerify(code: string): void {
-		enable2Fa(code).then((success) => {
-			if (success) {
+		enable2Fa(code).then((result) => {
+			if (result.ok) {
 				this.qrData = null;
-				messages.twoFaMessage("enable", true);
+				this.queueTwoFaMessage({ status: "enable", success: true });
 				this.renderAndBind();
 				setTimeout(() => router.navigate("/settings/security"), 2000);
 			} else {
-				messages.twoFaMessage("enable", false);
+				this.queueTwoFaMessage(this.getTwoFaErrorPayload(result.status, "enable"));
 				this.renderAndBind();
 			}
 		});
 	}
 
 	private handleDisable(): void {
-		disable2FA().then((success) => {
-			if (success) {
+		disable2FA().then((result) => {
+			if (result.ok) {
 				this.qrData = null;
-				messages.twoFaMessage("disable", true);
+				this.queueTwoFaMessage({ status: "disable", success: true });
 				this.renderAndBind();
 				setTimeout(() => router.navigate("/settings/security"), 2000);
 			} else {
-				messages.twoFaMessage("disable", false);
+				this.queueTwoFaMessage(this.getTwoFaErrorPayload(result.status, "disable"));
 				this.renderAndBind();
 			}
 		});
+	}
+
+	private queueTwoFaMessage(payload: { status: "enable" | "disable"; success: boolean; override?: { titleKey?: string; messageKey?: string; icon?: string; theme?: string } }): void {
+		this.pendingMessage = payload;
+	}
+
+	private getTwoFaErrorPayload(status: number, stage: "setup" | "enable" | "disable"): { status: "enable" | "disable"; success: boolean; override?: { titleKey?: string; messageKey?: string; icon?: string; theme?: string } } {
+		const statusKey = stage === "disable" ? "disable" : "enable";
+		if (status === 401) {
+			if (stage === "enable") {
+				return {
+					status: "enable",
+					success: false,
+					override: {
+						titleKey: "twofa_enable_error_title",
+						messageKey: "twofa_enable_error_message",
+						icon: "⚠️"
+					}
+				};
+			}
+			return {
+				status: statusKey,
+				success: false,
+				override: {
+				titleKey: "twofa_error_unauthorized_title",
+				messageKey: "twofa_error_unauthorized_message",
+				icon: "🔒"
+				}
+			};
+		}
+
+		if (status === 0) {
+			return {
+				status: statusKey,
+				success: false,
+				override: {
+					titleKey: "network_error_title",
+					messageKey: "network_error_unreachable"
+				}
+			};
+		}
+
+		if (stage === "setup") {
+			return {
+				status: "enable",
+				success: false,
+				override: {
+					titleKey: "twofa_setup_error_title",
+					messageKey: "twofa_setup_error_message"
+				}
+			};
+		}
+
+		return { status: statusKey, success: false };
 	}
 
 	private adjustMainContentMargin(isCollapsed: boolean): void {

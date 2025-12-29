@@ -85,6 +85,7 @@ export async function handleLogin(): Promise<boolean> {
 	const user = getUser();
 
 	if (user && user.accesstoken) {
+		console.log("2fa---->user found with token: ", user.accesstoken);
 		const valid = await fetchUser(user.accesstoken);
 		if (valid) return true;
 	}
@@ -124,90 +125,102 @@ export async function checkAndGetAccessToken(): Promise<string | null> {
 	return accessToken;
 }
 
-export async function set2FA(): Promise<string | null> {
+export async function set2FA(): Promise<{ ok: boolean; status: number; qr?: string }> {
 
 	console.log("--------------------------- SET 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
-		return null;
+		return { ok: false, status: 401 };
 	}
 	console.log("Setting 2FA to: ", accessToken);
-	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/setup`, {
-		method: "POST",
-		credentials: "include",
-		headers: {
-			"Authorization": `Bearer ${accessToken}`
-		},
-	});
+	try {
+		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/setup`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Authorization": `Bearer ${accessToken}`
+			},
+		});
 
-	if (res.ok) {
-		const data = await res.json();
-		if (data.success) {
-			return data.qr;
+		if (res.ok) {
+			const data = await res.json();
+			if (data.success) {
+				return { ok: true, status: res.status, qr: data.qr };
+			}
 		}
+		return { ok: false, status: res.status };
+	} catch {
+		return { ok: false, status: 0 };
 	}
-	return null;
 }
 
-export async function enable2Fa(code: string): Promise<boolean> {
+export async function enable2Fa(code: string): Promise<{ ok: boolean; status: number }> {
 	console.log("--------------------------- ENABLE 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
 		console.log("Acces token yok");
-		return false;
+		return { ok: false, status: 401 };
 	}
 	console.log("Access token_Enable: ", accessToken);
 	console.log("Enabling 2FA with code: ", code);
-	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/enable`, {
-		method: "POST",
-		credentials: "include",
-		headers: {
-			accept: "application/json",
-			"Authorization": `Bearer ${accessToken}`,
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			"token": code
-		})
-	});
+	try {
+		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/enable`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				accept: "application/json",
+				"Authorization": `Bearer ${accessToken}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({
+				"token": code
+			})
+		});
 
-	if (res.ok) {
-		const data = await res.json();
-		if (data.success) {
-			await handleLogin();
-			const updatedUser = getUser();
-			console.log("2FA enabled successfully-------------------:", updatedUser?.is_2fa_enabled);
-			return true;
+		if (res.ok) {
+			const data = await res.json();
+			if (data.success) {
+				await handleLogin();
+				const updatedUser = getUser();
+				console.log("2FA enabled successfully-------------------:", updatedUser?.is_2fa_enabled);
+				return { ok: true, status: res.status };
+			}
 		}
+		return { ok: false, status: res.status };
+	} catch {
+		return { ok: false, status: 0 };
 	}
-	return false;
 }
 
-export async function disable2FA(): Promise<boolean> {
+export async function disable2FA(): Promise<{ ok: boolean; status: number }> {
 	console.log("--------------------------- DISABLE 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
-		return false;
+		return { ok: false, status: 401 };
 	}
 	console.log("Disabling 2FA with token: ", accessToken);
-	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/disable`, {
-		method: "POST",
-		credentials: "include",
-		headers: {
-			"Authorization": `Bearer ${accessToken}`
-		},
-	});
+	try {
+		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/disable`, {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Authorization": `Bearer ${accessToken}`
+			},
+		});
 
-	if (res.ok) {
-		const data = await res.json();
-		if (data.success) {
-			await handleLogin();
-			const updatedUser = getUser();
-			console.log("2FA disabled successfully:", updatedUser?.is_2fa_enabled);
-			return true;
+		if (res.ok) {
+			const data = await res.json();
+			if (data.success) {
+				await handleLogin();
+				const updatedUser = getUser();
+				console.log("2FA disabled successfully:", updatedUser?.is_2fa_enabled);
+				return { ok: true, status: res.status };
+			}
 		}
+		return { ok: false, status: res.status };
+	} catch {
+		return { ok: false, status: 0 };
 	}
-	return false;
 }
 
 export function removeUndefinedKey(data:any): void {

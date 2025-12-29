@@ -85,10 +85,7 @@ export abstract class UserForm extends HTMLElement {
 
 	protected async handleGoogleAuthResponse(data: any, messageContainer: string): Promise<void> {
 		if (!data.success) {
-			const errorMessage = typeof data.message === "string"
-				? data.message.slice(0, 200)
-				: t("login_generic_error_message");
-			messages.showMessage(t("login_generic_error_title"), errorMessage, "error", messageContainer);
+			messages.showMessage(t("login_generic_error_title"), t("login_generic_error_message"), "error", messageContainer);
 			return;
 		}
 
@@ -229,10 +226,7 @@ export abstract class UserForm extends HTMLElement {
 
 	protected async loginCheck(data: any, messageContainer: string): Promise<void> {
 		if (!data.success) {
-			const errorMessage = typeof data.message === "string"
-				? data.message.slice(0, 200)
-				: t("login_generic_error_message");
-			messages.showMessage(t("login_generic_error_title"), errorMessage, "error", messageContainer);
+			messages.showMessage(t("login_generic_error_title"), t("login_generic_error_message"), "error", messageContainer);
 			return;
 		}
 

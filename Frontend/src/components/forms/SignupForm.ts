@@ -152,11 +152,7 @@ export default class SignupForm extends UserForm {
 
 	private handleSuccessfulRegistration(data: any): void {
 		if (!data.success) {
-			const errorMessage = typeof data.message === "string"
-				? data.message.slice(0, 200)
-				: t("signup_failure_fallback");
-
-			messages.showMessage(t("signup_failure_title"), errorMessage, "error", "#messageContainer");
+			messages.showMessage(t("signup_failure_title"), t("signup_failure_fallback"), "error", "#messageContainer");
 			return;
 		}
 
