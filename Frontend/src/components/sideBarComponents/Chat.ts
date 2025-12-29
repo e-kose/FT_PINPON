@@ -127,11 +127,11 @@ class Chat extends LocalizedComponent {
 					}
 				}
 			} else {
-				console.error("Failed to fetch friends online status:", onlineStatusResponse);
+				console.error(t("chat_fetch_online_status_error_log"), onlineStatusResponse);
 				this.friendsOnlineStatus = {};
 			}
 		} catch (error) {
-			console.error("Error fetching friends online status:", error);
+			console.error(t("chat_fetch_online_status_exception_log"), error);
 			this.friendsOnlineStatus = {};
 		}
 	}
@@ -162,7 +162,7 @@ class Chat extends LocalizedComponent {
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
 									<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
-									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? '99+' : unreadCount}</span>` : ''}
+									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}</span>` : ''}
 								</div>
 								<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("chat_friend_no_name")}</div>
 							</div>
@@ -516,7 +516,7 @@ class Chat extends LocalizedComponent {
 				}
 			}
 		} catch (error) {
-			console.error('Notification message parse error:', error);
+			console.error(t("chat_notification_parse_error_log"), error);
 		}
 	}
 
@@ -543,7 +543,7 @@ class Chat extends LocalizedComponent {
 				this.updateFriendListUI();
 			}
 		} catch (error) {
-			console.error('Error loading unread message counts:', error);
+			console.error(t("chat_unread_counts_load_error_log"), error);
 		}
 	}
 
@@ -569,7 +569,7 @@ class Chat extends LocalizedComponent {
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
 									<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
-									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? '99+' : unreadCount}</span>` : ''}
+									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}</span>` : ''}
 								</div>
 								<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("chat_friend_no_name")}</div>
 							</div>
@@ -597,7 +597,7 @@ class Chat extends LocalizedComponent {
 				this.updateFriendListUI();
 			}
 		} catch (error) {
-			console.error('Error marking messages as read:', error);
+			console.error(t("chat_mark_read_error_log"), error);
 		}
 	}
 
@@ -608,12 +608,12 @@ class Chat extends LocalizedComponent {
 
 			await createNotification({
 				to_user_id: toUserId,
-				title: `${currentUser.username}'den yeni mesaj`,
+				title: t("chat_notification_title_new_message", { username: currentUser.username }),
 				message: message.length > 50 ? message.substring(0, 50) + '...' : message,
 				type: 'chat_message'
 			});
 		} catch (error) {
-			console.error('Error creating message notification:', error);
+			console.error(t("chat_create_notification_error_log"), error);
 		}
 	}
 
@@ -621,10 +621,10 @@ class Chat extends LocalizedComponent {
 		try {
 			const response = await deleteNotification(notificationId);
 			if (!response.ok || !response.data.success) {
-				console.error('Failed to delete notification:', notificationId, response);
+				console.error(t("chat_delete_notification_failed_log"), notificationId, response);
 			}
 		} catch (error) {
-			console.error('Error deleting notification:', notificationId, error);
+			console.error(t("chat_delete_notification_error_log"), notificationId, error);
 		}
 	}
 
