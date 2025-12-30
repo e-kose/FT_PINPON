@@ -180,6 +180,7 @@ class LastGames extends LocalizedComponent {
 
     private handleGameClick(gameId: string | null): void {
         // TODO: Show detailed game info
+        void gameId;
     }
 
     // Update Methods - İçleri boş, sen dolduracaksın

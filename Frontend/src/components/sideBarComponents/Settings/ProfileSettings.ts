@@ -181,6 +181,8 @@ class ProfileSettings extends Settings {
 					t("profile_settings_update_success_message"),
 					MESSAGE_CONTAINER
 				);
+				// Header'ı güncellemek için custom event fırlat
+				window.dispatchEvent(new CustomEvent('user-profile-updated'));
 			}
 		} catch (error) {
 			console.error("Profile update error:", error);
@@ -292,6 +294,9 @@ class ProfileSettings extends Settings {
 				t("profile_settings_avatar_update_success_message"),
 				MESSAGE_CONTAINER
 			);
+			
+			// Header'ı güncellemek için custom event fırlat
+			window.dispatchEvent(new CustomEvent('user-profile-updated'));
 		} else {
 			console.log("Avatar upload success but no URL in response:", response);
 			this.renderSection();

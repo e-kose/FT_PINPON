@@ -114,10 +114,10 @@ export default class SignupForm extends UserForm {
 			return;
 		}
 
-		const fullNamePattern = /^[a-zA-Z\s]+$/;
-		if (!this.checkInput(fullNamePattern, '#fullName', 'label[for="fullName"]', "signup_form_fullname_label")) {
-			return;
-		}
+		const fullNamePattern = /^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$/;
+				if (!this.checkInput(fullNamePattern, '#fullName', 'label[for="fullName"]', "signup_form_fullname_label")) {
+					return;
+				}
 
 		const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 		if (!this.checkInput(passwordPattern, '#password', 'label[for="password"]', "signup_form_password_label")) {
