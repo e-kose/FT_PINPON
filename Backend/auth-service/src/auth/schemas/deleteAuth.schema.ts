@@ -2,8 +2,14 @@ export const deleteAuthSchema = {
   headers: {
     type: "object",
     properties: {
-      "X-Internal-Secret": { type: "string" },
-      "x-user-id": { type: "string" },
+      "X-Internal-Secret": { 
+        type: "string",
+        pattern: "^[a-zA-Z0-9_-]+$"  // XSS koruması: güvenli karakterler
+      },
+      "x-user-id": { 
+        type: "string",
+        pattern: "^[0-9]+$"  // sadece sayı
+      },
     },
     required: ["X-Internal-Secret"],
   },

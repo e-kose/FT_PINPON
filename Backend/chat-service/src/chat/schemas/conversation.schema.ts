@@ -26,7 +26,11 @@ export const conversationSchema = {
             type: "object",
             properties: {
               id: { type: "number", example: 1 },
-              content: { type: "string", example: "Selam" },
+              content: { 
+                type: "string", 
+                example: "Selam",
+                pattern: "^[^<>&\"']+$"  // XSS koruması (response'da önerilen)
+              },
               created_at: {
                 type: "string",
                 format: "date-time",

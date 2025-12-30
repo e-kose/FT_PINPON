@@ -2,28 +2,38 @@ export const registerUserSchema = {
   headers: {
     type: "object",
     properties: {
-      "X-Internal-Secret": { type: "string" },
-      "x-user-id": { type: "string" },
-      "x-user-email": { type: "string", format: "email" }
+      "X-Internal-Secret": { 
+        type: "string",
+        pattern: "^[a-zA-Z0-9_-]+$"  // XSS koruması
+      },
+      "x-user-id": { 
+        type: "string",
+        pattern: "^[0-9]+$"  // XSS koruması: sadece sayı
+      },
+      "x-user-email": { 
+        type: "string", 
+        format: "email",
+        pattern: "^[^<>&\"']+$"  // XSS koruması: HTML yasak
+      }
     },
     required: ["X-Internal-Secret"],
   },
   body: {
     type: "object",
     properties: {
-      username: { type: "string", minLength: 3, maxLength: 30 },
+      username: { type: "string", minLength: 3, maxLength: 30, pattern: "^[^<>&\"']+$" },
       password: { type: "string", minLength: 6, maxLength: 100 },
-      email: { type: "string", format: "email" },
+      email: { type: "string", format: "email", pattern: "^[^<>&\"']+$" },
       profile: {
         type: "object",
         properties: {
-          full_name: { type: "string", minLength: 1, maxLength: 100 },
+          full_name: { type: "string", minLength: 1, maxLength: 100, pattern: "^[^<>&\"']+$" },
           avatar_url: { type: "string", format: "uri" },
         },
         required: ["full_name", "avatar_url"],
       },
     },
-    required: ["username", "password", "email", "profile"],
+    required: ["username", "email", "profile"],
   },
   response: {
     201: {
