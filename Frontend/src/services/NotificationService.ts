@@ -1,5 +1,6 @@
 import { checkAndGetAccessToken } from './AuthService';
 import { getUser } from '../store/UserStore';
+import { t } from '../i18n/lang';
 import type {
   Notification,
   NotificationType,
@@ -260,7 +261,7 @@ export async function getAllOnlineUsers(): Promise<OnlineUsersResponse> {
 export async function connectNotificationWebSocket(): Promise<WebSocket> {
   const token = await checkAndGetAccessToken();
   if (!token) {
-    throw new Error('Access token not found');
+    throw new Error(t("notification_access_token_missing"));
   }
 
   const ws = new WebSocket(`${WS_BASE}?token=${encodeURIComponent(token)}`);
@@ -336,10 +337,10 @@ export function getNotificationStatusDotClass(type: NotificationType): string {
  */
 export function getNotificationTypeTitle(type: NotificationType): string {
   switch (type) {
-    case 'game_invite': return 'Oyun Davetiyesi';
-    case 'chat_message': return 'Yeni Mesaj';
-    case 'friend_request': return 'Arkadaşlık İsteği';
-    default: return 'Bildirim';
+    case 'game_invite': return t("notification_type_game_invite_title");
+    case 'chat_message': return t("notification_type_chat_message_title");
+    case 'friend_request': return t("notification_type_friend_request_title");
+    default: return t("notification_type_default_title");
   }
 }
 
@@ -381,8 +382,8 @@ export function createNotificationsListHTML(notifications: Notification[]): stri
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
           </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Henüz bildirim yok</p>
-        <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Yeni bildirimler burada görünecek</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">${t("notifications_empty_title")}</p>
+        <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">${t("notifications_empty_description")}</p>
       </div>
     `;
   }
@@ -395,7 +396,7 @@ export function createNotificationsListHTML(notifications: Notification[]): stri
  */
 export function formatNotificationBadge(count: number): string {
   if (count === 0) return '';
-  if (count > 99) return '99+';
+  if (count > 99) return t("notification_badge_overflow");
   return count.toString();
 }
 
@@ -444,16 +445,16 @@ export function formatNotificationTime(dateString: string): string {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return 'Az önce';
+    return t("notification_time_just_now");
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes} dakika önce`;
+    return t("notification_time_minutes_ago", { count: minutes });
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours} saat önce`;
+    return t("notification_time_hours_ago", { count: hours });
   } else {
     const days = Math.floor(diffInSeconds / 86400);
-    return `${days} gün önce`;
+    return t("notification_time_days_ago", { count: days });
   }
 }
 

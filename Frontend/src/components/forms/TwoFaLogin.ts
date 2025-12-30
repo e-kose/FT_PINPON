@@ -3,25 +3,26 @@ import { loginAuth } from '../../services/AuthService';
 import { getUserLoginData, submitCodeIfValid, setUserLoginData, setUser } from '../../store/UserStore';
 import messages from '../utils/Messages';
 import { UserForm } from './UserForm';
+import { t } from '../../i18n/lang';
 
 
 class TwoFaLogin extends UserForm {
 	private isSubmitting = false;
 
-	protected errorMappings: Record<number, { title: string; message: string; }> = 
+protected errorMappings: Record<number, { title: string; message: string; }> = 
 	{
-		400: { title: 'Geçersiz Kod', message: 'Girilen 2FA kodu geçersiz.' },
-		401: { title: 'Yetkilendirme Hatası', message: 'Kod süresi dolmuş olabilir.' },
-		403: { title: 'Erişim Engellendi', message: 'Çok fazla yanlış deneme yapıldı.' },
-		404: { title: 'Kullanıcı Bulunamadı', message: 'Oturum süresi dolmuş.' },
-		429: { title: 'Çok Fazla Deneme', message: 'Lütfen biraz bekleyip tekrar deneyin.' },
-		500: { title: 'Sunucu Hatası', message: 'Bir hata oluştu. Lütfen tekrar deneyin.' }
+		400: { title: "twofa_login_error_400_title", message: "twofa_login_error_400_message" },
+		401: { title: "twofa_login_error_401_title", message: "twofa_login_error_401_message" },
+		403: { title: "twofa_login_error_403_title", message: "twofa_login_error_403_message" },
+		404: { title: "twofa_login_error_404_title", message: "twofa_login_error_404_message" },
+		429: { title: "twofa_login_error_429_title", message: "twofa_login_error_429_message" },
+		500: { title: "twofa_login_error_500_title", message: "twofa_login_error_500_message" }
 	};
 
 	protected getAuthPageConfig() {
 		return {
-			cardTitleKey: '2FA Doğrulaması',
-			heroSubtitleKey: 'Hesabınızı korumak için 2FA kodunu girin'
+			cardTitleKey: "twofa_login_card_title",
+			heroSubtitleKey: "twofa_login_subtitle"
 		};
 	}
 
@@ -55,7 +56,6 @@ class TwoFaLogin extends UserForm {
 		if (loginData) {
 			const updated = { ...loginData, token: code };
 			setUserLoginData(updated);
-			console.log("User Dataa 2FA----->", getUserLoginData());
 			loginAuth(updated).then(({ status, ok, data }) => {
 				if (ok) {
 					if (data && data.success && data.user) {
@@ -70,7 +70,7 @@ class TwoFaLogin extends UserForm {
 					this.handleApiError(status, '#inline-msg');
 				this.isSubmitting = false;
 			}).catch((error) => {
-				console.error("2FA Login error:", error);
+				console.error(t("twofa_login_error_log"), error);
 				this.handleApiError(500, '#inline-msg');
 				this.isSubmitting = false;
 			});
@@ -84,13 +84,13 @@ class TwoFaLogin extends UserForm {
 			<div class="flex flex-col items-center gap-5">
 				<div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center text-3xl shadow-md ring-4 ring-indigo-500/10">🔐</div>
 				<div class="w-full flex flex-col items-center gap-3">
-					<label for="login-2fa-code" class="text-[11px] font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">Kod</label>
-					<input id="login-2fa-code" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" class="w-48 text-center text-xl font-mono tracking-[0.35em] px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 transition" />
-					<p class="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>Kod yenilenir ~30sn</p>
+					<label for="login-2fa-code" class="text-[11px] font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">${t("twofa_login_code_label")}</label>
+					<input id="login-2fa-code" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="${t("twofa_login_code_placeholder")}" class="w-48 text-center text-xl font-mono tracking-[0.35em] px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 transition" />
+					<p class="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>${t("twofa_login_code_hint")}</p>
 				</div>
 				<div class="flex flex-col gap-2 w-full max-w-xs">
-					<button type="submit" data-action="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold text-sm shadow-md transition disabled:opacity-60">Doğrula</button>
-					<button type="button" data-action="cancel" class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-[11px] font-medium transition">İptal</button>
+					<button type="submit" data-action="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold text-sm shadow-md transition disabled:opacity-60">${t("twofa_login_submit_button")}</button>
+					<button type="button" data-action="cancel" class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-[11px] font-medium transition">${t("twofa_login_cancel_button")}</button>
 				</div>
 				<div id="inline-msg" class="w-full text-center min-h-[32px]"></div>
 			</div>
@@ -100,4 +100,3 @@ class TwoFaLogin extends UserForm {
 }
 customElements.define('twofa-login', TwoFaLogin);
 export default TwoFaLogin;
-

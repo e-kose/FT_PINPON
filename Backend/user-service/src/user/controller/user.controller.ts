@@ -161,6 +161,10 @@ export async function updateUserHandler(
       return reply
         .code(error.statusCode)
         .send({ success: false, message: "Kullanıcı adı zaten kullanılıyor." });
+    else if (error instanceof UserAlreadyExistsUsername)
+      return reply
+        .code(error.statusCode)
+        .send({ success: false, message: error.message });
     return reply
       .code(500)
       .send({ success: false, message: "An error has occurred" });

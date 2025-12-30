@@ -8,6 +8,23 @@ export const registerUserSchema = {
     },
     required: ["X-Internal-Secret"],
   },
+  body: {
+    type: "object",
+    properties: {
+      username: { type: "string", minLength: 3, maxLength: 30 },
+      password: { type: "string", minLength: 6, maxLength: 100 },
+      email: { type: "string", format: "email" },
+      profile: {
+        type: "object",
+        properties: {
+          full_name: { type: "string", minLength: 1, maxLength: 100 },
+          avatar_url: { type: "string", format: "uri" },
+        },
+        required: ["full_name", "avatar_url"],
+      },
+    },
+    required: ["username", "password", "email", "profile"],
+  },
   response: {
     201: {
       description: "User registered successfully",

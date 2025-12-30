@@ -50,9 +50,27 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			}
 		}
 		if (userData.is_2fa_enabled !== undefined) {
-			const is_2fa_enabled = parseInt(userData.is_2fa_enabled);
-			if (!isNaN(is_2fa_enabled) && (is_2fa_enabled === 0 || is_2fa_enabled === 1)) {
+			console.log("is_2fa_enabled value:", userData.is_2fa_enabled);
+			let is_2fa_enabled: number;
+			
+			// Handle both string and number values
+			if (typeof userData.is_2fa_enabled === 'string') {
+				// Convert string 'true'/'false' or '1'/'0' to number
+				if (userData.is_2fa_enabled === 'true' || userData.is_2fa_enabled === '1') {
+					is_2fa_enabled = 1;
+				} else if (userData.is_2fa_enabled === 'false' || userData.is_2fa_enabled === '0') {
+					is_2fa_enabled = 0;
+				} 
+				else {
+					is_2fa_enabled = parseInt(userData.is_2fa_enabled);
+				}
+			} else {
+				is_2fa_enabled = parseInt(userData.is_2fa_enabled);
+			}
+			
+			if (!isNaN(is_2fa_enabled)) {
 				sanitizedUser.is_2fa_enabled = is_2fa_enabled;
+				console.log("is_2fa_enabled sanitized to:", is_2fa_enabled);
 			}
 		}
 		if (userData.created_at) {

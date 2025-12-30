@@ -2,7 +2,7 @@ import BetterSqlite3 from "better-sqlite3";
 import { CreateProfileType } from "../types/table.types/createProfile.type";
 import { registerUserBody } from "../types/table.types/register.userBody";
 import { User } from "../types/table.types/userDB";
-import { BadRequest } from "../errors/user.errors.js";
+import { BadRequest, UserAlreadyExistsUsername } from "../errors/user.errors.js";
 
 export class UserRepository {
   db: BetterSqlite3.Database;
@@ -76,8 +76,10 @@ export class UserRepository {
     const stmt = this.db.prepare(sql);
     try {
       return stmt.run(...values, id);
-    } catch (err) {
-      console.log(err);
+    } catch (err:any) {
+      if(err.code.includes("SQLITE_CONSTRAINT")){
+        throw new UserAlreadyExistsUsername();
+      }
       throw BadRequest();
     }
   }
@@ -181,6 +183,7 @@ export class UserRepository {
   }
 
   updateUser(id: number, data: Record<string, any>) {
+
     let profileRes, userRes;
     const { profile, ...userFields } = data;
     if (profile && Object.keys(profile).length > 0) {
@@ -190,7 +193,9 @@ export class UserRepository {
       userRes = this.updateTable("users", id, userFields, "id");
     }
     return { userRes, profileRes };
-  }
+  }   
+  
+
 
   getUserAll(id: number) {
     const stmt = this.db.prepare(`

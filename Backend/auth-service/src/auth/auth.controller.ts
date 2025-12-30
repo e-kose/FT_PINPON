@@ -44,7 +44,7 @@ const headers = {
 
 export async function register(req: FastifyRequest<{ Body: registerUserBody }>, reply: FastifyReply) {
   try {
-    if (!req.body.profile) req.body.profile = { avatar_url: DEFAULT_AVATAR };
+    if (!req.body.profile) req.body.profile = { full_name: "", avatar_url: DEFAULT_AVATAR };
     else req.body.profile.avatar_url = DEFAULT_AVATAR;
     const result = await axios.post(
       userService + "/internal/user",

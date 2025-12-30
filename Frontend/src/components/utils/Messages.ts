@@ -130,13 +130,21 @@ export class Messages {
 		this.clearMessages(parentSelector);
 	}
 
-	public twoFaMessage (status:string, success:boolean) {
+	public twoFaMessage (
+		status: "enable" | "disable",
+		success: boolean,
+		hostSelector?: string,
+		override?: { titleKey?: string; messageKey?: string; icon?: string; theme?: string }
+	): void {
 		// status: 'enable' | 'disable'
 		// Placement rules:
 		// - enable false (doğrulama hatası): inline QR kartı altında (#twofa-inline-message)
 		// - diğer tüm durumlar: ana kart altı (#twofa-global-message) sayfanın ortasında
 		let host: HTMLElement | null = null;
-		if (status === 'enable' && !success) {
+		if (hostSelector) {
+			host = document.querySelector(hostSelector) as HTMLElement | null;
+		}
+		if (!host && status === 'enable' && !success) {
 			host = document.querySelector('#twofa-inline-message') as HTMLElement | null;
 			if (!host) {
 				host = document.createElement('div');
@@ -145,7 +153,7 @@ export class Messages {
 				const qrCard = document.querySelector('[data-action="verify"]')?.closest('div');
 				qrCard?.appendChild(host);
 			}
-		} else {
+		} else if (!host) {
 			host = document.querySelector('#twofa-global-message') as HTMLElement | null;
 			if (!host) {
 				host = document.createElement('div');
@@ -191,6 +199,10 @@ export class Messages {
 				theme = 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-800 dark:text-red-200';
 			}
 		}
+		if (override?.titleKey) title = t(override.titleKey);
+		if (override?.messageKey) desc = t(override.messageKey);
+		if (override?.icon) icon = override.icon;
+		if (override?.theme) theme = override.theme;
 		wrapper.className += ' ' + theme;
 
 		// Icon

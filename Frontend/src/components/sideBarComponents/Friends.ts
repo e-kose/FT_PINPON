@@ -114,47 +114,93 @@ class Friends extends LocalizedComponent {
 		let content: string;
 
 		if (this.loading) {
-			content = `<p class="text-gray-400">${t("friends_loading")}</p>`;
+			content = `
+				<div class="flex flex-col items-center justify-center py-8">
+					<div class="w-10 h-10 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-3"></div>
+					<p class="text-gray-400 text-sm">${t("friends_loading")}</p>
+				</div>
+			`;
 		} else if (this.loadError) {
-			content = `<p class="text-red-500">${t("friends_server_error")}</p>`;
+			content = `
+				<div class="flex flex-col items-center justify-center py-8">
+					<p class="text-red-500 text-sm">${t("friends_server_error")}</p>
+				</div>
+			`;
 		} else if (!this.friends.length) {
-			content = `<p class="text-gray-400">${t("friends_none")}</p>`;
+			content = `
+				<div class="flex flex-col items-center justify-center py-8">
+					<p class="text-gray-400 text-sm">${t("friends_none")}</p>
+				</div>
+			`;
 		} else {
-			content = this.friends
+			content = `<div class="grid grid-cols-1 gap-2">` + this.friends
 				.map((friend) => `
-					<div class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded border border-transparent hover:border-blue-200 dark:hover:border-blue-700 transition-colors">
-						<img src="${friend.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full" alt="${t("friends_avatar_alt")}">
-						<div class="flex-1">
-							<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
-							<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("friends_fallback_no_name")}</div>
+					<div class="bg-gray-50 dark:bg-gray-800/60 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+						<!-- Profile section - always visible -->
+						<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${friend.friend_id}">
+							<img src="${friend.friend_avatar_url || "/default-avatar.png"}" 
+								class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 flex-shrink-0" 
+								alt="${t("friends_avatar_alt")}">
+							<div class="flex-1 min-w-0">
+								<h3 class="font-semibold text-sm text-gray-900 dark:text-white truncate">
+									${friend.friend_username}
+								</h3>
+								<p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+									${friend.friend_full_name || t("friends_fallback_no_name")}
+								</p>
+							</div>
 						</div>
-						<div class="flex gap-2">
-							<button class="remove-friend-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors" data-id="${friend.friend_id}">
-								${t("friends_button_remove")}
+						
+						<!-- Action buttons - responsive grid -->
+						<div class="grid grid-cols-3 gap-1.5">
+							<button class="view-profile-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-700 transition-colors" data-id="${friend.friend_id}">
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+								</svg>
+								<span class="hidden sm:inline">${t("friends_button_view_profile")}</span>
 							</button>
-							<button class="block-user-btn px-3 py-1 bg-yellow-600 hover:bg-yellow-500 text-white rounded transition-colors" data-id="${friend.friend_id}">
-								${t("friends_button_block")}
+							<button class="remove-friend-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-700 transition-colors" data-id="${friend.friend_id}">
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"/>
+								</svg>
+								<span class="hidden sm:inline">${t("friends_button_remove")}</span>
+							</button>
+							<button class="block-user-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-700 transition-colors" data-id="${friend.friend_id}">
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+								</svg>
+								<span class="hidden sm:inline">${t("friends_button_block")}</span>
 							</button>
 						</div>
 					</div>
 				`)
-				.join("");
+				.join("") + `</div>`;
 		}
 
 		return `
-			<aside class="lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-[calc(100vh-6rem)] overflow-auto">
-				<div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">${t("friends_list_title")}</div>
-				<div class="divide-y overflow-auto max-h-[70vh]">${content}</div>
+			<aside class="lg:col-span-1 bg-white/80 dark:bg-gray-800/80 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
+				<!-- Header -->
+				<div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">${t("friends_list_title")}</h2>
+					${this.friends.length > 0 ? `
+						<span class="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full">
+							${this.friends.length}
+						</span>
+					` : ''}
+				</div>
+				<!-- Scrollable content -->
+				<div class="overflow-y-auto flex-1">${content}</div>
 			</aside>
 		`;
 	}
 
 	private renderManagementSection(): string {
 		return `
-			<section class="lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-6 flex flex-col h-[calc(100vh-6rem)]">
+			<section class="lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-6 flex flex-col h-auto lg:h-[calc(100vh-6rem)]">
 				${this.renderHeroSection()}
 				${this.renderTabButtons()}
-				<div class="overflow-auto">${this.renderActiveTabContent()}</div>
+				<div class="overflow-auto max-h-none lg:max-h-full">${this.renderActiveTabContent()}</div>
 			</section>
 		`;
 	}
@@ -162,7 +208,7 @@ class Friends extends LocalizedComponent {
 	private renderHeroSection(): string {
 		return `
 			<div class="mb-6">
-				<div class="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-6 shadow-lg text-white flex items-center gap-6">
+				<div class="rounded-lg bg-gradient-to-r from-blue-800 to-indigo-800 p-6 shadow-lg text-white flex items-center gap-6">
 					<div class="flex-1 p-4 sm:p-6">
 						<h3 class="text-2xl font-bold text-center">${t("friends_header_title")}</h3>
 						<p class="text-sm text-blue-100/80 mb-4 text-center">${t("friends_header_description")}</p>
@@ -217,100 +263,111 @@ class Friends extends LocalizedComponent {
 
 	private renderIncomingRequests(): string {
 		if (this.loading) {
-			return `<p class="text-gray-400">${t("friends_loading")}</p>`;
+			return `<div class="flex justify-center py-8"><div class="w-8 h-8 border-3 border-green-500/30 border-t-green-500 rounded-full animate-spin"></div></div>`;
 		}
 		if (this.loadError) {
-			return `<p class="text-red-500">${t("friends_server_error")}</p>`;
+			return `<p class="text-red-500 text-sm py-4">${t("friends_server_error")}</p>`;
 		}
 		if (this.requests.length === 0) {
-			return `<p class="text-gray-400">${t("friends_requests_none")}</p>`;
+			return `<p class="text-gray-400 text-sm py-4">${t("friends_requests_none")}</p>`;
 		}
 
-		return this.requests
-			.map(
-				(request) => `
-					<div class="flex justify-between items-center p-3 bg-gray-900/60 rounded border border-gray-700 mb-3">
-						<div class="flex items-center gap-3">
-							<img src="${request.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full" alt="${t("friends_avatar_alt")}">
-							<div class="flex flex-col">
-								<span class="text-white font-semibold">${request.friend_username}</span>
-								<span class="text-sm text-gray-400">${request.friend_full_name || t("friends_fallback_no_name")}</span>
-							</div>
-						</div>
-						<div class="flex gap-2">
-							<button class="accept-btn px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded transition-colors" data-id="${request.id}">
-								${t("friends_button_accept")}
-							</button>
-							<button class="reject-btn px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded transition-colors" data-id="${request.id}">
-								${t("friends_button_reject")}
-							</button>
+		return `<div class="grid grid-cols-1 gap-2">` + this.requests
+			.map((request) => `
+				<div class="bg-gray-50 dark:bg-gray-800/60 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 transition-colors">
+					<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${request.friend_id}">
+						<img src="${request.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 flex-shrink-0" alt="${t("friends_avatar_alt")}">
+						<div class="flex-1 min-w-0">
+							<h3 class="font-semibold text-sm text-gray-900 dark:text-white truncate">${request.friend_username}</h3>
+							<p class="text-xs text-gray-500 dark:text-gray-400 truncate">${request.friend_full_name || t("friends_fallback_no_name")}</p>
 						</div>
 					</div>
-				`
-			)
-			.join("");
+					<div class="grid grid-cols-3 gap-1.5">
+						<button class="view-profile-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-700 transition-colors" data-id="${request.friend_id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_view_profile")}</span>
+						</button>
+						<button class="accept-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-700 transition-colors" data-id="${request.id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_accept")}</span>
+						</button>
+						<button class="reject-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-700 transition-colors" data-id="${request.id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_reject")}</span>
+						</button>
+					</div>
+				</div>
+			`).join("") + `</div>`;
 	}
 
 	private renderSentRequests(): string {
 		if (this.loading) {
-			return `<p class="text-gray-400">${t("friends_loading")}</p>`;
+			return `<div class="flex justify-center py-8"><div class="w-8 h-8 border-3 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div></div>`;
 		}
 		if (this.loadError) {
-			return `<p class="text-red-500">${t("friends_server_error")}</p>`;
+			return `<p class="text-red-500 text-sm py-4">${t("friends_server_error")}</p>`;
 		}
 		if (this.sentRequests.length === 0) {
-			return `<p class="text-gray-400">${t("friends_sent_none")}</p>`;
+			return `<p class="text-gray-400 text-sm py-4">${t("friends_sent_none")}</p>`;
 		}
 
-		return this.sentRequests
-			.map(
-				(request) => `
-					<div class="flex justify-between items-center p-3 bg-gray-900/60 rounded border border-gray-700 mb-3">
-						<div class="flex items-center gap-3">
-							<img src="${request.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full" alt="${t("friends_avatar_alt")}">
-							<div class="flex flex-col">
-								<span class="text-white font-semibold">${request.friend_username}</span>
-								<span class="text-sm text-gray-400">${request.friend_full_name || t("friends_fallback_no_name")}</span>
-							</div>
+		return `<div class="grid grid-cols-1 gap-2">` + this.sentRequests
+			.map((request) => `
+				<div class="bg-gray-50 dark:bg-gray-800/60 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 transition-colors">
+					<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${request.friend_id}">
+						<img src="${request.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 flex-shrink-0" alt="${t("friends_avatar_alt")}">
+						<div class="flex-1 min-w-0">
+							<h3 class="font-semibold text-sm text-gray-900 dark:text-white truncate">${request.friend_username}</h3>
+							<p class="text-xs text-gray-500 dark:text-gray-400 truncate">${request.friend_full_name || t("friends_fallback_no_name")}</p>
 						</div>
-						<button class="cancel-sent-btn px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded transition-colors" data-id="${request.id}">
-							${t("friends_button_cancel_request")}
+					</div>
+					<div class="grid grid-cols-2 gap-1.5">
+						<button class="view-profile-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-700 transition-colors" data-id="${request.friend_id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_view_profile")}</span>
+						</button>
+						<button class="cancel-sent-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-700 transition-colors" data-id="${request.id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_cancel_request")}</span>
 						</button>
 					</div>
-				`
-			)
-			.join("");
+				</div>
+			`).join("") + `</div>`;
 	}
 
 	private renderBlockedUsers(): string {
 		if (this.loading) {
-			return `<p class="text-gray-400">${t("friends_loading")}</p>`;
+			return `<div class="flex justify-center py-8"><div class="w-8 h-8 border-3 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div></div>`;
 		}
 		if (this.loadError) {
-			return `<p class="text-red-500">${t("friends_server_error")}</p>`;
+			return `<p class="text-red-500 text-sm py-4">${t("friends_server_error")}</p>`;
 		}
 		if (this.blocked.length === 0) {
-			return `<p class="text-gray-400">${t("friends_blocked_none")}</p>`;
+			return `<p class="text-gray-400 text-sm py-4">${t("friends_blocked_none")}</p>`;
 		}
 
-		return this.blocked
-			.map(
-				(user) => `
-					<div class="flex justify-between items-center p-3 bg-gray-900/60 rounded border border-gray-700 mb-3">
-						<div class="flex items-center gap-3">
-							<img src="${user.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full" alt="${t("friends_avatar_alt")}">
-							<div class="flex flex-col">
-								<span class="text-white font-semibold">${user.friend_username}</span>
-								<span class="text-sm text-gray-400">${user.friend_full_name || t("friends_fallback_no_name")}</span>
-							</div>
+		return `<div class="grid grid-cols-1 gap-2">` + this.blocked
+			.map((user) => `
+				<div class="bg-gray-50 dark:bg-gray-800/60 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600 transition-colors">
+					<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${user.friend_id}">
+						<img src="${user.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 flex-shrink-0 grayscale" alt="${t("friends_avatar_alt")}">
+						<div class="flex-1 min-w-0">
+							<h3 class="font-semibold text-sm text-gray-900 dark:text-white truncate">${user.friend_username}</h3>
+							<p class="text-xs text-gray-500 dark:text-gray-400 truncate">${user.friend_full_name || t("friends_fallback_no_name")}</p>
 						</div>
-						<button class="unblock-btn px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded transition-colors" data-id="${user.friend_id}">
-							${t("friends_button_unblock")}
+					</div>
+					<div class="grid grid-cols-2 gap-1.5">
+						<button class="view-profile-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-700 transition-colors" data-id="${user.friend_id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_view_profile")}</span>
+						</button>
+						<button class="unblock-btn flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-700 transition-colors" data-id="${user.friend_id}">
+							<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+							<span class="hidden sm:inline">${t("friends_button_unblock")}</span>
 						</button>
 					</div>
-				`
-			)
-			.join("");
+				</div>
+			`).join("") + `</div>`;
 	}
 
 	private setupEvents(): void {
@@ -351,6 +408,14 @@ class Friends extends LocalizedComponent {
 		this.querySelectorAll<HTMLElement>(".cancel-sent-btn").forEach((btn) =>
 			btn.addEventListener("click", () => this.handleSimpleAction(btn, FriendService.cancelSentRequest, "friends_toast_cancel_success", "friends_toast_cancel_failure"))
 		);
+
+		this.querySelectorAll<HTMLElement>(".view-profile-btn").forEach((btn) =>
+			btn.addEventListener("click", () => this.handleViewProfile(btn))
+		);
+
+		this.querySelectorAll<HTMLElement>(".profile-view-trigger").forEach((trigger) =>
+			trigger.addEventListener("click", () => this.handleViewProfile(trigger))
+		);
 	}
 
 	private async handleAddFriend(input: HTMLInputElement | null): Promise<void> {
@@ -377,7 +442,7 @@ class Friends extends LocalizedComponent {
 			}
 			await this.fetchData();
 		} else {
-			this.showToast(data.message || t("friends_toast_request_failed"), "error");
+			this.showToast(this.getFriendErrorMessage(data.message, "friends_toast_request_failed"), "error");
 		}
 	}
 
@@ -395,7 +460,7 @@ class Friends extends LocalizedComponent {
 			this.showToast(t(action === "accept" ? "friends_toast_accept_success" : "friends_toast_reject_success"), "success");
 			await this.fetchData();
 		} else {
-			this.showToast(response.data.message || t("friends_toast_action_failure"), "error");
+			this.showToast(this.getFriendErrorMessage(response.data.message, "friends_toast_action_failure"), "error");
 		}
 	}
 
@@ -415,8 +480,34 @@ class Friends extends LocalizedComponent {
 			this.showToast(t(successKey), "success");
 			await this.fetchData();
 		} else {
-			this.showToast(response.data.message || t(errorKey), "error");
+			this.showToast(this.getFriendErrorMessage(response.data.message, errorKey), "error");
 		}
+	}
+
+	private getFriendErrorMessage(message: unknown, fallbackKey: string): string {
+		if (typeof message !== "string") {
+			return t(fallbackKey);
+		}
+
+		const normalized = message.toLowerCase();
+		if (normalized.includes("friend request") && normalized.includes("blocked")) {
+			return t("friends_error_request_blocked");
+		}
+
+		return t(fallbackKey);
+	}
+
+	private handleViewProfile(element: HTMLElement): void {
+		const id = element.getAttribute("data-id");
+		if (!id) return;
+		const friendId = parseInt(id, 10);
+		//todo freinds profile
+		this.dispatchEvent(
+			new CustomEvent("friends:view-profile", {
+				detail: { friendId },
+				bubbles: true
+			})
+		);
 	}
 
 	private setupSidebarListener(): void {

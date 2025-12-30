@@ -111,8 +111,8 @@ function initializeRouter(): void {
 	router.addRoute('/profile', '<my-profile></my-profile>');
 	router.addRoute('/2fa', '<twofa-auth></twofa-auth>');
 	router.addRoute('/2fa-login', '<twofa-login></twofa-login>');
-	router.addRoute('/play', '<div class="p-8"><h1 class="text-2xl font-bold">Oyun Oyna</h1><p>Oyun komponenti geliştiriliyor...</p></div>');
-	router.addRoute('/tournament', '<div class="p-8"><h1 class="text-2xl font-bold">Turnuva</h1><p>Turnuva komponenti geliştiriliyor...</p></div>');
+	router.addRoute('/play', '<play-component></play-component>');
+	router.addRoute('/tournament', '<tournament-component></tournament-component>');
 	router.addRoute('/friends', '<friends-component></friends-component>');
 	router.addRoute('/chat', '<chat-component></chat-component>');
 	router.addRoute('/settings', '<settings-component></settings-component>');
