@@ -5,6 +5,7 @@ import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
+import { APP_CONTAINER } from "./Layout";
 
 class Header extends LocalizedComponent {
     private sidebarListener: SidebarStateListener | null = null;
@@ -35,16 +36,23 @@ class Header extends LocalizedComponent {
         const user = getUser();
         this.innerHTML = `
             <nav class="bg-white/95 backdrop-blur-sm dark:bg-gray-800/95 shadow-xl border-b border-gray-200 dark:border-gray-700 fixed top-0 w-full z-50">
-                <div class="relative flex items-center h-14 sm:h-16 md:h-20 lg:h-24 px-2 sm:px-4 md:px-6">
+                <div class="${APP_CONTAINER} relative flex items-center h-14 sm:h-16 md:h-20 lg:h-24">
+                    ${user ? `
+                    <button id="mobileSidebarToggle" aria-label="${t("sidebar_toggle_aria")}" class="md:hidden inline-flex items-center justify-center h-11 w-11 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    ` : ""}
                     <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
-                    <div id="logoSection" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-12 sm:ml-14 md:ml-16" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
+                    <div id="logoSection" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-0 md:ml-16 min-w-0" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
                         <img class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 drop-shadow-lg" src="/pong.png" alt="${t("header_logo_alt")}">
-                        <h1 class="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-wide hidden xs:block">Ft_Transcendance</h1>
+                        <h1 class="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-wide hidden xs:block truncate max-w-[10rem] sm:max-w-none">Ft_Transcendance</h1>
                     </div>
                     <!-- User Section -->
                     <div class="ml-auto flex items-center mr-1 sm:mr-2 md:mr-4 lg:mr-6 relative select-none">
                         ${user ? `
-                        <div id="userDropdownBtn" class="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 px-2 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 md:py-3 lg:py-4 rounded-xl md:rounded-2xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-600">
+                        <div id="userDropdownBtn" class="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 px-2 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 md:py-3 lg:py-4 rounded-xl md:rounded-2xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-600 min-w-0">
                             <!-- Avatar with Status Indicator -->
                             <div class="relative">
                                 <img id="userAvatar" class="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 rounded-full border-2 md:border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-1 sm:ring-2 ring-white dark:ring-gray-800" src="${user.profile?.avatar_url}" alt="${t("header_user_avatar_alt")}">
@@ -65,7 +73,7 @@ class Header extends LocalizedComponent {
                                 </svg>
                             </div>
                         </div>
-                        <div id="userDropdownMenu" class="hidden absolute right-0 top-12 sm:top-14 md:top-16 lg:top-20 w-52 sm:w-56 md:w-60 lg:w-64 bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 border border-gray-200/50 dark:border-gray-700/50 rounded-xl md:rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div id="userDropdownMenu" class="hidden absolute right-0 top-12 sm:top-14 md:top-16 lg:top-20 w-[calc(100vw-2rem)] max-w-xs sm:w-56 md:w-60 lg:w-64 bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 border border-gray-200/50 dark:border-gray-700/50 rounded-xl md:rounded-2xl shadow-2xl z-50 overflow-hidden">
                             <!-- Menu Items -->
                             <div class="py-2 sm:py-3 md:py-4">
                                 <button id="profileBtn" class="flex items-center gap-2 sm:gap-3 md:gap-4 w-full px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 md:py-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200 text-sm sm:text-base md:text-lg font-medium group">
@@ -109,9 +117,9 @@ class Header extends LocalizedComponent {
                             </div>
                         </div>
                         ` : `
-                        <div class="flex items-center gap-1.5 sm:gap-2 md:gap-3">
-                            <button id="headerLoginBtn" class="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-semibold rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base px-2.5 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">${t("header_login_button")}</button>
-                            <button id="headerSignupBtn" class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 font-semibold rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base px-2.5 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 border-2 border-blue-200 dark:border-blue-700 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 transform hover:scale-105">${t("header_signup_button")}</button>
+                        <div class="flex items-center gap-2">
+                            <button id="headerLoginBtn" class="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-semibold rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-h-[44px]">${t("header_login_button")}</button>
+                            <button id="headerSignupBtn" class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 font-semibold rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base px-2.5 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 border-2 border-blue-200 dark:border-blue-700 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 transform hover:scale-105 min-h-[44px]">${t("header_signup_button")}</button>
                         </div>
                         `}
                     </div>
@@ -144,6 +152,11 @@ class Header extends LocalizedComponent {
         profileSettingsBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             router.navigate("/settings");
+        });
+        const mobileSidebarToggle = this.querySelector('#mobileSidebarToggle');
+        mobileSidebarToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            sidebarStateManager.toggleMobile();
         });
 
         // Logo click event - Ana sayfaya yönlendir
@@ -222,12 +235,12 @@ class Header extends LocalizedComponent {
             
             if (isCollapsed) {
                 // Sidebar kapalı - margin'i azalt
-                logoSection.classList.remove('ml-72');
-                logoSection.classList.add('ml-16');
+                logoSection.classList.remove('md:ml-72');
+                logoSection.classList.add('md:ml-16');
             } else {
                 // Sidebar açık - margin'i artır
-                logoSection.classList.remove('ml-16');
-                logoSection.classList.add('ml-72');
+                logoSection.classList.remove('md:ml-16');
+                logoSection.classList.add('md:ml-72');
             }
         }
     }

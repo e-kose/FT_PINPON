@@ -5,6 +5,7 @@ import { sidebarStateManager } from "../../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../../router/SidebarStateManager";
 import messages from "../../utils/Messages";
 import { t } from "../../../i18n/lang";
+import { APP_CONTAINER, PAGE_TOP_OFFSET } from "../../utils/Layout";
 
 export type SettingsTabKey = "profile" | "security" | "account" | "view";
 
@@ -317,8 +318,9 @@ class SettingsContainer extends Settings {
 		const layout = this.querySelector(".settings-shell");
 		if (!layout) return;
 
-		layout.classList.toggle("ml-16", isCollapsed);
-		layout.classList.toggle("ml-72", !isCollapsed);
+		layout.classList.add("ml-0");
+		layout.classList.toggle("md:ml-16", isCollapsed);
+		layout.classList.toggle("md:ml-72", !isCollapsed);
 	}
 
 	private renderRoot(): void {
@@ -343,8 +345,8 @@ class SettingsContainer extends Settings {
 				<header-component></header-component>
 				<sidebar-component current-route="settings"></sidebar-component>
 
-				<div class="settings-shell ${marginClass} pt-14 sm:pt-16 md:pt-20 lg:pt-24 transition-all duration-300">
-					<div class="px-2 sm:px-4 md:px-6 lg:px-8 pb-8 sm:pb-12 lg:pb-16">
+				<div class="settings-shell ${marginClass} ${PAGE_TOP_OFFSET} transition-all duration-300 min-w-0">
+					<div class="${APP_CONTAINER} pb-8 sm:pb-12 lg:pb-16">
 						<section class="mb-4 sm:mb-6">
 							<div class="rounded-xl sm:rounded-2xl border border-white/50 bg-white/85 backdrop-blur-sm shadow-lg shadow-black/5 dark:border-white/10 dark:bg-gray-900/70">
 								<div class="flex flex-col gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-6 lg:p-8">
@@ -468,12 +470,12 @@ class SettingsContainer extends Settings {
 	}
 
 	private getLabelClass(isActive: boolean): string {
-		const base = "tab-label text-xs sm:text-sm font-semibold";
+		const base = "tab-label text-xs sm:text-sm font-semibold break-words leading-tight";
 		return `${base} ${isActive ? "text-inherit" : "text-gray-700 dark:text-gray-200"}`;
 	}
 
 	private getDescriptionClass(isActive: boolean): string {
-		const base = "tab-description text-[10px] sm:text-xs hidden xl:block";
+		const base = "tab-description text-[10px] sm:text-xs hidden xl:block break-words leading-tight";
 		return `${base} ${isActive ? "text-inherit opacity-80" : "text-gray-500 dark:text-gray-400"}`;
 	}
 
@@ -521,13 +523,13 @@ class SettingsContainer extends Settings {
 
 			const label = element.querySelector(".tab-label") as HTMLElement | null;
 			if (label) {
-				const base = "tab-label text-xs sm:text-sm font-semibold transition-colors duration-200";
+				const base = "tab-label text-xs sm:text-sm font-semibold transition-colors duration-200 break-words leading-tight";
 				label.className = `${base} ${isActive ? "text-white" : "text-gray-800 dark:text-gray-100"}`;
 			}
 
 			const description = element.querySelector(".tab-description") as HTMLElement | null;
 			if (description) {
-				const base = "tab-description text-[10px] sm:text-xs transition-colors duration-200 hidden xl:block";
+				const base = "tab-description text-[10px] sm:text-xs transition-colors duration-200 hidden xl:block break-words leading-tight";
 				description.className = `${base} ${isActive ? "text-white/85" : "text-gray-500 dark:text-gray-400"}`;
 			}
 
@@ -544,7 +546,7 @@ class SettingsContainer extends Settings {
 
 	private getTabItemClasses(tab: SettingsTabKey): string {
 		const base =
-			"settings-tab-item relative flex items-center gap-2 sm:gap-3 w-full md:w-auto flex-shrink-0 md:min-w-[180px] xl:min-w-0 xl:w-full px-2 sm:px-3 md:px-3.5 py-2 sm:py-2.5 md:py-3 xl:px-4 xl:py-3 rounded-lg sm:rounded-xl border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500";
+			"settings-tab-item relative flex items-center gap-2 sm:gap-3 w-full md:w-auto flex-shrink-0 md:min-w-[180px] xl:min-w-0 xl:w-full px-2 sm:px-3 md:px-3.5 py-2 sm:py-2.5 md:py-3 xl:px-4 xl:py-3 rounded-lg sm:rounded-xl border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 min-h-[44px]";
 
 		const accent = this.tabConfig[tab].accent;
 

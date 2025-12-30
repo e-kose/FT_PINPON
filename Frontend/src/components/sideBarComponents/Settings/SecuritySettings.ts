@@ -86,7 +86,7 @@ class SecuritySettings extends Settings {
 								<input 
 									type="password" 
 									id="currentPassword"
-									class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+									class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 									placeholder="${t("security_settings_current_password_placeholder")}"
 								>
 							</div>
@@ -95,7 +95,7 @@ class SecuritySettings extends Settings {
 								<input 
 									type="password" 
 									id="newPassword"
-									class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+									class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 									placeholder="${t("security_settings_new_password_placeholder")}"
 								>
 							</div>
@@ -104,13 +104,13 @@ class SecuritySettings extends Settings {
 								<input 
 									type="password" 
 									id="confirmPassword"
-									class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+									class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 									placeholder="${t("security_settings_confirm_password_placeholder")}"
 								>
 							</div>
 						</div>
 						<div class="flex justify-end mt-4 sm:mt-6">
-							<button class="save-password-btn bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+							<button class="save-password-btn w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-base rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl min-h-[44px]">
 								${t("security_settings_change_password_button")}
 							</button>
 						</div>
@@ -126,7 +126,7 @@ class SecuritySettings extends Settings {
 							</div>
 							<p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">${t("security_settings_2fa_description")}</p>
 						</div>
-						<button class="toggle-2fa-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap">
+						<button class="toggle-2fa-btn w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 text-base rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap min-h-[44px]">
 							${is2FAEnabled ? t("security_settings_2fa_manage") : t("security_settings_2fa_button")}
 						</button>
 					</div>

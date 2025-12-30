@@ -3,6 +3,7 @@ import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
+import { APP_CONTAINER_NARROW } from "../utils/Layout";
 
 class ErrorPages extends LocalizedComponent {
 	private errorType: string = "404";
@@ -90,18 +91,16 @@ class ErrorPages extends LocalizedComponent {
 		const transitionClasses = sidebarStateManager.getTransitionClasses();
 		errorContainer.classList.add(...transitionClasses);
 
-		if (isCollapsed) {
-			errorContainer.classList.remove("ml-72");
-		} else {
-			errorContainer.classList.add("ml-72");
-		}
+		errorContainer.classList.add("ml-0");
+		errorContainer.classList.toggle("md:ml-16", isCollapsed);
+		errorContainer.classList.toggle("md:ml-72", !isCollapsed);
 	}
 
 	protected renderComponent(): void {
 		this.innerHTML = `
 			<div class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
-				<div class="min-h-screen flex items-center justify-center px-4 py-8 transition-all duration-300" id="errorContainer" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5))">
-					<div class="max-w-lg w-full mx-auto">
+				<div class="min-h-screen flex items-center justify-center py-8 transition-all duration-300 min-w-0" id="errorContainer" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5))">
+					<div class="${APP_CONTAINER_NARROW} w-full mx-auto">
 						<div class="bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 rounded-2xl p-6 sm:p-8 lg:p-10 text-center shadow-2xl border border-white/20">
 							<div class="mb-6 lg:mb-8">
 								<div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-red-100 dark:bg-red-900/50 rounded-full mb-4 lg:mb-6">
@@ -113,21 +112,21 @@ class ErrorPages extends LocalizedComponent {
 							</div>
 
 							<div class="mb-6 lg:mb-8">
-								<h2 class="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-3 lg:mb-4">
+								<h2 class="text-xl sm:text-2xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-3 lg:mb-4 break-words">
 									${this.getErrorTitle()}
 								</h2>
-								<p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-md mx-auto">
+								<p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-prose mx-auto break-words">
 									${this.getErrorDescription()}
 								</p>
 							</div>
 
 							<div class="space-y-3 lg:space-y-4">
-								<button id="goHomeBtn" class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 lg:py-4 px-4 lg:px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base" aria-label="${t("error_go_home_button")}">
+								<button id="goHomeBtn" class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 lg:py-4 px-4 lg:px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base min-h-[44px]" aria-label="${t("error_go_home_button")}">
 									<span class="mr-2">🏠</span>
 									${t("error_go_home_button")}
 								</button>
 								
-								<button id="goBackBtn" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold py-3 lg:py-4 px-4 lg:px-6 rounded-xl transition-all duration-200 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transform hover:scale-105 text-sm sm:text-base" aria-label="${t("error_go_back_button")}">
+								<button id="goBackBtn" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold py-3 lg:py-4 px-4 lg:px-6 rounded-xl transition-all duration-200 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transform hover:scale-105 text-sm sm:text-base min-h-[44px]" aria-label="${t("error_go_back_button")}">
 									<span class="mr-2">⬅️</span>
 									${t("error_go_back_button")}
 								</button>

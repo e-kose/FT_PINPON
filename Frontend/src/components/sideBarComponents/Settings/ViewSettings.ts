@@ -68,7 +68,7 @@ class ViewSettings extends Settings {
 				const isActive = currentLang === code;
 				const buttonClasses = isActive ? meta.activeClass : meta.inactiveClass;
 				return `
-					<button data-language="${code}" class="language-option w-full p-3 sm:p-4 rounded-lg border transition-all duration-200 ${buttonClasses} flex items-center space-x-3 sm:space-x-4 group">
+					<button data-language="${code}" class="language-option w-full p-3 sm:p-4 rounded-lg border transition-all duration-200 ${buttonClasses} flex items-center space-x-3 sm:space-x-4 group min-h-[44px]">
 						<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full ${meta.badgeClass} flex items-center justify-center shadow-sm flex-shrink-0">
 							<span class="text-white font-bold text-xs sm:text-sm">${code.toUpperCase()}</span>
 						</div>

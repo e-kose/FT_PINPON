@@ -85,12 +85,12 @@ protected errorMappings: Record<number, { title: string; message: string; }> =
 				<div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center text-3xl shadow-md ring-4 ring-indigo-500/10">🔐</div>
 				<div class="w-full flex flex-col items-center gap-3">
 					<label for="login-2fa-code" class="text-[11px] font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300">${t("twofa_login_code_label")}</label>
-					<input id="login-2fa-code" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="${t("twofa_login_code_placeholder")}" class="w-48 text-center text-xl font-mono tracking-[0.35em] px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 transition" />
+					<input id="login-2fa-code" type="text" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="${t("twofa_login_code_placeholder")}" class="w-full max-w-[220px] text-center text-lg sm:text-xl font-mono tracking-[0.35em] px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/30 transition" />
 					<p class="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>${t("twofa_login_code_hint")}</p>
 				</div>
 				<div class="flex flex-col gap-2 w-full max-w-xs">
-					<button type="submit" data-action="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold text-sm shadow-md transition disabled:opacity-60">${t("twofa_login_submit_button")}</button>
-					<button type="button" data-action="cancel" class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-[11px] font-medium transition">${t("twofa_login_cancel_button")}</button>
+					<button type="submit" data-action="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold text-base shadow-md transition disabled:opacity-60 min-h-[44px]">${t("twofa_login_submit_button")}</button>
+					<button type="button" data-action="cancel" class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium transition min-h-[44px]">${t("twofa_login_cancel_button")}</button>
 				</div>
 				<div id="inline-msg" class="w-full text-center min-h-[32px]"></div>
 			</div>

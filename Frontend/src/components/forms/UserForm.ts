@@ -4,6 +4,7 @@ import type { UserLogin } from "../../types/AuthType";
 import messages from "../utils/Messages";
 import { t } from "../../i18n/lang";
 import { observeLanguageChange } from "../../i18n/useTranslation";
+import { APP_CONTAINER_NARROW } from "../utils/Layout";
 
 interface AuthPageConfig {
 	cardTitleKey: string;
@@ -123,24 +124,26 @@ export abstract class UserForm extends HTMLElement {
 	protected renderAuthPage(content: string, config: AuthPageConfig): string {
 		return `
 			<section class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
-				<div class="flex flex-col items-center justify-center px-4 py-6 mx-auto min-h-screen" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))">
-					<div id="headerSection" class="flex flex-col items-center mb-6 md:mb-8 text-center cursor-pointer hover:scale-105 transition-transform duration-300">
-						<div class="flex flex-col sm:flex-row items-center mb-3 md:mb-4">
-							<img class="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mb-2 sm:mb-0 sm:mr-3 md:mr-4 drop-shadow-2xl" src="/pong.png" alt="${t("auth_brand_logo_alt")}">
-							<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-2xl tracking-wide text-center sm:text-left">
-								Ft_Transcendance
-							</h1>
+				<div class="flex flex-col items-center justify-center min-h-screen" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))">
+					<div class="${APP_CONTAINER_NARROW} w-full flex flex-col items-center py-6 sm:py-8 space-y-6 sm:space-y-8">
+						<div id="headerSection" class="flex flex-col items-center text-center cursor-pointer hover:scale-105 transition-transform duration-300">
+							<div class="flex flex-col sm:flex-row items-center mb-3 md:mb-4">
+								<img class="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mb-2 sm:mb-0 sm:mr-3 md:mr-4 drop-shadow-2xl" src="/pong.png" alt="${t("auth_brand_logo_alt")}">
+								<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-2xl tracking-wide text-center sm:text-left break-words">
+									Ft_Transcendance
+								</h1>
+							</div>
+							<p class="text-sm sm:text-base md:text-lg text-white/90 drop-shadow-lg font-light max-w-prose">
+								${t(config.heroSubtitleKey)}
+							</p>
 						</div>
-						<p class="text-sm sm:text-base md:text-lg text-white/90 drop-shadow-lg font-light max-w-sm md:max-w-md">
-							${t(config.heroSubtitleKey)}
-						</p>
-					</div>
-					<div class="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-lg shadow-xl border border-white/20">
-						<div class="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4 md:space-y-5">
-							<h2 class="text-base sm:text-lg md:text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white text-center">
-								${t(config.cardTitleKey)}
-							</h2>
-							${content}
+						<div class="w-full max-w-md sm:max-w-lg bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-lg shadow-xl border border-white/20">
+							<div class="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4 md:space-y-5">
+								<h2 class="text-base sm:text-lg md:text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white text-center">
+									${t(config.cardTitleKey)}
+								</h2>
+								${content}
+							</div>
 						</div>
 					</div>
 				</div>

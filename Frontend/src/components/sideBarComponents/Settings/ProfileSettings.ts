@@ -41,14 +41,14 @@ class ProfileSettings extends Settings {
 					<div class="lg:col-span-2">
 						<div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl border border-gray-200/50 dark:border-gray-600/50">
 							<h3 class="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">${t("profile_settings_avatar_section_title")}</h3>
-							<div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 md:space-x-6 space-y-3 sm:space-y-0">
+							<div class="flex flex-col sm:flex-row sm:items-start sm:gap-4 md:gap-6 gap-3">
 								<img 
 									src="${user.profile?.avatar_url || "/Avatar/1.png"}" 
 									alt="Profil Resmi" 
-									class="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full object-cover border-3 sm:border-4 border-white shadow-lg mx-auto sm:mx-0"
+									class="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full object-cover border-3 sm:border-4 border-white shadow-lg mx-auto sm:mx-0 shrink-0"
 								>
-								<div class="text-center sm:text-left">
-									<button class="upload-avatar-btn bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-sm sm:text-base transition-all duration-300">
+								<div class="text-center sm:text-left flex-1 min-w-0">
+									<button class="upload-avatar-btn w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-base transition-all duration-300 min-h-[44px] whitespace-normal">
 										${t("profile_settings_avatar_change_button")}
 									</button>
 									<input 
@@ -70,7 +70,7 @@ class ProfileSettings extends Settings {
 								type="text" 
 								id="settingsFullName"
 								value="${user.profile?.full_name || ""}"
-								class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+								class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 								placeholder="${t("profile_settings_fullname_placeholder")}"
 							>
 						</div>
@@ -81,7 +81,7 @@ class ProfileSettings extends Settings {
 								type="text" 
 								id="settingsUsername"
 								value="${user.username}"	
-								class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+								class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 								placeholder="${t("profile_settings_username_placeholder")}"
 							>
 						</div>
@@ -92,7 +92,7 @@ class ProfileSettings extends Settings {
 								type="email" 
 								id="settingsEmail"
 								value="${user.email}"
-								class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+								class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
 								placeholder="${t("profile_settings_email_placeholder")}"
 							>
 						</div>
@@ -103,14 +103,14 @@ class ProfileSettings extends Settings {
 						<textarea 
 							id="settingsBio"
 							rows="6"
-							class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300"
+							class="w-full px-3 sm:px-4 py-2 sm:py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300"
 							placeholder="${t("profile_settings_bio_placeholder")}"
 						>${user.profile?.bio || ""}</textarea>
 					</div>
 				</div>
 
 				<div class="flex justify-end">
-					<button class="save-profile-btn bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+					<button class="save-profile-btn w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-base rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl min-h-[44px]">
 						${t("profile_settings_save_button")}
 					</button>
 				</div>

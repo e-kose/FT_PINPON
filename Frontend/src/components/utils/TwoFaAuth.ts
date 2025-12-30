@@ -8,6 +8,7 @@ import { disable2FA, enable2Fa, set2FA } from "../../services/AuthService";
 import messages from "./Messages";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
+import { APP_CONTAINER_NARROW, MAIN_CONTENT_SCROLL, PAGE_TOP_OFFSET } from "./Layout";
 
 class TwoFaAuth extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -51,10 +52,10 @@ class TwoFaAuth extends LocalizedComponent {
 		this.innerHTML = `
 			<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
 				<header-component></header-component>
-				<div class="pt-16 md:pt-20 lg:pt-24">
+				<div class="${PAGE_TOP_OFFSET}">
 					<sidebar-component current-route="2fa"></sidebar-component>
-					<div class="main-content ${marginClass} p-4 sm:p-6 lg:p-8 transition-all duration-300">
-						<section class="mx-auto w-full max-w-4xl space-y-6">
+					<div class="main-content ${marginClass} ${MAIN_CONTENT_SCROLL} min-w-0">
+						<section class="${APP_CONTAINER_NARROW} space-y-6">
 							<div class="rounded-2xl border border-white/40 bg-white/85 dark:border-white/10 dark:bg-gray-900/70 shadow-xl p-6 sm:p-8">
 								<div class="text-center space-y-3 mb-6">
 									<span class="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 text-2xl text-white shadow-lg">🔐</span>
@@ -65,7 +66,7 @@ class TwoFaAuth extends LocalizedComponent {
 								${enabled ? this.renderEnabledSection() : this.renderDisabledSection()}
 								${!enabled && this.qrData ? this.renderQrSection() : ""}
 								<div class="mt-6 flex justify-center">
-									<button data-back class="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150 text-sm">
+									<button data-back class="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150 text-sm min-h-[44px]">
 										<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
 										</svg>
@@ -110,7 +111,7 @@ class TwoFaAuth extends LocalizedComponent {
 						<li class="flex gap-2 items-start"><span class="mt-1 h-2 w-2 rounded-full bg-green-500"></span>${t("twofa_tip_device_change")}</li>
 						<li class="flex gap-2 items-start"><span class="mt-1 h-2 w-2 rounded-full bg-green-500"></span>${t("twofa_tip_regenerate")}</li>
 					</ul>
-					<button data-action="disable" class="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-500 transition-colors">
+					<button data-action="disable" class="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-500 transition-colors min-h-[44px]">
 						${t("twofa_disable_button")}
 					</button>
 				</div>
@@ -140,7 +141,7 @@ class TwoFaAuth extends LocalizedComponent {
 								<span>${t("twofa_step_enter_code")}</span>
 							</li>
 						</ol>
-						<button data-action="begin" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-500 transition-colors">
+						<button data-action="begin" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-500 transition-colors min-h-[44px]">
 							${t("twofa_start_button")}
 						</button>
 					</div>
@@ -165,8 +166,8 @@ class TwoFaAuth extends LocalizedComponent {
 				<div class="flex-1 w-full md:w-auto">
 					<label for="twofa-code" class="block text-xs font-semibold text-indigo-900 dark:text-indigo-200 mb-1">${t("twofa_code_label")}</label>
 					<div class="flex gap-2">
-						<input id="twofa-code" inputmode="numeric" maxlength="6" class="flex-1 rounded-lg border border-indigo-200 dark:border-indigo-700 bg-white/80 dark:bg-gray-900 px-3 py-2 text-sm text-indigo-900 dark:text-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="${t("twofa_code_placeholder")}" aria-label="${t("twofa_code_placeholder")}">
-						<button data-action="verify" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 transition-colors">
+						<input id="twofa-code" inputmode="numeric" maxlength="6" class="flex-1 rounded-lg border border-indigo-200 dark:border-indigo-700 bg-white/80 dark:bg-gray-900 px-3 py-2 text-base text-indigo-900 dark:text-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="${t("twofa_code_placeholder")}" aria-label="${t("twofa_code_placeholder")}">
+						<button data-action="verify" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 transition-colors min-h-[44px]">
 							${t("twofa_verify_button")}
 						</button>
 					</div>
@@ -308,8 +309,9 @@ class TwoFaAuth extends LocalizedComponent {
 		if (!main) return;
 		const transitionClasses = sidebarStateManager.getTransitionClasses();
 		main.classList.add(...transitionClasses);
-		main.classList.toggle("ml-72", !isCollapsed);
-		main.classList.toggle("ml-16", isCollapsed);
+		main.classList.add("ml-0");
+		main.classList.toggle("md:ml-72", !isCollapsed);
+		main.classList.toggle("md:ml-16", isCollapsed);
 	}
 }
 

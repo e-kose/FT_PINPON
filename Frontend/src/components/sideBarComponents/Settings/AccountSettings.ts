@@ -42,7 +42,7 @@ class AccountSettings extends Settings {
 					<div class="space-y-2 sm:space-y-3 md:space-y-4">
 						<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-600 gap-1 sm:gap-0">
 							<span class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">${t("account_settings_field_id")}</span>
-							<span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">${user.id}</span>
+							<span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white break-words">${user.id}</span>
 						</div>
 						<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-600 gap-1 sm:gap-0">
 							<span class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">${t("account_settings_field_created")}</span>
@@ -65,7 +65,7 @@ class AccountSettings extends Settings {
 						<h3 class="text-sm sm:text-base md:text-lg font-semibold text-red-800 dark:text-red-400">${t("account_settings_danger_zone_title")}</h3>
 					</div>
 					<p class="text-xs sm:text-sm text-red-700 dark:text-red-300 mb-4 sm:mb-6">${t("account_settings_danger_zone_description")}</p>
-					<button class="delete-account-btn bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+					<button class="delete-account-btn w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-base rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl min-h-[44px]">
 						<span class="flex items-center space-x-1.5 sm:space-x-2 justify-center">
 							<svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -86,10 +86,10 @@ class AccountSettings extends Settings {
 							<h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">${t("account_settings_delete_modal_title")}</h3>
 							<p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">${t("account_settings_delete_modal_description")}</p>
 							<div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
-								<button class="cancel-delete-btn flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg transition-all duration-300">
+								<button class="cancel-delete-btn flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-base rounded-lg transition-all duration-300 min-h-[44px]">
 									${t("common_cancel")}
 								</button>
-								<button class="confirm-delete-btn flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg transition-all duration-300">
+								<button class="confirm-delete-btn flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 text-base rounded-lg transition-all duration-300 min-h-[44px]">
 									${t("account_settings_delete_confirm_button")}
 								</button>
 							</div>

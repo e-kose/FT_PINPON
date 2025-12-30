@@ -5,6 +5,7 @@
 
 export interface SidebarState {
     isCollapsed: boolean;
+    isMobileOpen: boolean;
     sidebarWidth: number;
 }
 
@@ -21,6 +22,7 @@ class SidebarStateManager {
         
         this.state = {
             isCollapsed,
+            isMobileOpen: false,
             sidebarWidth: isCollapsed ? 64 : 288
         };
     }
@@ -30,6 +32,7 @@ class SidebarStateManager {
      */
     public updateState(isCollapsed: boolean): void {
         this.state = {
+            ...this.state,
             isCollapsed,
             sidebarWidth: isCollapsed ? 64 : 288 // w-16 : w-72
         };
@@ -58,6 +61,44 @@ class SidebarStateManager {
      */
     public getState(): SidebarState {
         return { ...this.state };
+    }
+
+    /**
+     * Mobil drawer durumunu ayarlar
+     */
+    public setMobileOpen(isMobileOpen: boolean): void {
+        if (this.state.isMobileOpen === isMobileOpen) return;
+        this.state = {
+            ...this.state,
+            isMobileOpen
+        };
+
+        this.listeners.forEach(listener => {
+            try {
+                listener(this.state);
+            } catch (error) {
+                console.error('Sidebar state listener error:', error);
+            }
+        });
+
+        const event = new CustomEvent('sidebar-state-changed', {
+            detail: this.state
+        });
+        document.dispatchEvent(event);
+    }
+
+    /**
+     * Mobil drawer'ı toggle eder
+     */
+    public toggleMobile(): void {
+        this.setMobileOpen(!this.state.isMobileOpen);
+    }
+
+    /**
+     * Mobil drawer'ı kapatır
+     */
+    public closeMobile(): void {
+        this.setMobileOpen(false);
     }
 
     /**
@@ -113,7 +154,7 @@ class SidebarStateManager {
      * Component için Tailwind CSS sınıflarını döndürür
      */
     public getMarginClass(): string {
-        return this.state.isCollapsed ? 'ml-16' : 'ml-72';
+        return this.state.isCollapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-72';
     }
 
     /**
