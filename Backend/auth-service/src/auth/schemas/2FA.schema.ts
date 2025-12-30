@@ -29,7 +29,8 @@ export const twoFacEnableSchema = {
     properties: {
       token: {
         type: "string",
-        maxLength: 10,
+        maxLength: 6,
+        pattern: "^[0-9]{6}$"
       },
     },
   },

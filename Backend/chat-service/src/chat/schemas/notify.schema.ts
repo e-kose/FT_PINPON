@@ -4,7 +4,10 @@ export const notifySchema = {
     required: ["user_id", "message"],
     properties: {
       user_id: { type: "number" },
-      message: { type: "string" },
+      message: { 
+        type: "string",
+        pattern: "^[^<>&\"']+$"  // XSS koruması: HTML yasak
+      },
     },
   },
   response: {

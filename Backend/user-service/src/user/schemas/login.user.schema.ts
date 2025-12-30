@@ -1,12 +1,26 @@
-import { create } from "domain";
 
 export const loginUserSchema = {
   headers: {
     type: "object",
     properties: {
-      "X-Internal-Secret": { type: "string" },
+      "X-Internal-Secret": { 
+        type: "string",
+        pattern: "^[a-zA-Z0-9_-]+$"  // XSS koruması: güvenli karakterler
+      },
     },
     required: ["X-Internal-Secret"],
+  },
+  body: {
+    type: "object",
+    properties: {
+      email: { type: "string", format: "email", pattern: "^[^<>&\"']+$" },
+      username: { type: "string", minLength: 3, maxLength: 30, pattern: "^[^<>&\"']+$" },
+      password: { type: "string", minLength: 6, maxLength: 100 },
+    },
+    oneOf: [
+      { required: ["email"] },
+      { required: ["username"] }
+    ],
   },
   response: {
     200: {

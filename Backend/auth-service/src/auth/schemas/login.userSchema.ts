@@ -8,9 +8,11 @@ export const loginUserSchema = {
         type: "string",
         format: "email",
         maxLength: 254,
+        pattern: "^[^<>&\"']+$"
       },
       username: {
         type: "string",
+        pattern: "^[a-zA-Z0-9_]+$",
       },
       password: {
         type: "string",

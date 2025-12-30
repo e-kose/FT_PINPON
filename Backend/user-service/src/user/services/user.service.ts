@@ -49,8 +49,10 @@ export class UserService {
       ? this.userRepo.getUserByEmail(body.email!)
       : this.userRepo.getUserByUsername(body.username!);
     if (!result) throw new UserNotFound();
-    const checkedPass = await checkHash(body.password, result.password);
-    if (!checkedPass) throw new InvalidCredentials();
+    if (body.password) {
+      const checkedPass = await checkHash(body.password, result.password);
+      if (!checkedPass) throw new InvalidCredentials();
+    }
     return result;
   }
 

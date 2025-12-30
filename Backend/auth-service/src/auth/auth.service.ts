@@ -219,7 +219,6 @@ export async function OAuthRegister(
   const result = await userServicePost(userService + `/internal/user`, {
     username: userName,
     email: user.email,
-    password: null,
     profile: {
       avatar_url: avatarUrl,
       full_name: user.name || userName,
