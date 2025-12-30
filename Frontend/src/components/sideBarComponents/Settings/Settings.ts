@@ -317,8 +317,8 @@ class SettingsContainer extends Settings {
 		const layout = this.querySelector(".settings-shell");
 		if (!layout) return;
 
-		layout.classList.toggle("lg:ml-16", isCollapsed);
-		layout.classList.toggle("lg:ml-72", !isCollapsed);
+		layout.classList.toggle("ml-16", isCollapsed);
+		layout.classList.toggle("ml-72", !isCollapsed);
 	}
 
 	private renderRoot(): void {
@@ -336,29 +336,28 @@ class SettingsContainer extends Settings {
 			return;
 		}
 
-		const sidebarState = sidebarStateManager.getState();
-		const marginClass = sidebarState.isCollapsed ? "lg:ml-16" : "lg:ml-72";
+		const marginClass = sidebarStateManager.getMarginClass();
 
 		this.innerHTML = `
 			<div class="settings-page min-h-screen bg-gray-50 dark:bg-gray-900 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed">
 				<header-component></header-component>
 				<sidebar-component current-route="settings"></sidebar-component>
 
-				<div class="settings-shell ${marginClass} pt-16 md:pt-20 lg:pt-24 transition-all duration-300">
-					<div class="px-4 sm:px-6 lg:px-8 pb-16">
-						<section class="mb-6">
-							<div class="rounded-2xl border border-white/50 bg-white/85 backdrop-blur-sm shadow-lg shadow-black/5 dark:border-white/10 dark:bg-gray-900/70">
-								<div class="flex flex-col gap-6 p-6 sm:p-8">
-									<div class="flex items-center justify-center gap-4">
-										<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/30 text-blue-600 dark:text-blue-200">
-											<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="settings-shell ${marginClass} pt-14 sm:pt-16 md:pt-20 lg:pt-24 transition-all duration-300">
+					<div class="px-2 sm:px-4 md:px-6 lg:px-8 pb-8 sm:pb-12 lg:pb-16">
+						<section class="mb-4 sm:mb-6">
+							<div class="rounded-xl sm:rounded-2xl border border-white/50 bg-white/85 backdrop-blur-sm shadow-lg shadow-black/5 dark:border-white/10 dark:bg-gray-900/70">
+								<div class="flex flex-col gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-6 lg:p-8">
+									<div class="flex items-center justify-center gap-2 sm:gap-3 md:gap-4">
+										<div class="flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/30 text-blue-600 dark:text-blue-200">
+											<svg class="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.573-1.066z"></path>
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
 											</svg>
 										</div>
 										<div class="text-center">
-											<h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">${t("settings_title")}</h1>
-											<p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+											<h1 class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100">${t("settings_title")}</h1>
+											<p class="mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
 												${t("settings_subtitle")}
 											</p>
 										</div>
@@ -367,21 +366,21 @@ class SettingsContainer extends Settings {
 							</div>
 						</section>
 
-						<section class="settings-container flex flex-col xl:flex-row gap-6 xl:gap-8 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-2xl shadow-2xl shadow-black/10 border border-white/30 overflow-hidden min-h-[60vh]">
-							<aside class="settings-sidebar bg-gray-50/85 dark:bg-gray-900/70 border-b xl:border-b-0 xl:border-r border-gray-200/50 dark:border-gray-700/50 p-4 sm:p-5 xl:p-6 xl:w-64 xl:max-w-sm flex flex-col gap-4">
+						<section class="settings-container flex flex-col xl:flex-row gap-3 sm:gap-4 md:gap-6 xl:gap-8 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/10 border border-white/30 overflow-hidden min-h-[50vh] sm:min-h-[60vh]">
+							<aside class="settings-sidebar bg-gray-50/85 dark:bg-gray-900/70 border-b xl:border-b-0 xl:border-r border-gray-200/50 dark:border-gray-700/50 p-2 sm:p-3 md:p-4 lg:p-5 xl:p-6 xl:w-64 xl:max-w-sm flex flex-col gap-2 sm:gap-3 md:gap-4">
 								<div class="hidden xl:block">
-									<div class="px-2 py-3 mb-2">
-										<h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">${t("settings_sidebar_card_title")}</h3>
+									<div class="px-2 py-2 sm:py-3 mb-1 sm:mb-2">
+										<h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 pb-2">${t("settings_sidebar_card_title")}</h3>
 									</div>
 								</div>
-								<nav class="flex gap-3 xl:flex-col xl:gap-3 overflow-x-auto pb-2 pr-1 xl:overflow-visible xl:pb-0">
+								<nav class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:flex md:flex-row md:gap-3 xl:flex-col xl:gap-3 md:overflow-x-auto md:pb-2 pr-1 xl:overflow-visible xl:pb-0 -mx-1 px-1">
 									${this.renderSidebarButtons()}
 								</nav>
 							</aside>
 
-							<main class="settings-content flex-1 min-w-0 p-2 sm:p-4 xl:p-6 overflow-auto">
-								<div class="settings-panel h-full min-h-[50vh] rounded-2xl border border-white/60 bg-white/85 shadow-lg shadow-black/5 dark:border-white/10 dark:bg-gray-900/70 backdrop-blur-md overflow-hidden">
-									<div class="settings-dynamic space-y-6 p-4 sm:p-6 lg:p-8"></div>
+							<main class="settings-content flex-1 min-w-0 p-2 sm:p-3 md:p-4 xl:p-6 overflow-auto">
+								<div class="settings-panel h-full min-h-[40vh] sm:min-h-[50vh] rounded-xl sm:rounded-2xl border border-white/60 bg-white/85 shadow-lg shadow-black/5 dark:border-white/10 dark:bg-gray-900/70 backdrop-blur-md overflow-hidden">
+									<div class="settings-dynamic space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6 lg:p-8"></div>
 								</div>
 							</main>
 						</section>
@@ -464,17 +463,17 @@ class SettingsContainer extends Settings {
 
 	private getIconClass(tab: SettingsTabKey, isActive: boolean): string {
 		const accent = this.tabConfig[tab].accent;
-		const base = "tab-icon flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 shadow-sm";
+		const base = "tab-icon flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 xl:h-11 xl:w-11 items-center justify-center rounded-lg sm:rounded-xl transition-all duration-300 shadow-sm";
 		return `${base} ${isActive ? accent.iconActive : accent.iconInactive}`;
 	}
 
 	private getLabelClass(isActive: boolean): string {
-		const base = "tab-label text-sm font-semibold";
+		const base = "tab-label text-xs sm:text-sm font-semibold";
 		return `${base} ${isActive ? "text-inherit" : "text-gray-700 dark:text-gray-200"}`;
 	}
 
 	private getDescriptionClass(isActive: boolean): string {
-		const base = "tab-description text-xs hidden 2xl:block";
+		const base = "tab-description text-[10px] sm:text-xs hidden xl:block";
 		return `${base} ${isActive ? "text-inherit opacity-80" : "text-gray-500 dark:text-gray-400"}`;
 	}
 
@@ -516,19 +515,19 @@ class SettingsContainer extends Settings {
 
 			const icon = element.querySelector(".tab-icon") as HTMLElement | null;
 			if (icon) {
-				const base = "tab-icon flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300 shadow-sm";
+				const base = "tab-icon flex h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 xl:h-11 xl:w-11 items-center justify-center rounded-lg sm:rounded-xl transition-all duration-300 shadow-sm";
 				icon.className = `${base} ${isActive ? config.accent.iconActive : config.accent.iconInactive}`;
 			}
 
 			const label = element.querySelector(".tab-label") as HTMLElement | null;
 			if (label) {
-				const base = "tab-label text-sm font-semibold transition-colors duration-200";
+				const base = "tab-label text-xs sm:text-sm font-semibold transition-colors duration-200";
 				label.className = `${base} ${isActive ? "text-white" : "text-gray-800 dark:text-gray-100"}`;
 			}
 
 			const description = element.querySelector(".tab-description") as HTMLElement | null;
 			if (description) {
-				const base = "tab-description text-xs transition-colors duration-200 hidden 2xl:block";
+				const base = "tab-description text-[10px] sm:text-xs transition-colors duration-200 hidden xl:block";
 				description.className = `${base} ${isActive ? "text-white/85" : "text-gray-500 dark:text-gray-400"}`;
 			}
 
@@ -545,7 +544,7 @@ class SettingsContainer extends Settings {
 
 	private getTabItemClasses(tab: SettingsTabKey): string {
 		const base =
-			"settings-tab-item relative flex items-center gap-3 flex-shrink-0 min-w-[200px] xl:min-w-0 xl:w-full px-3.5 py-3 xl:px-4 xl:py-3 rounded-xl border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500";
+			"settings-tab-item relative flex items-center gap-2 sm:gap-3 w-full md:w-auto flex-shrink-0 md:min-w-[180px] xl:min-w-0 xl:w-full px-2 sm:px-3 md:px-3.5 py-2 sm:py-2.5 md:py-3 xl:px-4 xl:py-3 rounded-lg sm:rounded-xl border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500";
 
 		const accent = this.tabConfig[tab].accent;
 

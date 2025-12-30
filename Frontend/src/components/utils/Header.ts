@@ -35,83 +35,83 @@ class Header extends LocalizedComponent {
         const user = getUser();
         this.innerHTML = `
             <nav class="bg-white/95 backdrop-blur-sm dark:bg-gray-800/95 shadow-xl border-b border-gray-200 dark:border-gray-700 fixed top-0 w-full z-50">
-                <div class="relative flex items-center h-24 px-6">
+                <div class="relative flex items-center h-14 sm:h-16 md:h-20 lg:h-24 px-2 sm:px-4 md:px-6">
                     <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
-                    <div id="logoSection" class="flex items-center space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-16" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
-                        <img class="w-12 h-12 drop-shadow-lg" src="/pong.png" alt="${t("header_logo_alt")}">
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-wide">Ft_Transcendance</h1>
+                    <div id="logoSection" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 cursor-pointer hover:opacity-90 transition-all duration-300 hover:scale-105 ml-12 sm:ml-14 md:ml-16" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
+                        <img class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 drop-shadow-lg" src="/pong.png" alt="${t("header_logo_alt")}">
+                        <h1 class="text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-wide hidden xs:block">Ft_Transcendance</h1>
                     </div>
                     <!-- User Section -->
-                    <div class="ml-auto flex items-center mr-6 relative select-none">
+                    <div class="ml-auto flex items-center mr-1 sm:mr-2 md:mr-4 lg:mr-6 relative select-none">
                         ${user ? `
-                        <div id="userDropdownBtn" class="flex items-center gap-4 px-6 py-4 rounded-2xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-600">
+                        <div id="userDropdownBtn" class="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 px-2 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 md:py-3 lg:py-4 rounded-xl md:rounded-2xl cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-300 hover:shadow-xl transform hover:scale-105 border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-600">
                             <!-- Avatar with Status Indicator -->
                             <div class="relative">
-                                <img id="userAvatar" class="h-14 w-14 rounded-full border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-2 ring-white dark:ring-gray-800" src="${user.profile?.avatar_url}" alt="${t("header_user_avatar_alt")}">
-                                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse shadow-lg"></div>
+                                <img id="userAvatar" class="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 rounded-full border-2 md:border-3 border-gradient-to-r from-blue-500 to-purple-500 object-cover bg-white shadow-lg ring-1 sm:ring-2 ring-white dark:ring-gray-800" src="${user.profile?.avatar_url}" alt="${t("header_user_avatar_alt")}">
+                                <div class="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 bg-green-500 border-1.5 sm:border-2 border-white dark:border-gray-800 rounded-full animate-pulse shadow-lg"></div>
                             </div>
                             
-                            <!-- User Info -->
-                            <div class="flex flex-col min-w-0">
+                            <!-- User Info - Hidden on mobile -->
+                            <div class="hidden sm:flex flex-col min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <span id="username" class="text-xl font-bold text-gray-900 dark:text-white truncate max-w-32">${user.profile?.full_name || user.username}</span>
+                                    <span id="username" class="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white truncate max-w-20 sm:max-w-24 md:max-w-28 lg:max-w-32">${user.profile?.full_name || user.username}</span>
                                 </div>
                             </div>
                             
                             <!-- Dropdown Arrow with Background -->
-                            <div class="ml-auto flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-800 transition-all duration-300">
-                                <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 transition-all duration-300" id="dropdownArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 rounded-full bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-800 transition-all duration-300">
+                                <svg class="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-600 dark:text-gray-300 transition-all duration-300" id="dropdownArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </div>
                         </div>
-                        <div id="userDropdownMenu" class="hidden absolute right-0 top-20 w-64 bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div id="userDropdownMenu" class="hidden absolute right-0 top-12 sm:top-14 md:top-16 lg:top-20 w-52 sm:w-56 md:w-60 lg:w-64 bg-white/90 backdrop-blur-sm dark:bg-gray-800/90 border border-gray-200/50 dark:border-gray-700/50 rounded-xl md:rounded-2xl shadow-2xl z-50 overflow-hidden">
                             <!-- Menu Items -->
-                            <div class="py-4">
-                                <button id="profileBtn" class="flex items-center gap-4 w-full px-6 py-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200 text-lg font-medium group">
-                                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors">
-                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="py-2 sm:py-3 md:py-4">
+                                <button id="profileBtn" class="flex items-center gap-2 sm:gap-3 md:gap-4 w-full px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 md:py-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200 text-sm sm:text-base md:text-lg font-medium group">
+                                    <div class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg md:rounded-xl flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors flex-shrink-0">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
                                     </div>
-                                    <div class="text-left">
-                                        <div class="font-semibold">${t("header_dropdown_profile_title")}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">${t("header_dropdown_profile_description")}</div>
+                                    <div class="text-left min-w-0">
+                                        <div class="font-semibold text-xs sm:text-sm md:text-base truncate">${t("header_dropdown_profile_title")}</div>
+                                        <div class="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block truncate">${t("header_dropdown_profile_description")}</div>
                                     </div>
                                 </button>
                                 
-                                <button id="profileSettingsBtn" class="flex items-center gap-4 w-full px-6 py-4 text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all duration-200 text-lg font-medium group">
-                                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800 transition-colors">
-                                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button id="profileSettingsBtn" class="flex items-center gap-2 sm:gap-3 md:gap-4 w-full px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 md:py-4 text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all duration-200 text-sm sm:text-base md:text-lg font-medium group">
+                                    <div class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 bg-purple-100 dark:bg-purple-900/50 rounded-lg md:rounded-xl flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800 transition-colors flex-shrink-0">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
                                     </div>
-                                    <div class="text-left">
-                                        <div class="font-semibold">${t("header_dropdown_settings_title")}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">${t("header_dropdown_settings_description")}</div>
+                                    <div class="text-left min-w-0">
+                                        <div class="font-semibold text-xs sm:text-sm md:text-base truncate">${t("header_dropdown_settings_title")}</div>
+                                        <div class="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block truncate">${t("header_dropdown_settings_description")}</div>
                                     </div>
                                 </button>
                                 
-                                <div class="border-t border-gray-200/50 dark:border-gray-600/50 mt-2 pt-2">
-                                    <button id="logoutBtn" class="flex items-center gap-4 w-full px-6 py-4 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 text-lg font-medium group">
-                                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800 transition-colors">
-                                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="border-t border-gray-200/50 dark:border-gray-600/50 mt-1 sm:mt-2 pt-1 sm:pt-2">
+                                    <button id="logoutBtn" class="flex items-center gap-2 sm:gap-3 md:gap-4 w-full px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-3 md:py-4 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 text-sm sm:text-base md:text-lg font-medium group">
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 bg-red-100 dark:bg-red-900/50 rounded-lg md:rounded-xl flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-800 transition-colors flex-shrink-0">
+                                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                             </svg>
                                         </div>
-                                        <div class="text-left">
-                                            <div class="font-semibold">${t("header_dropdown_logout_title")}</div>
-                                            <div class="text-sm text-red-400">${t("header_dropdown_logout_description")}</div>
+                                        <div class="text-left min-w-0">
+                                            <div class="font-semibold text-xs sm:text-sm md:text-base truncate">${t("header_dropdown_logout_title")}</div>
+                                            <div class="text-[10px] sm:text-xs md:text-sm text-red-400 hidden sm:block truncate">${t("header_dropdown_logout_description")}</div>
                                         </div>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         ` : `
-                        <div class="flex items-center gap-3">
-                            <button id="headerLoginBtn" class="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-semibold rounded-xl text-base px-6 py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">${t("header_login_button")}</button>
-                            <button id="headerSignupBtn" class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 font-semibold rounded-xl text-base px-6 py-3 border-2 border-blue-200 dark:border-blue-700 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 transform hover:scale-105">${t("header_signup_button")}</button>
+                        <div class="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+                            <button id="headerLoginBtn" class="text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-semibold rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base px-2.5 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">${t("header_login_button")}</button>
+                            <button id="headerSignupBtn" class="text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 font-semibold rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base px-2.5 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 border-2 border-blue-200 dark:border-blue-700 transition-all duration-300 hover:border-blue-300 dark:hover:border-blue-600 transform hover:scale-105">${t("header_signup_button")}</button>
                         </div>
                         `}
                     </div>
