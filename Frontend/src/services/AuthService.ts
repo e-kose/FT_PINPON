@@ -21,12 +21,16 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 				ok: response.ok,
 				data: text ? JSON.parse(text) : {}
 			}));
-			if (responseData.ok && responseData.data.success && responseData.data.token) {
-				const fetchSuccess = await fetchUser(responseData.data.token);
-				if (fetchSuccess) {
-					const currentUser = getUser();
-					if (currentUser) {
-						responseData.data.user = currentUser;
+			if (responseData.ok && responseData.data.success) {
+				const token = responseData.data.token || responseData.data.accesstoken;
+				if (token) {
+					const fetchSuccess = await fetchUser(token);
+					if (fetchSuccess) {
+						const currentUser = getUser();
+						if (currentUser) {
+							responseData.data.user = currentUser;
+							responseData.data.accesstoken = token;
+						}
 					}
 				}
 			}
@@ -182,7 +186,7 @@ export async function enable2Fa(code: string): Promise<{ ok: boolean; status: nu
 			if (data.success) {
 				await handleLogin();
 				const updatedUser = getUser();
-				console.log("2FA enabled successfully-------------------:", updatedUser?.is_2fa_enabled);
+				console.log("2FA enabled successfull----y---------------:", updatedUser?.is_2fa_enabled);
 				return { ok: true, status: res.status };
 			}
 		}

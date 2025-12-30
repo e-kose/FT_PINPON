@@ -94,7 +94,8 @@ export abstract class UserForm extends HTMLElement {
 			return;
 		}
 
-		if (!data.accesstoken) {
+		const token = data.accesstoken || data.token;
+		if (!token) {
 			messages.showMessage(t("common_error"), t("login_token_missing"), "error", messageContainer);
 			return;
 		}
@@ -102,7 +103,7 @@ export abstract class UserForm extends HTMLElement {
 		messages.showLoadingAnimation(messageContainer);
 
 		try {
-			const valid = await fetchUser(data.accesstoken);
+			const valid = await fetchUser(token);
 			if (valid) {
 				setTimeout(() => {
 					router.navigate("/");
@@ -237,17 +238,10 @@ export abstract class UserForm extends HTMLElement {
 
 		messages.showLoadingAnimation(messageContainer);
 
-		fetchUser(data.accesstoken).then((valid) => {
-			if (valid) {
-				setTimeout(() => {
-					router.navigate("/");
-				}, 1000);
-			} else {
-				messages.showMessage(t("common_error"), t("login_user_validation_error"), "error", messageContainer);
-			}
-		}).catch((error) => {
-			this.handleNetworkError(error, messageContainer);
-		});
+		// fetchUser already called in loginAuth, just navigate
+		setTimeout(() => {
+			router.navigate("/");
+		}, 1000);
 	}
 
 	protected async loginValidation(userData: UserLogin, messageContainer: string): Promise<void> {
