@@ -9,6 +9,7 @@ import "../components/sideBarComponents/Settings/Settings";
 import "../components/sideBarComponents/Play";
 import "../components/sideBarComponents/Tournament";
 import "../components/sideBarComponents/Friends";
+import "../components/sideBarComponents/FriendProfile";
 import "../components/sideBarComponents/Chat";
 
 
@@ -58,7 +59,9 @@ class Router
 	{
 		const previouesPath = window.location.pathname;
 		const app = document.getElementById("app");
-		const route = this.routes.find(r => r.path === path);
+		// Query parametrelerini ayır
+		const [pathWithoutQuery] = path.split('?');
+		const route = this.routes.find(r => r.path === pathWithoutQuery);
 		console.log("Navigating to:", path);
 		if (route) {
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
@@ -114,6 +117,7 @@ function initializeRouter(): void {
 	router.addRoute('/play', '<play-component></play-component>');
 	router.addRoute('/tournament', '<tournament-component></tournament-component>');
 	router.addRoute('/friends', '<friends-component></friends-component>');
+	router.addRoute('/Friend', '<friend-profile></friend-profile>');
 	router.addRoute('/chat', '<chat-component></chat-component>');
 	router.addRoute('/settings', '<settings-component></settings-component>');
 	router.addRoute('/settings/profile', '<settings-component></settings-component>');

@@ -2,6 +2,7 @@ import "../utils/Header";
 import "../utils/SideBar";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
+import { router } from "../../router/Router";
 import type { Friend, BlockedUser, SentRequest, ReceivedRequest } from "../../types/FriendsType";
 import { getUser } from "../../store/UserStore";
 import FriendService from "../../services/FriendService";
@@ -490,9 +491,24 @@ class Friends extends LocalizedComponent {
 			return t(fallbackKey);
 		}
 
+		// Global error config pattern kullanarak error mesajlarını yönet
+		const errorMap: Record<string, string> = {
+			"user not found": "friends_error_user_not_found",
+			"already friends": "friends_error_already_friends",
+			"blocked": "friends_error_request_blocked",
+			"pending request": "friends_error_pending_request",
+			"cannot send to self": "friends_error_self_request",
+			"internal server error": "friends_error_server",
+			"network error": "friends_error_network",
+		};
+
 		const normalized = message.toLowerCase();
-		if (normalized.includes("friend request") && normalized.includes("blocked")) {
-			return t("friends_error_request_blocked");
+		
+		// Error mesajını map'te ara
+		for (const [key, translationKey] of Object.entries(errorMap)) {
+			if (normalized.includes(key)) {
+				return t(translationKey);
+			}
 		}
 
 		return t(fallbackKey);
@@ -502,13 +518,9 @@ class Friends extends LocalizedComponent {
 		const id = element.getAttribute("data-id");
 		if (!id) return;
 		const friendId = parseInt(id, 10);
-		//todo freinds profile
-		this.dispatchEvent(
-			new CustomEvent("friends:view-profile", {
-				detail: { friendId },
-				bubbles: true
-			})
-		);
+		
+		// Navigate to friend profile page with ID as query parameter
+		router.navigate(`/Friend?id=${friendId}`);
 	}
 
 	private setupSidebarListener(): void {

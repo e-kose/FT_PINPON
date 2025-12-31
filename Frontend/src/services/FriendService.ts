@@ -124,6 +124,16 @@ export async function removeFriend(friend_id: number) {
   return { status: res.status, ok: res.ok, data };
 }
 
+export async function getFriendProfile(friendId: number): Promise<{ status: number; ok: boolean; data: any }> {
+  const headers = await baseHeaders();
+  const res = await fetch(`${API_BASE}/user/id/${friendId}`, { 
+    method: 'GET', 
+    headers 
+  });
+  const data = await res.json().catch(() => ({ success: false, message: 'Failed to parse response' }));
+  return { status: res.status, ok: res.ok, data };
+}
+
 export default {
   sendFriendRequest,
   acceptRequest,
@@ -136,4 +146,5 @@ export default {
   unblockUser,
   removeFriend,
   cancelSentRequest,
+  getFriendProfile,
 };

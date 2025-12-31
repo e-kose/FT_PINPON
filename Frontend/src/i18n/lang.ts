@@ -50,9 +50,9 @@ function safeStorageSet(key: string, value: string): void {
 
 function interpolate(template: string, vars?: InterpolationValues): string {
 	if (!vars) return template;
-	return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key: string) => {
+	return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => {
 		const value = vars[key];
-		return value !== undefined ? String(value) : "";
+		return value !== undefined ? String(value) : match;
 	});
 }
 

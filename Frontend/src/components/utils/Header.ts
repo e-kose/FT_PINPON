@@ -74,16 +74,16 @@ class Header extends LocalizedComponent {
         const user = getUser();
         this.innerHTML = `
             <nav class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200/70 dark:border-slate-800/70 shadow-sm fixed top-0 w-full z-50">
-                <div class="${APP_CONTAINER} relative flex items-center justify-between h-14 sm:h-16 md:h-20 lg:h-24">
+                <div class="${APP_CONTAINER} relative flex items-center justify-between min-h-14 sm:min-h-16 md:min-h-20 lg:min-h-24 py-2 sm:py-3">
                     ${user ? `
                     <button id="mobileSidebarToggle" aria-label="${t("sidebar_toggle_aria")}" class="md:hidden ${ICON_BUTTON}">
                         ${ICONS.menu("w-5 h-5")}
                     </button>
                     ` : ""}
                     <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
-                    <div id="logoSection" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 cursor-pointer hover:opacity-90 transition-opacity duration-200 ml-0 md:ml-8 min-w-0" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
-                        <img class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" src="/pong.png" alt="${t("header_logo_alt")}">
-                        <h1 class="text-sm sm:text-lg md:text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight truncate max-w-[8rem] xs:max-w-[10rem] sm:max-w-none">Ft_Transcendance</h1>
+                    <div id="logoSection" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 cursor-pointer hover:opacity-90 transition-opacity duration-200 ml-0 md:ml-8 min-w-0 flex-1" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
+                        <img class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex-shrink-0" src="/pong.png" alt="${t("header_logo_alt")}">
+                        <h1 class="text-[11px] xs:text-sm sm:text-lg md:text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-tight break-words whitespace-normal">Ft_Transcendance</h1>
                     </div>
                     <!-- User Section -->
                     <div class="ml-auto flex items-center mr-0 sm:mr-1 md:mr-2 lg:mr-3 relative select-none">

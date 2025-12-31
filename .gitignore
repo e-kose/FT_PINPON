@@ -31,7 +31,7 @@ docker-compose.override.yml
 auth-service/db/*.db
 user-service/db/*.db
 notification-service/db/*.db
-chat-service/db/*.db
+chat-service/db/*.
 
 coverage/
 

@@ -21,6 +21,7 @@ import {
 class Chat extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
 	private activeConversationId: string | null = null;
+	private requestedConversationId: string | null = null;
 	private messages: Record<string, any[]> = {};
 	private socket: WebSocket | null = null;
 	private friends: Friend[] = [];
@@ -35,6 +36,8 @@ class Chat extends LocalizedComponent {
 		if (!this.sidebarListener) {
 			this.setupSidebarListener();
 		}
+		const urlParams = new URLSearchParams(window.location.search);
+		this.requestedConversationId = urlParams.get("id");
 		void this.fetchFriends();
 		this.startOnlineStatusInterval();
 		this.setupNotificationListener();
@@ -110,6 +113,11 @@ class Chat extends LocalizedComponent {
 				this.friends = res.data.friends;
 				// Friend'lerin online durumlarını çek
 				await this.fetchFriendsOnlineStatus();
+				if (this.requestedConversationId) {
+					const targetId = this.requestedConversationId;
+					this.requestedConversationId = null;
+					void this.loadConversation(targetId);
+				}
 			} else {
 				this.friends = [];
 			}
@@ -117,6 +125,11 @@ class Chat extends LocalizedComponent {
 			console.error(t("chat_fetch_friends_error_log"), error);
 			this.friends = [];
 		} finally {
+			if (this.requestedConversationId) {
+				const targetId = this.requestedConversationId;
+				this.requestedConversationId = null;
+				void this.loadConversation(targetId);
+			}
 			this.isLoadingFriends = false;
 			this.renderAndBind();
 		}
@@ -195,15 +208,16 @@ class Chat extends LocalizedComponent {
 					<button data-action="close-friends-drawer" class="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="${t("common_close")}">✕</button>
 				` : ""}
 			</div>
-			<div class="divide-y overflow-auto max-h-[70vh] lg:max-h-none pr-1">${content}</div>
+			<div class="divide-y flex-1 min-h-0 overflow-y-auto pr-1">${content}</div>
 		`;
 	}
 
 	private renderFriendList(variant: "panel" | "drawer" = "panel"): string {
+		const panelVisibilityClass = this.activeConversationId ? "hidden lg:flex" : "flex lg:flex";
 		const panelClasses =
-			"hidden lg:flex lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-auto flex-col";
+			`${panelVisibilityClass} lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-hidden flex-col min-h-0`;
 		const drawerClasses =
-			"fixed left-0 top-0 h-screen w-[85%] max-w-sm bg-white dark:bg-gray-900 shadow-2xl border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col";
+			"fixed left-0 top-0 h-screen w-[85%] max-w-sm bg-white dark:bg-gray-900 shadow-2xl border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col min-h-0";
 
 		if (variant === "drawer") {
 			return `
@@ -229,15 +243,16 @@ class Chat extends LocalizedComponent {
 	}
 
 	private renderConversationArea(): string {
+		const conversationVisibilityClass = this.activeConversationId ? "flex" : "hidden lg:flex";
 		const conversationContent = this.activeConversationId
 			? `
 				${this.renderMessagesOwnerInfo()}
-				<div class="flex-1 px-3 sm:px-4 overflow-y-auto messages p-2 mb-3 min-h-[40vh]">
+				<div class="flex-1 px-3 sm:px-4 overflow-y-auto messages p-2 mb-3 min-h-[30vh] sm:min-h-[40vh]">
 					${this.renderMessagesHTML()}
 				</div>
-				<div class="flex text-base">
-					<input id="chatInput" class="flex-1 min-w-0 px-3 py-3 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-base min-h-[44px]" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
-					<button id="chatSend" class="px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-r-lg transition-colors min-h-[44px]" aria-label="${t("chat_send_button_label")}">➤</button>
+				<div class="flex flex-col sm:flex-row gap-2 text-base">
+					<input id="chatInput" class="flex-1 min-w-0 px-3 py-3 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-l-lg sm:rounded-r-none focus:outline-none focus:ring-2 focus:ring-green-500 text-base min-h-[44px]" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
+					<button id="chatSend" class="w-full sm:w-auto px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg sm:rounded-r-lg sm:rounded-l-none transition-colors min-h-[44px]" aria-label="${t("chat_send_button_label")}">➤</button>
 				</div>
 			`
 			: `
@@ -249,7 +264,7 @@ class Chat extends LocalizedComponent {
 			`;
 
 		return `
-			<section class="lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex flex-col min-h-[60vh] lg:h-[calc(100vh-6rem)] min-w-0">
+			<section class="${conversationVisibilityClass} lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex-col min-h-[60vh] lg:h-[calc(100vh-6rem)] min-w-0">
 				${conversationContent}
 			</section>
 		`;
@@ -293,9 +308,9 @@ class Chat extends LocalizedComponent {
 					: "bg-gray-900 text-gray-200 rounded-br-2xl rounded-t-2xl";
 
 				return `
-					<div class="flex ${isMine ? "justify-end" : "justify-start"}">
-						<div class="max-w-[85%] sm:max-w-[70%] p-2 my-1 ${bubbleClass} break-words whitespace-pre-wrap">
-							<div>${message.content}</div>
+					<div class="flex ${isMine ? "justify-end" : "justify-start"} mb-2">
+					<div class="inline-block px-3 py-2 ${bubbleClass} break-words text-sm" style="max-width: 75%;">
+							${message.content}
 						</div>
 					</div>
 				`;
