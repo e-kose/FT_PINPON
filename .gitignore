@@ -31,7 +31,7 @@ docker-compose.override.yml
 auth-service/db/*.db
 user-service/db/*.db
 notification-service/db/*.db
-chat-service/db/*.db
+chat-service/db/*.
 
 coverage/
 
@@ -43,3 +43,12 @@ dist/
 .env
 
 *.log
+
+# SQLite / local DB artifacts
+*.db
+*.sqlite
+*.sqlite3
+
+Backend/**/db/*.db
+Backend/**/db/*.sqlite
+Backend/**/db/*.sqlite3
