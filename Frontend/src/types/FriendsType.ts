@@ -33,3 +33,16 @@ export type ReceivedRequest = {
 };
 
 
+type FriendProfileDetail={
+  full_name: string;
+  avatar_url: string;
+  bio: string;
+}
+export type FriendProfile = {
+    id: number;
+    email: string;
+    username: string;
+    created_at: string;
+    profile: FriendProfileDetail;
+};
+

@@ -6,6 +6,7 @@ import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { router } from "../../router/Router";
 import { t, getLanguage } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
+import { APP_CONTAINER, MAIN_CONTENT_SCROLL, PAGE_TOP_OFFSET } from "./Layout";
 
 class MyProfile extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -43,13 +44,9 @@ class MyProfile extends LocalizedComponent {
 	private updateMainContentMargin(isCollapsed: boolean): void {
 		const mainContent = this.querySelector('.main-content');
 		if (mainContent) {
-			if (isCollapsed) {
-				mainContent.classList.remove('ml-72');
-				mainContent.classList.add('ml-16');
-			} else {
-				mainContent.classList.remove('ml-16');
-				mainContent.classList.add('ml-72');
-			}
+			mainContent.classList.add('ml-0');
+			mainContent.classList.toggle('md:ml-16', isCollapsed);
+			mainContent.classList.toggle('md:ml-72', !isCollapsed);
 		}
 	}
 
@@ -86,7 +83,7 @@ class MyProfile extends LocalizedComponent {
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
                         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">${t("my_profile_login_required_title")}</h2>
                         <p class="text-gray-600 dark:text-gray-400 mb-6">${t("my_profile_login_required_description")}</p>
-                        <button class="login-redirect-btn bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
+                        <button class="login-redirect-btn bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 min-h-[44px]">
                             ${t("my_profile_login_required_button")}
                         </button>
                     </div>
@@ -95,9 +92,7 @@ class MyProfile extends LocalizedComponent {
 			return;
 		}
 
-		// Sidebar durumunu al ve doğru margin class'ını belirle
-		const sidebarState = sidebarStateManager.getState();
-		const marginClass = sidebarState.isCollapsed ? 'ml-16' : 'ml-72';
+		const marginClass = sidebarStateManager.getMarginClass();
 
 
 
@@ -117,13 +112,13 @@ class MyProfile extends LocalizedComponent {
                 <!-- Header Component -->
                 <header-component></header-component>
                 
-                <div class="pt-16 md:pt-20 lg:pt-24">
+                <div class="${PAGE_TOP_OFFSET}">
                     <!-- Sidebar Component -->
                     <sidebar-component current-route="profile"></sidebar-component>
 
                     <!-- Main Content -->
-                    <div class="main-content ${marginClass} p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
-                        <div class="w-full">
+                    <div class="main-content ${marginClass} ${MAIN_CONTENT_SCROLL} min-w-0" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
+                        <div class="${APP_CONTAINER}">
                             <!-- Profile Header -->
                             <div class="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-xl shadow-xl border border-white/30 overflow-hidden mb-6">
                                 <div class="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 dark:from-gray-900 dark:via-gray-800 dark:to-black p-8 text-white relative overflow-hidden">
@@ -164,7 +159,7 @@ class MyProfile extends LocalizedComponent {
                                             </div>
                                         </div>
                                         
-                                        <button class="edit-profile-btn bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 backdrop-blur-sm text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-white/30 hover:border-white/50 shadow-lg hover:shadow-xl">
+                                        <button class="edit-profile-btn w-full sm:w-auto bg-gradient-to-r from-blue-500/20 to-purple-500/20 hover:from-blue-500/30 hover:to-purple-500/30 backdrop-blur-sm text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-white/30 hover:border-white/50 shadow-lg hover:shadow-xl min-h-[44px]">
                                             <span class="flex items-center space-x-2">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>

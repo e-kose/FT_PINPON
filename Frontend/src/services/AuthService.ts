@@ -42,7 +42,9 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 }
 
 export async function 	fetchUser(token: string): Promise<boolean> {
-	const res = await fetch("http://localhost:3000/auth/me", {
+	const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
+	console.log("--------------------------- FETCH USER -------------------------- ");
+	const res = await fetch(url, {
 		method: "GET",
 		headers: {
 			"Authorization": `Bearer ${token}`
@@ -64,7 +66,7 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 
 export async function refreshToken(): Promise<string | null> {
 	console.log("--------------------------- Refresh TOKEN -------------------------- ");
-	const res = await fetch("http://localhost:3000/auth/refresh-token", {
+	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh-token`, {
 		method: "POST",
 		credentials: "include",
 	});
@@ -104,7 +106,7 @@ export async function handleLogin(): Promise<boolean> {
 
 export async function logout(): Promise<boolean> {
 	try {
-		const res = await fetch("http://localhost:3000/auth/logout", {
+		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/logout`, {
 			method: "POST",
 			credentials: "include",
 		});

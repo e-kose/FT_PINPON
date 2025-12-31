@@ -7,6 +7,7 @@ import type { Friend } from "../../types/FriendsType";
 import ChatService from "../../services/ChatService";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
+import { APP_CONTAINER, MAIN_CONTENT_SCROLL, PAGE_TOP_OFFSET } from "../utils/Layout";
 import {
 	getMultipleUsersOnlineStatus,
 	getNotificationSocket,
@@ -20,6 +21,7 @@ import {
 class Chat extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
 	private activeConversationId: string | null = null;
+	private requestedConversationId: string | null = null;
 	private messages: Record<string, any[]> = {};
 	private socket: WebSocket | null = null;
 	private friends: Friend[] = [];
@@ -28,11 +30,14 @@ class Chat extends LocalizedComponent {
 	private onlineStatusInterval: number | null = null;
 	private unreadMessageCounts: Record<string, number> = {};
 	private eventListeners: Array<{ element: Element; type: string; handler: EventListener }> = [];
+	private isFriendListOpen = false;
 
 	protected onConnected(): void {
 		if (!this.sidebarListener) {
 			this.setupSidebarListener();
 		}
+		const urlParams = new URLSearchParams(window.location.search);
+		this.requestedConversationId = urlParams.get("id");
 		void this.fetchFriends();
 		this.startOnlineStatusInterval();
 		this.setupNotificationListener();
@@ -58,6 +63,8 @@ class Chat extends LocalizedComponent {
 		this.isLoadingFriends = true;
 		this.friendsOnlineStatus = {};
 		this.unreadMessageCounts = {};
+		this.isFriendListOpen = false;
+		this.updateBodyScrollLock();
 	}
 
 	protected renderComponent(): void {
@@ -65,12 +72,24 @@ class Chat extends LocalizedComponent {
 		this.innerHTML = `
 			<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
 				<header-component></header-component>
-				<div class="pt-16 md:pt-20 lg:pt-24">
+				<div class="${PAGE_TOP_OFFSET}">
 					<sidebar-component current-route="chat"></sidebar-component>
-					<div id="mainContent" class="${marginClass} p-4 sm:p-6 lg:p-8 min-h-screen overflow-auto transition-all duration-300">
-						<div class="w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[calc(100vh-6rem)]">
-							${this.renderFriendList()}
-							${this.renderConversationArea()}
+					<div id="mainContent" class="${marginClass} ${MAIN_CONTENT_SCROLL} min-w-0">
+						<div class="${APP_CONTAINER} space-y-4 sm:space-y-6">
+							<div class="lg:hidden flex items-center justify-between">
+								<h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">${t("chat_sidebar_title")}</h2>
+								<button data-action="open-friends-drawer" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px]">
+									<span>👥</span>
+									<span>${t("chat_sidebar_title")}</span>
+								</button>
+							</div>
+
+							${this.renderMobileFriendDrawer()}
+
+							<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:min-h-[calc(100vh-6rem)]">
+								${this.renderFriendList("panel")}
+								${this.renderConversationArea()}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -81,6 +100,7 @@ class Chat extends LocalizedComponent {
 	protected afterRender(): void {
 		this.setupEvents();
 		this.adjustMainContentMargin(sidebarStateManager.getState().isCollapsed);
+		this.updateBodyScrollLock();
 	}
 
 	private async fetchFriends(): Promise<void> {
@@ -93,6 +113,11 @@ class Chat extends LocalizedComponent {
 				this.friends = res.data.friends;
 				// Friend'lerin online durumlarını çek
 				await this.fetchFriendsOnlineStatus();
+				if (this.requestedConversationId) {
+					const targetId = this.requestedConversationId;
+					this.requestedConversationId = null;
+					void this.loadConversation(targetId);
+				}
 			} else {
 				this.friends = [];
 			}
@@ -100,6 +125,11 @@ class Chat extends LocalizedComponent {
 			console.error(t("chat_fetch_friends_error_log"), error);
 			this.friends = [];
 		} finally {
+			if (this.requestedConversationId) {
+				const targetId = this.requestedConversationId;
+				this.requestedConversationId = null;
+				void this.loadConversation(targetId);
+			}
 			this.isLoadingFriends = false;
 			this.renderAndBind();
 		}
@@ -136,7 +166,7 @@ class Chat extends LocalizedComponent {
 		}
 	}
 
-	private renderFriendList(): string {
+	private renderFriendListContent(showClose: boolean): string {
 		let content: string;
 
 		if (this.isLoadingFriends) {
@@ -159,12 +189,12 @@ class Chat extends LocalizedComponent {
 								<!-- Online/Offline Badge -->
 								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
 							</div>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center gap-2 min-w-0">
+									<div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${friend.friend_username}</div>
 									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}</span>` : ''}
 								</div>
-								<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("chat_friend_no_name")}</div>
+								<div class="text-sm text-gray-500 dark:text-gray-400 truncate">${friend.friend_full_name || t("chat_friend_no_name")}</div>
 							</div>
 						</div>`;
 				})
@@ -172,23 +202,57 @@ class Chat extends LocalizedComponent {
 		}
 
 		return `
-			<aside class="lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-auto">
-				<div class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">${t("chat_sidebar_title")}</div>
-				<div class="divide-y overflow-auto max-h-none lg:max-h-[70vh]">${content}</div>
+			<div class="flex items-center justify-between gap-3 mb-4">
+				<div class="text-lg font-semibold text-gray-900 dark:text-gray-100">${t("chat_sidebar_title")}</div>
+				${showClose ? `
+					<button data-action="close-friends-drawer" class="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="${t("common_close")}">✕</button>
+				` : ""}
+			</div>
+			<div class="divide-y flex-1 min-h-0 overflow-y-auto pr-1">${content}</div>
+		`;
+	}
+
+	private renderFriendList(variant: "panel" | "drawer" = "panel"): string {
+		const panelVisibilityClass = this.activeConversationId ? "hidden lg:flex" : "flex lg:flex";
+		const panelClasses =
+			`${panelVisibilityClass} lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-hidden flex-col min-h-0`;
+		const drawerClasses =
+			"fixed left-0 top-0 h-screen w-[85%] max-w-sm bg-white dark:bg-gray-900 shadow-2xl border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col min-h-0";
+
+		if (variant === "drawer") {
+			return `
+				<div class="lg:hidden">
+					<div class="fixed inset-0 bg-black/40 backdrop-blur-sm" data-action="close-friends-drawer"></div>
+					<aside data-friend-list="drawer" class="${drawerClasses}">
+						${this.renderFriendListContent(true)}
+					</aside>
+				</div>
+			`;
+		}
+
+		return `
+			<aside data-friend-list="panel" class="${panelClasses}">
+				${this.renderFriendListContent(false)}
 			</aside>
 		`;
 	}
 
+	private renderMobileFriendDrawer(): string {
+		if (!this.isFriendListOpen) return "";
+		return this.renderFriendList("drawer");
+	}
+
 	private renderConversationArea(): string {
+		const conversationVisibilityClass = this.activeConversationId ? "flex" : "hidden lg:flex";
 		const conversationContent = this.activeConversationId
 			? `
 				${this.renderMessagesOwnerInfo()}
-				<div class="flex-1 px-4 overflow-auto messages p-2 mb-3">
+				<div class="flex-1 px-3 sm:px-4 overflow-y-auto messages p-2 mb-3 min-h-[30vh] sm:min-h-[40vh]">
 					${this.renderMessagesHTML()}
 				</div>
-				<div class="flex text-lg">
-					<input id="chatInput" class="flex-1 p-3 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
-					<button id="chatSend" class="p-3 bg-green-500 hover:bg-green-600 text-white rounded-r-lg transition-colors" aria-label="${t("chat_send_button_label")}">➤</button>
+				<div class="flex flex-col sm:flex-row gap-2 text-base">
+					<input id="chatInput" class="flex-1 min-w-0 px-3 py-3 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-l-lg sm:rounded-r-none focus:outline-none focus:ring-2 focus:ring-green-500 text-base min-h-[44px]" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
+					<button id="chatSend" class="w-full sm:w-auto px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg sm:rounded-r-lg sm:rounded-l-none transition-colors min-h-[44px]" aria-label="${t("chat_send_button_label")}">➤</button>
 				</div>
 			`
 			: `
@@ -200,7 +264,7 @@ class Chat extends LocalizedComponent {
 			`;
 
 		return `
-			<section class="lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex flex-col h-auto lg:h-[calc(100vh-6rem)]">
+			<section class="${conversationVisibilityClass} lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex-col min-h-[60vh] lg:h-[calc(100vh-6rem)] min-w-0">
 				${conversationContent}
 			</section>
 		`;
@@ -214,15 +278,15 @@ class Chat extends LocalizedComponent {
 		const isOnline = this.friendsOnlineStatus[this.activeConversationId] || false;
 
 		return `
-			<div class="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/60">
-				<div class="relative">
+			<div data-chat-header="true" class="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/60 min-w-0">
+				<div class="relative flex-shrink-0">
 					<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
 					<!-- Online/Offline Badge -->
 					<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
 				</div>
-				<div>
-					<div class="font-semibold text-gray-900 dark:text-gray-100">${owner.friend_username}</div>
-					<div class="text-sm text-gray-500 dark:text-gray-400">${owner.friend_full_name || t("chat_friend_no_name")}</div>
+				<div class="min-w-0">
+					<div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${owner.friend_username}</div>
+					<div class="text-sm text-gray-500 dark:text-gray-400 truncate">${owner.friend_full_name || t("chat_friend_no_name")}</div>
 				</div>
 			</div>
 		`;
@@ -244,9 +308,9 @@ class Chat extends LocalizedComponent {
 					: "bg-gray-900 text-gray-200 rounded-br-2xl rounded-t-2xl";
 
 				return `
-					<div class="flex ${isMine ? "justify-end" : "justify-start"}">
-						<div class="max-w-[80%] p-2 my-1 ${bubbleClass}">
-							<div>${message.content}</div>
+					<div class="flex ${isMine ? "justify-end" : "justify-start"} mb-2">
+					<div class="inline-block px-3 py-2 ${bubbleClass} break-words text-sm" style="max-width: 75%;">
+							${message.content}
 						</div>
 					</div>
 				`;
@@ -257,6 +321,19 @@ class Chat extends LocalizedComponent {
 	private setupEvents(): void {
 		// Önceki event listener'ları temizle
 		this.removeAllEventListeners();
+
+		const openDrawerBtn = this.querySelector('[data-action="open-friends-drawer"]');
+		if (openDrawerBtn) {
+			const handler = () => this.toggleFriendList(true);
+			openDrawerBtn.addEventListener("click", handler);
+			this.eventListeners.push({ element: openDrawerBtn, type: "click", handler });
+		}
+
+		this.querySelectorAll<HTMLElement>('[data-action="close-friends-drawer"]').forEach((item) => {
+			const handler = () => this.toggleFriendList(false);
+			item.addEventListener("click", handler);
+			this.eventListeners.push({ element: item, type: "click", handler });
+		});
 
 		this.querySelectorAll<HTMLElement>(".conversation-item").forEach((item) => {
 			const handler = () => {
@@ -299,6 +376,7 @@ class Chat extends LocalizedComponent {
 		await this.markMessagesAsReadFromUser(friendId);
 
 		await this.loadConversation(friendId);
+		this.toggleFriendList(false);
 	}
 
 	private connectWs(): void {
@@ -349,6 +427,13 @@ class Chat extends LocalizedComponent {
 			this.renderAndBind();
 			this.scrollMessagesToBottom();
 		}
+	}
+
+	private toggleFriendList(forceOpen?: boolean): void {
+		const nextState = typeof forceOpen === "boolean" ? forceOpen : !this.isFriendListOpen;
+		if (this.isFriendListOpen === nextState) return;
+		this.isFriendListOpen = nextState;
+		this.renderAndBind();
 	}
 
 	private handleSend(): void {
@@ -413,8 +498,9 @@ class Chat extends LocalizedComponent {
 		if (!mainContent) return;
 		const transitionClasses = sidebarStateManager.getTransitionClasses();
 		mainContent.classList.add(...transitionClasses);
-		mainContent.classList.toggle("ml-72", !isCollapsed);
-		mainContent.classList.toggle("ml-16", isCollapsed);
+		mainContent.classList.add("ml-0");
+		mainContent.classList.toggle("md:ml-72", !isCollapsed);
+		mainContent.classList.toggle("md:ml-16", isCollapsed);
 	}
 
 	private startOnlineStatusInterval(): void {
@@ -439,15 +525,19 @@ class Chat extends LocalizedComponent {
 	}
 
 	private updateOnlineStatusUI(): void {
-		// Friend list'i yeniden render et
-		const friendListContainer = this.querySelector('.lg\\:col-span-1');
-		if (friendListContainer) {
-			friendListContainer.innerHTML = this.renderFriendList().replace(/<aside[^>]*>/, '').replace(/<\/aside>$/, '');
+		const panelList = this.querySelector('[data-friend-list="panel"]');
+		if (panelList) {
+			panelList.innerHTML = this.renderFriendListContent(false);
+		}
+
+		const drawerList = this.querySelector('[data-friend-list="drawer"]');
+		if (drawerList) {
+			drawerList.innerHTML = this.renderFriendListContent(true);
 		}
 
 		// Conversation header'ı yeniden render et
 		if (this.activeConversationId) {
-			const conversationHeader = this.querySelector('.lg\\:col-span-2 .border-b');
+			const conversationHeader = this.querySelector('[data-chat-header="true"]');
 			if (conversationHeader) {
 				conversationHeader.outerHTML = this.renderMessagesOwnerInfo();
 			}
@@ -549,7 +639,7 @@ class Chat extends LocalizedComponent {
 
 	private updateFriendListUI(): void {
 		// Friend list container'ı bul ve yeniden render et
-		const friendListContainer = this.querySelector('.lg\\:col-span-1 .divide-y');
+		const friendListContainer = this.querySelector('[data-friend-list="panel"] .divide-y');
 		if (friendListContainer && this.friends.length > 0) {
 			friendListContainer.innerHTML = this.friends
 				.map((friend) => {
@@ -566,18 +656,49 @@ class Chat extends LocalizedComponent {
 								<!-- Online/Offline Badge -->
 								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
 							</div>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<div class="font-semibold text-gray-900 dark:text-gray-100">${friend.friend_username}</div>
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center gap-2 min-w-0">
+									<div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${friend.friend_username}</div>
 									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}</span>` : ''}
 								</div>
-								<div class="text-sm text-gray-500 dark:text-gray-400">${friend.friend_full_name || t("chat_friend_no_name")}</div>
+								<div class="text-sm text-gray-500 dark:text-gray-400 truncate">${friend.friend_full_name || t("chat_friend_no_name")}</div>
 							</div>
 						</div>`;
 				})
 				.join("");
 
 			// Event'leri tekrar bağla
+			this.setupEvents();
+		}
+
+		const drawerContainer = this.querySelector('[data-friend-list="drawer"] .divide-y');
+		if (drawerContainer && this.friends.length > 0) {
+			drawerContainer.innerHTML = this.friends
+				.map((friend) => {
+					const friendId = friend.friend_id;
+					const isActive = this.activeConversationId === friendId.toString();
+					const isOnline = this.friendsOnlineStatus[friendId.toString()] || false;
+					const unreadCount = this.unreadMessageCounts[friendId.toString()] || 0;
+
+					return `
+						<div data-id="${friendId}"
+							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
+							<div class="relative">
+								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+								<!-- Online/Offline Badge -->
+								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+							</div>
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center gap-2 min-w-0">
+									<div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${friend.friend_username}</div>
+									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}</span>` : ''}
+								</div>
+								<div class="text-sm text-gray-500 dark:text-gray-400 truncate">${friend.friend_full_name || t("chat_friend_no_name")}</div>
+							</div>
+						</div>`;
+				})
+				.join("");
+
 			this.setupEvents();
 		}
 	}
@@ -633,6 +754,11 @@ class Chat extends LocalizedComponent {
 			element.removeEventListener(type, handler);
 		});
 		this.eventListeners = [];
+	}
+
+	private updateBodyScrollLock(): void {
+		const shouldLock = this.isFriendListOpen || sidebarStateManager.getState().isMobileOpen;
+		document.body.classList.toggle("overflow-hidden", shouldLock);
 	}
 }
 

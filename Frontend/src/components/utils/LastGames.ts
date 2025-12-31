@@ -75,22 +75,22 @@ class LastGames extends LocalizedComponent {
             this.games = this.getDefaultGames();
         }
         this.innerHTML = `
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
+                    <div class="flex items-center space-x-3 min-w-0">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
                             <span class="text-white text-lg">🎮</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">${t("last_games_heading")}</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">${t("last_games_subheading")}</p>
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">${t("last_games_heading")}</h3>
+                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">${t("last_games_subheading")}</p>
                         </div>
                     </div>
-                    <button id="viewAllGamesBtn" class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-600">
+                    <button id="viewAllGamesBtn" class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-600 min-h-[44px]">
                         ${t("last_games_view_all")}
                     </button>
                 </div>
-                <div id="gamesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="gamesContainer" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                     ${this.generateGamesHTML()}
                 </div>
             </div>
@@ -113,16 +113,16 @@ class LastGames extends LocalizedComponent {
             const { label: gameModeLabel, icon: gameModeIcon } = this.translateGameMode(game.gameMode);
             
             return `
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border-2 border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105" data-game-id="${game.id}">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border-2 border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105" data-game-id="${game.id}">
                     <!-- Header with opponent and result -->
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                    <div class="flex justify-between items-center gap-2 mb-4">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
                                 <span class="text-sm font-bold text-blue-600 dark:text-blue-400">${game.opponent.charAt(0).toUpperCase()}</span>
                             </div>
-                            <span class="font-semibold text-gray-900 dark:text-white">${game.opponent}</span>
+                            <span class="font-semibold text-gray-900 dark:text-white truncate max-w-[140px]">${game.opponent}</span>
                         </div>
-                        <div class="flex items-center space-x-1 ${resultClass} px-3 py-1 rounded-full border text-xs font-bold">
+                        <div class="flex items-center space-x-1 ${resultClass} px-2.5 py-1 rounded-full border text-[10px] sm:text-xs font-bold whitespace-nowrap">
                             <span>${resultIcon}</span>
                             <span>${resultText}</span>
                         </div>
@@ -130,7 +130,7 @@ class LastGames extends LocalizedComponent {
                     
                     <!-- Score -->
                     <div class="text-center mb-4">
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                        <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
                             <span class="${game.result === 'win' ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}">${game.playerScore}</span>
                             <span class="text-gray-400 mx-2">-</span>
                             <span class="${game.result === 'loss' ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">${game.opponentScore}</span>
@@ -139,7 +139,7 @@ class LastGames extends LocalizedComponent {
                     </div>
                     
                     <!-- Footer with time and game mode -->
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex flex-wrap justify-between items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
                         <div class="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
                             <span class="text-xs">⏰</span>
                             <span class="text-xs font-medium">${game.timeAgo}</span>
@@ -180,6 +180,7 @@ class LastGames extends LocalizedComponent {
 
     private handleGameClick(gameId: string | null): void {
         // TODO: Show detailed game info
+        void gameId;
     }
 
     // Update Methods - İçleri boş, sen dolduracaksın
