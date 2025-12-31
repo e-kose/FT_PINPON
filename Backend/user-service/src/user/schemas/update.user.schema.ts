@@ -3,22 +3,46 @@ export const updateUserSchema = {
   headers: {
     type: "object",
     properties: {
-      "x-user-id": { type: "string" },
+      "x-user-id": { 
+        type: "string", 
+        pattern: "^[0-9]+$"  // XSS koruması: sadece sayı
+      },
     },
     required: ["x-user-id"],
   },
   body: {
     type: "object",
     properties: {
-      email: { type: "string", format: "email" },
-      username: {type: "string"},
-      is_2fa_enabled: {type: "boolean"},
+      email: { 
+        type: "string", 
+        format: "email",
+        pattern: "^[^<>&\"']+$"  // XSS koruması: HTML yasak
+      },
+      username: { 
+        type: "string",
+        pattern: "^[a-zA-Z0-9_]+$",  // XSS koruması
+        minLength: 3,
+        maxLength: 32
+      },
+      is_2fa_enabled: { type: "boolean" },
       profile: {
         type: "object",
         properties: {
-          full_name: { type: "string" },
-          avatar_url: { type: "string", format: "uri" },
-          bio: { type: "string" },
+          full_name: { 
+            type: "string",
+            pattern: "^[^<>&\"']*$",  // XSS koruması: HTML yasak, Türkçe karakterler serbest
+            maxLength: 100
+          },
+          avatar_url: { 
+            type: "string", 
+            format: "uri",
+            pattern: "^https?://[^<>&\"']+$"  // XSS koruması
+          },
+          bio: { 
+            type: "string",
+            pattern: "^[^<>&\"']*$",  // XSS koruması: HTML yasak, boş string kabul
+            maxLength: 500
+          },
         },
       },
     },

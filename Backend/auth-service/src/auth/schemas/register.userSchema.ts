@@ -8,6 +8,7 @@ export const registerUserSchema = {
         type: "string",
         format: "email",
         maxLength: 254,
+        pattern: "^[^<>&\"']+$"
       },
       username: {
         type: "string",
@@ -30,10 +31,12 @@ export const registerUserSchema = {
             type: "string",
             minLength: 1,
             maxLength: 100,
+            pattern: "^[^<>&\"']*$"
           },
           avatar_url: {
             type: "string",
             format: "uri",
+            pattern: "^https?://[^<>&\"']+$"
           },
         },
       },

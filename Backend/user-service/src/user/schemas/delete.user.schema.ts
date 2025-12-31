@@ -3,7 +3,10 @@ export const deleteUserSchema = {
 	headers: {
 		type: "object",
 		properties: {
-			"x-user-id": { type: "string" },
+			"x-user-id": { 
+				type: "string",
+				pattern: "^[0-9]+$"  // XSS koruması: sadece sayı
+			},
 		},
 		required: ["x-user-id"],
 	},
