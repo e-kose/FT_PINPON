@@ -102,6 +102,7 @@ export interface GameState {
 // ============================================================================
 
 export enum WSClientMessageType {
+  SET_USER_ID = 'SET_USER_ID',
   CREATE_LOCAL_GAME = 'CREATE_LOCAL_GAME',
   JOIN_MATCHMAKING = 'JOIN_MATCHMAKING',
   LEAVE_MATCHMAKING = 'LEAVE_MATCHMAKING',
@@ -122,6 +123,8 @@ export enum WSServerMessageType {
   ROOM_JOINED = 'ROOM_JOINED',
   ROOM_LEFT = 'ROOM_LEFT',
   PLAYER_ASSIGNED = 'PLAYER_ASSIGNED',
+  PLAYER_DISCONNECTED = 'PLAYER_DISCONNECTED',
+  PLAYER_RECONNECTED = 'PLAYER_RECONNECTED',
   MATCHMAKING_SEARCHING = 'MATCHMAKING_SEARCHING',
   MATCH_FOUND = 'MATCH_FOUND',
   GAME_STATE = 'GAME_STATE',
@@ -139,6 +142,10 @@ export interface WSMessage<T = any> {
 }
 
 // Client payloads
+export interface SetUserIdPayload {
+  userId: string;
+}
+
 export interface CreateLocalGamePayload {
   config?: Partial<GameConfig>;
 }
@@ -176,6 +183,21 @@ export interface RoomJoinedPayload {
 export interface PlayerAssignedPayload {
   playerPosition: PlayerPosition;
   userId: string;
+}
+
+export interface PlayerDisconnectedPayload {
+  userId: string;
+  playerPosition: PlayerPosition;
+  timeout?: number | undefined;
+  timestamp: number;
+}
+
+export interface PlayerReconnectedPayload {
+  roomId: string;
+  mode: GameMode;
+  playerPosition: PlayerPosition;
+  opponentId: string;
+  timestamp: number;
 }
 
 export interface MatchmakingSearchingPayload {

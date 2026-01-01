@@ -21,6 +21,7 @@ export class GameRoom extends EventEmitter {
   private engine: GameEngine;
   private gameLoop: NodeJS.Timeout | null = null;
   private readonly fps: number;
+  private isPaused: boolean = false;
 
   constructor(roomId: string, mode: GameMode, config?: Partial<GameConfig>) {
     super();
@@ -53,6 +54,10 @@ export class GameRoom extends EventEmitter {
     let lastTime = Date.now();
 
     this.gameLoop = setInterval(() => {
+      if (this.isPaused) {
+        return;
+      }
+
       const currentTime = Date.now();
       const deltaTime = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
@@ -106,6 +111,14 @@ export class GameRoom extends EventEmitter {
       clearInterval(this.gameLoop);
       this.gameLoop = null;
     }
+  }
+
+  public pause(): void {
+    this.isPaused = true;
+  }
+
+  public resume(): void {
+    this.isPaused = false;
   }
 
   public cleanup(): void {

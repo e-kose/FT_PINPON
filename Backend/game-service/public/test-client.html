@@ -112,6 +112,7 @@
                     <p><strong>Room ID:</strong> <span id="roomId">-</span></p>
                     <p><strong>Mode:</strong> <span id="gameMode">-</span></p>
                     <p><strong>Status:</strong> <span id="gameStatus">-</span></p>
+                    <p><strong>Opponent:</strong> <span id="opponentId">-</span></p>
                 </div>
 
                 <div class="controls">
@@ -140,7 +141,7 @@
 
     <script>
         let ws = null;
-        let gameState = { roomId: null, mode: null, status: null };
+        let gameState = { roomId: null, mode: null, status: null, opponentId: null };
 
         const elements = {
             status: document.getElementById('connectionStatus'),
@@ -155,6 +156,7 @@
             roomId: document.getElementById('roomId'),
             gameMode: document.getElementById('gameMode'),
             gameStatus: document.getElementById('gameStatus'),
+            opponentId: document.getElementById('opponentId'),
             canvas: document.getElementById('gameCanvas'),
         };
 
@@ -171,11 +173,24 @@
 
         function connect() {
             const url = elements.wsUrl.value;
+            console.log('[CONNECT] URL:', url);
+
             ws = new WebSocket(url);
 
             ws.onopen = () => {
                 log('✅ WebSocket connected', 'info');
+                console.log('[WEBSOCKET] Connected');
                 updateConnectionStatus(true);
+
+                // Send user ID to server if available
+                const userId = elements.userId.value.trim();
+                if (userId) {
+                    console.log('[WEBSOCKET] Sending user ID:', userId);
+                    const setUserIdMsg = { type: 'SET_USER_ID', payload: { userId } };
+                    ws.send(JSON.stringify(setUserIdMsg));
+                } else {
+                    console.log('[WEBSOCKET] No user ID provided');
+                }
             };
 
             ws.onmessage = (event) => {
@@ -215,7 +230,7 @@
                 elements.btnLocal.disabled = true;
                 elements.btnMatchmaking.disabled = true;
                 elements.btnLeave.disabled = true;
-                gameState = { roomId: null, mode: null, status: null };
+                gameState = { roomId: null, mode: null, status: null, opponentId: null };
                 updateGameInfo();
             }
         }
@@ -223,22 +238,26 @@
         function sendMessage(type, payload = {}) {
             if (!ws || ws.readyState !== WebSocket.OPEN) {
                 log('❌ WebSocket not connected', 'error');
+                console.error('WebSocket not connected');
                 return;
             }
             const message = { type, payload };
+            console.log('[CLIENT SEND]', message);
             ws.send(JSON.stringify(message));
-            log(`➡️ ${type}`, 'sent');
+            log(`➡️ ${type} ${JSON.stringify(payload).substring(0, 50)}`, 'sent');
         }
 
         function handleServerMessage(message) {
             const { type, payload } = message;
+            console.log('[CLIENT RECEIVE]', message);
 
             switch (type) {
                 case 'CONNECTED':
-                    log(`✅ Connected - Socket ID: ${payload.socketId}`, 'info');
+                    log(`✅ Connected - Socket ID: ${payload.socketId}, User ID: ${payload.userId || 'none'}`, 'info');
                     break;
 
                 case 'ROOM_CREATED':
+                    log(`🏠 Room created: ${payload.roomId}, mode: ${payload.mode}`, 'info');
                     gameState.roomId = payload.roomId;
                     gameState.mode = payload.mode;
                     updateGameInfo();
@@ -257,6 +276,7 @@
                 case 'MATCH_FOUND':
                     gameState.roomId = payload.roomId;
                     gameState.mode = 'matchmaking';
+                    gameState.opponentId = payload.opponentId;
                     updateGameInfo();
                     elements.status.textContent = 'CONNECTED';
                     elements.status.className = 'status connected';
@@ -264,11 +284,37 @@
                     log(`🎮 Match found! Opponent: ${payload.opponentId}`, 'info');
                     break;
 
+                case 'PLAYER_DISCONNECTED':
+                    log(`⚠️ Player disconnected! Waiting ${payload.timeout ? (payload.timeout/1000) + 's' : ''} for reconnect...`, 'info');
+                    gameState.status = 'paused';
+                    updateGameInfo();
+                    elements.status.textContent = 'OPPONENT DISCONNECTED';
+                    elements.status.className = 'status searching';
+                    break;
+
+                case 'PLAYER_RECONNECTED':
+                    log(`✅ Player reconnected! Room: ${payload.roomId}, Opponent: ${payload.opponentId}`, 'info');
+                    gameState.roomId = payload.roomId;
+                    gameState.mode = payload.mode;
+                    gameState.opponentId = payload.opponentId;
+                    gameState.status = 'playing';
+                    updateGameInfo();
+                    elements.status.textContent = 'CONNECTED';
+                    elements.status.className = 'status connected';
+                    elements.btnLeave.disabled = false;
+                    break;
+
                 case 'GAME_STATE':
+                    log(`🎮 Full game state received - Status: ${payload.status}`, 'info');
+                    console.log('[GAME_STATE]', payload);
                     renderGameState(payload);
                     break;
 
                 case 'STATE_UPDATE':
+                    // Only log occasionally to avoid spam
+                    if (Math.random() < 0.01) {
+                        console.log('[STATE_UPDATE]', payload);
+                    }
                     updateGameCanvas(payload);
                     break;
 
@@ -279,7 +325,7 @@
                     break;
 
                 case 'ROOM_LEFT':
-                    gameState = { roomId: null, mode: null, status: null };
+                    gameState = { roomId: null, mode: null, status: null, opponentId: null };
                     updateGameInfo();
                     elements.btnLeave.disabled = true;
                     clearCanvas();
@@ -295,6 +341,7 @@
             elements.roomId.textContent = gameState.roomId || '-';
             elements.gameMode.textContent = gameState.mode || '-';
             elements.gameStatus.textContent = gameState.status || '-';
+            elements.opponentId.textContent = gameState.opponentId || '-';
         }
 
         function clearCanvas() {
@@ -438,9 +485,25 @@
 
         elements.btnConnect.addEventListener('click', connect);
         elements.btnDisconnect.addEventListener('click', disconnect);
-        elements.btnLocal.addEventListener('click', () => sendMessage('CREATE_LOCAL_GAME'));
-        elements.btnMatchmaking.addEventListener('click', () => sendMessage('JOIN_MATCHMAKING'));
-        elements.btnLeave.addEventListener('click', () => sendMessage('LEAVE_ROOM'));
+        elements.btnLocal.addEventListener('click', () => {
+            console.log('[BUTTON] Create Local Game clicked');
+            sendMessage('CREATE_LOCAL_GAME');
+        });
+        elements.btnMatchmaking.addEventListener('click', () => {
+            console.log('[BUTTON] Join Matchmaking clicked');
+            const userId = elements.userId.value.trim();
+            console.log('[MATCHMAKING] User ID:', userId || 'MISSING!');
+            if (!userId) {
+                log('⚠️ User ID required for matchmaking!', 'error');
+                alert('Please enter a User ID before joining matchmaking');
+                return;
+            }
+            sendMessage('JOIN_MATCHMAKING');
+        });
+        elements.btnLeave.addEventListener('click', () => {
+            console.log('[BUTTON] Leave Room clicked');
+            sendMessage('LEAVE_ROOM');
+        });
 
         clearCanvas();
         log('💡 WebSocket Pong Test Client ready', 'info');
