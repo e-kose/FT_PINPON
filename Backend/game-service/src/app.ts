@@ -7,6 +7,13 @@ import sensiblePlugin from "./plugins/sensible.plugin.js";
 import catchGlobErrorPlugin from "./plugins/catchGlobError.plugin.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import fastifyWebsocket from "@fastify/websocket";
+import fastifyStatic from "@fastify/static";
+import { registerGameRoutes } from "./game/routes/game.routes.js";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -21,6 +28,10 @@ app.decorate("gameService", null);
 
 // Register plugins
 app.register(fastifyWebsocket);
+app.register(fastifyStatic, {
+  root: join(__dirname, '..', 'public'),
+  prefix: '/',
+});
 app.register(dbPlugin);
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
@@ -35,7 +46,7 @@ app.after(() => {
 });
 
 // Register routes
-// app.register(gameRoutes);
+app.register(registerGameRoutes);
 
 // Health check endpoint
 app.get('/health', async (request, reply) => {
@@ -48,7 +59,7 @@ const start = async () => {
       port,
       host,
     });
-    app.logger.info(`The game service has been started on port ${host}:${port}.`);
+    app.log.info(`The game service has been started on port ${host}:${port}.`);
   } catch (error) {
     console.log({
       message: `An issue occurred while running the game service server:`,

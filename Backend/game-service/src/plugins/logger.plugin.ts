@@ -1,35 +1,35 @@
 import type { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import net from "net";
-import pino from "pino";
+// import net from "net";
+// import pino from "pino";
 
 export default fp(async function logger(app: FastifyInstance) {
   const serviceName = process.env.SERVICE_NAME || "game-service";
-  const logstashHost = process.env.LOGSTASH_HOST || "localhost";
+  // const logstashHost = process.env.LOGSTASH_HOST || "localhost";
   const logLevel = process.env.LOG_LEVEL || "info";
-  const logstashPort = +(process.env.LOGSTASH_PORT || "5044");
+  // const logstashPort = +(process.env.LOGSTASH_PORT || "5044");
 
-  const tcpClient = new net.Socket();
+  // Logstash connection disabled - not in use currently
+  // const tcpClient = new net.Socket();
+  // tcpClient.connect(logstashPort, logstashHost, () => {
+  //   app.log.info(`Connected to Logstash at ${logstashHost}:${logstashPort}`);
+  // });
 
-  tcpClient.connect(logstashPort, logstashHost, () => {
-    app.log.info(`Connected to Logstash at ${logstashHost}:${logstashPort}`);
-  });
+  // const logger = pino(
+  //   {
+  //     base: { service: serviceName },
+  //     timestamp: pino.stdTimeFunctions.isoTime,
+  //     level: logLevel,
+  //   },
+  //   {
+  //     write: (msg) => tcpClient.write(msg + "\n"),
+  //   }
+  // );
 
-  const logger = pino(
-    {
-      base: { service: serviceName },
-      timestamp: pino.stdTimeFunctions.isoTime,
-      level: logLevel,
-    },
-    {
-      write: (msg) => tcpClient.write(msg + "\n"),
-    }
-  );
-
-  app.decorate("logger", logger);
+  // app.decorate("logger", logger);
 
   app.addHook("onRequest", async (req) => {
-    app.logger.info({
+    app.log.info({
       service: serviceName,
       method: req.method,
       url: req.url,
