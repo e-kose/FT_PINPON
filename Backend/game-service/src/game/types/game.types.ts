@@ -235,6 +235,8 @@ export interface GameStateUpdate {
 export interface GameOverData {
   roomId: string;
   winner: PlayerPosition;
+  winnerId: string;
+  loserId: string;
   finalScore: {
     left: number;
     right: number;

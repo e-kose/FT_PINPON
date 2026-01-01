@@ -6,10 +6,14 @@
 import type { FastifyInstance } from 'fastify';
 import { GameService } from '../service/game.service.js';
 import { GameWebSocketController } from '../controller/game-websocket.controller.js';
+import { GameHttpController } from '../controller/game-http.controller.js';
+import { DatabaseService } from '../../plugins/db.service.js';
 
 export async function registerGameRoutes(fastify: FastifyInstance) {
   const gameService = new GameService();
-  const wsController = new GameWebSocketController(gameService);
+  const dbService = new DatabaseService();
+  const wsController = new GameWebSocketController(gameService, dbService);
+  const httpController = new GameHttpController(dbService);
 
   /**
    * WebSocket endpoint: ws://localhost:3005/ws/game
@@ -21,5 +25,17 @@ export async function registerGameRoutes(fastify: FastifyInstance) {
     await wsController.handleConnection(socket, request);
   });
 
+  /**
+   * HTTP endpoints for stats
+   */
+  fastify.get<{ Params: { userId: string } }>('/api/stats/:userId', async (request, reply) => {
+    return httpController.getUserStats(request, reply);
+  });
+
+  fastify.get<{ Params: { userId: string }; Querystring: { limit?: string } }>('/api/recent-games/:userId', async (request, reply) => {
+    return httpController.getUserRecentGames(request, reply);
+  });
+
   fastify.log.info('Game WebSocket route registered: /ws/game');
+  fastify.log.info('Game HTTP routes registered: /api/stats/:userId, /api/recent-games/:userId');
 }

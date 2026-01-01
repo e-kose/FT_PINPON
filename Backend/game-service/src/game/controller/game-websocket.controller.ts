@@ -7,6 +7,7 @@
 import type { FastifyRequest } from 'fastify';
 import type { WebSocket } from '@fastify/websocket';
 import { GameService } from '../service/game.service.js';
+import { DatabaseService } from '../../plugins/db.service.js';
 import {
   WSClientMessageType,
   WSServerMessageType,
@@ -45,14 +46,16 @@ interface UserConnection {
 
 export class GameWebSocketController {
   private gameService: GameService;
+  private dbService: DatabaseService;
   private userSockets: Map<string, UserConnection> = new Map();
   private userIdToSocketId: Map<string, string> = new Map();
   private roomSockets: Map<string, Set<string>> = new Map();
   private disconnectedPlayers: Map<string, DisconnectedPlayer> = new Map();
   private socketIdCounter = 0;
 
-  constructor(gameService: GameService) {
+  constructor(gameService: GameService, dbService: DatabaseService) {
     this.gameService = gameService;
+    this.dbService = dbService;
     this.setupMatchmakingListeners();
   }
 
@@ -297,7 +300,20 @@ export class GameWebSocketController {
 
     if (!userId || typeof userId !== 'string') {
       console.log(`[SET_USER_ID] ERROR: Invalid user ID`);
+      this.sendError(userConnection.socket, 'Invalid user ID');
       return;
+    }
+
+    // Check if this user ID is already connected
+    const existingSocketId = this.userIdToSocketId.get(userId);
+    if (existingSocketId && existingSocketId !== socketId) {
+      const existingConnection = this.userSockets.get(existingSocketId);
+      if (existingConnection) {
+        console.log(`[SET_USER_ID] User ${userId} already connected on ${existingSocketId}, closing old connection`);
+        this.sendError(existingConnection.socket, 'New connection established with your user ID');
+        existingConnection.socket.close();
+        this.handleDisconnect(existingSocketId);
+      }
     }
 
     // Remove old mapping if user had a different ID
@@ -561,12 +577,17 @@ export class GameWebSocketController {
         const gameOverData: GameOverData = {
           roomId: currentRoomId,
           winner: opponentPosition,
+          winnerId: state.players[opponentPosition].id,
+          loserId: state.players[playerPosition].id,
           finalScore: {
             left: state.players.left.score,
             right: state.players.right.score,
           },
           timestamp: Date.now(),
         };
+
+        // Save to database
+        this.dbService.saveGameResult(gameOverData, room.mode);
 
         this.broadcastToRoom(currentRoomId, {
           type: WSServerMessageType.GAME_OVER,
@@ -610,6 +631,9 @@ export class GameWebSocketController {
     });
 
     room.on('gameOver', (data: GameOverData) => {
+      // Save to database (only matchmaking games)
+      this.dbService.saveGameResult(data, room.mode);
+
       this.broadcastToRoom(room.roomId, {
         type: WSServerMessageType.GAME_OVER,
         payload: data,
@@ -702,12 +726,17 @@ export class GameWebSocketController {
               const gameOverData: GameOverData = {
                 roomId: currentRoomId,
                 winner: opponentPosition,
+                winnerId: state.players[opponentPosition].id,
+                loserId: state.players[playerPosition].id,
                 finalScore: {
                   left: state.players.left.score,
                   right: state.players.right.score,
                 },
                 timestamp: Date.now(),
               };
+
+              // Save to database
+              this.dbService.saveGameResult(gameOverData, room.mode);
 
               this.broadcastToRoom(currentRoomId, {
                 type: WSServerMessageType.GAME_OVER,

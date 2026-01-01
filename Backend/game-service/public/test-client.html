@@ -115,10 +115,20 @@
                     <p><strong>Opponent:</strong> <span id="opponentId">-</span></p>
                 </div>
 
+                <div class="game-info" id="statsPanel" style="display:none; margin-top: 10px; background: rgba(16, 185, 129, 0.1);">
+                    <p style="font-size: 1.1em; margin-bottom: 8px;">📊 <strong>Your Stats:</strong></p>
+                    <p><strong>Wins:</strong> <span id="statsWins">-</span></p>
+                    <p><strong>Losses:</strong> <span id="statsLosses">-</span></p>
+                    <p><strong>Total Games:</strong> <span id="statsTotalGames">-</span></p>
+                    <p><strong>Win Rate:</strong> <span id="statsWinRate">-</span>%</p>
+                </div>
+
                 <div class="controls">
                     <button id="btnLocal" class="btn-primary" disabled>Create Local Game</button>
                     <button id="btnMatchmaking" class="btn-secondary" disabled>Join Matchmaking</button>
                     <button id="btnLeave" class="btn-secondary" disabled>Leave Room</button>
+                    <button id="btnGetStats" class="btn-secondary" disabled>Get My Stats</button>
+                    <button id="btnGetGames" class="btn-secondary" disabled>Get Recent Games</button>
                 </div>
 
                 <div class="keyboard-hint">
@@ -131,6 +141,13 @@
         <div class="panel">
             <h2>🎯 Game Canvas</h2>
             <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+
+        <div class="panel" id="gamesPanel" style="display:none;">
+            <h2>🎮 Recent Games</h2>
+            <div id="gamesContainer" style="max-height: 400px; overflow-y: auto;">
+                <!-- Games will be inserted here -->
+            </div>
         </div>
 
         <div class="panel">
@@ -152,12 +169,21 @@
             btnLocal: document.getElementById('btnLocal'),
             btnMatchmaking: document.getElementById('btnMatchmaking'),
             btnLeave: document.getElementById('btnLeave'),
+            btnGetStats: document.getElementById('btnGetStats'),
+            btnGetGames: document.getElementById('btnGetGames'),
             logContainer: document.getElementById('logContainer'),
             roomId: document.getElementById('roomId'),
             gameMode: document.getElementById('gameMode'),
             gameStatus: document.getElementById('gameStatus'),
             opponentId: document.getElementById('opponentId'),
             canvas: document.getElementById('gameCanvas'),
+            statsPanel: document.getElementById('statsPanel'),
+            statsWins: document.getElementById('statsWins'),
+            statsLosses: document.getElementById('statsLosses'),
+            statsTotalGames: document.getElementById('statsTotalGames'),
+            statsWinRate: document.getElementById('statsWinRate'),
+            gamesPanel: document.getElementById('gamesPanel'),
+            gamesContainer: document.getElementById('gamesContainer'),
         };
 
         const ctx = elements.canvas.getContext('2d');
@@ -208,6 +234,11 @@
                 updateConnectionStatus(false);
                 ws = null;
             };
+
+            ws.onerror = (error) => {
+                log('❌ WebSocket error', 'error');
+                console.error('[WEBSOCKET ERROR]', error);
+            };
         }
 
         function disconnect() {
@@ -222,6 +253,8 @@
                 elements.btnDisconnect.disabled = false;
                 elements.btnLocal.disabled = false;
                 elements.btnMatchmaking.disabled = false;
+                elements.btnGetStats.disabled = false;
+                elements.btnGetGames.disabled = false;
             } else {
                 elements.status.textContent = 'DISCONNECTED';
                 elements.status.className = 'status disconnected';
@@ -230,6 +263,10 @@
                 elements.btnLocal.disabled = true;
                 elements.btnMatchmaking.disabled = true;
                 elements.btnLeave.disabled = true;
+                elements.btnGetStats.disabled = true;
+                elements.btnGetGames.disabled = true;
+                elements.statsPanel.style.display = 'none';
+                elements.gamesPanel.style.display = 'none';
                 gameState = { roomId: null, mode: null, status: null, opponentId: null };
                 updateGameInfo();
             }
@@ -319,7 +356,9 @@
                     break;
 
                 case 'GAME_OVER':
-                    log(`🏆 Game Over! Winner: ${payload.winner} | Score: ${payload.finalScore.left} - ${payload.finalScore.right}`, 'info');
+                    // For local games, show position (left/right), for matchmaking show userId
+                    const winnerDisplay = gameState.mode === 'local' ? payload.winner : payload.winnerId;
+                    log(`🏆 Game Over! Winner: ${winnerDisplay} | Score: ${payload.finalScore.left} - ${payload.finalScore.right}`, 'info');
                     gameState.status = 'finished';
                     updateGameInfo();
                     break;
@@ -333,6 +372,10 @@
 
                 case 'ERROR':
                     log(`❌ Error: ${payload.message}`, 'error');
+                    // If error is about duplicate connection, show prominent warning
+                    if (payload.message.includes('New connection established')) {
+                        alert(`⚠️ Your account was logged in from another location!\n\nYour connection has been closed.`);
+                    }
                     break;
             }
         }
@@ -503,6 +546,109 @@
         elements.btnLeave.addEventListener('click', () => {
             console.log('[BUTTON] Leave Room clicked');
             sendMessage('LEAVE_ROOM');
+        });
+
+        elements.btnGetStats.addEventListener('click', async () => {
+            const userId = elements.userId.value.trim();
+            if (!userId) {
+                log('⚠️ User ID required to get stats!', 'error');
+                alert('Please enter a User ID first');
+                return;
+            }
+
+            try {
+                log(`📊 Fetching stats for user: ${userId}`, 'info');
+                const response = await fetch(`/api/stats/${userId}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const stats = data.stats;
+
+                // Update UI
+                elements.statsWins.textContent = stats.wins;
+                elements.statsLosses.textContent = stats.losses;
+                elements.statsTotalGames.textContent = stats.totalGames;
+                elements.statsWinRate.textContent = stats.winRate;
+                elements.statsPanel.style.display = 'block';
+
+                log(`✅ Stats loaded: ${stats.wins}W / ${stats.losses}L (${stats.winRate}% win rate)`, 'info');
+            } catch (error) {
+                log(`❌ Failed to load stats: ${error.message}`, 'error');
+                console.error('[GET_STATS] Error:', error);
+            }
+        });
+
+        elements.btnGetGames.addEventListener('click', async () => {
+            const userId = elements.userId.value.trim();
+            if (!userId) {
+                log('⚠️ User ID required to get games!', 'error');
+                alert('Please enter a User ID first');
+                return;
+            }
+
+            try {
+                log(`🎮 Fetching recent games for user: ${userId}`, 'info');
+                const response = await fetch(`/api/recent-games/${userId}?limit=10`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const games = data.games;
+
+                // Clear previous games
+                elements.gamesContainer.innerHTML = '';
+
+                if (games.length === 0) {
+                    elements.gamesContainer.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">No games found. Play some matchmaking games first!</p>';
+                } else {
+                    games.forEach((game, index) => {
+                        const isWinner = game.winner_id === userId;
+                        const opponentId = isWinner ? game.loser_id : game.winner_id;
+                        const myScore = isWinner ? game.winner_score : game.loser_score;
+                        const opponentScore = isWinner ? game.loser_score : game.winner_score;
+                        const date = new Date(game.created_at).toLocaleString();
+
+                        const gameDiv = document.createElement('div');
+                        gameDiv.style.cssText = `
+                            padding: 15px;
+                            margin-bottom: 10px;
+                            border-radius: 8px;
+                            background: ${isWinner ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
+                            border-left: 4px solid ${isWinner ? '#10b981' : '#ef4444'};
+                        `;
+
+                        gameDiv.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: ${isWinner ? '#10b981' : '#ef4444'}; font-size: 1.1em;">
+                                        ${isWinner ? '✅ WIN' : '❌ LOSS'}
+                                    </strong>
+                                    <p style="margin: 5px 0; font-size: 0.9em; color: #9ca3af;">vs ${opponentId}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.5em; font-weight: bold;">
+                                        ${myScore} - ${opponentScore}
+                                    </div>
+                                    <p style="margin: 5px 0; font-size: 0.8em; color: #9ca3af;">${date}</p>
+                                </div>
+                            </div>
+                        `;
+
+                        elements.gamesContainer.appendChild(gameDiv);
+                    });
+                }
+
+                elements.gamesPanel.style.display = 'block';
+                log(`✅ Loaded ${games.length} games`, 'info');
+            } catch (error) {
+                log(`❌ Failed to load games: ${error.message}`, 'error');
+                console.error('[GET_GAMES] Error:', error);
+            }
         });
 
         clearCanvas();

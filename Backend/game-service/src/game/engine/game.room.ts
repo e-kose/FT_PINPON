@@ -91,9 +91,12 @@ export class GameRoom extends EventEmitter {
         this.stop();
 
         const winner = this.engine.getWinner();
+        const loser = winner === PlayerPosition.LEFT ? PlayerPosition.RIGHT : PlayerPosition.LEFT;
         const gameOverData: GameOverData = {
           roomId: this.roomId,
           winner: winner!,
+          winnerId: state.players[winner!].id,
+          loserId: state.players[loser].id,
           finalScore: {
             left: state.players.left.score,
             right: state.players.right.score,
