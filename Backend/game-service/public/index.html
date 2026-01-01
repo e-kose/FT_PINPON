@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PING PONG ARENA</title>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+		rel="stylesheet">
+	<style>
+		:root {
+			--primary: #00f3ff;
+			--secondary: #bd00ff;
+			--bg: #050510;
+			--glass: rgba(255, 255, 255, 0.05);
+			--border: rgba(255, 255, 255, 0.1);
+			--text: #e0e6ed;
+		}
+
+		* {
+			box-sizing: border-box;
+			user-select: none;
+		}
+
+		body {
+			margin: 0;
+			font-family: 'Rajdhani', sans-serif;
+			background-color: var(--bg);
+			background-image:
+				radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.1) 0%, transparent 20%),
+				radial-gradient(circle at 90% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 20%);
+			color: var(--text);
+			height: 100vh;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		/* Screens */
+		.screen {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			transition: opacity 0.5s ease, transform 0.5s ease;
+			opacity: 0;
+			pointer-events: none;
+			z-index: 0;
+		}
+
+		.screen.active {
+			opacity: 1;
+			pointer-events: all;
+			z-index: 10;
+			transform: scale(1);
+		}
+
+		.screen.hidden {
+			transform: scale(0.95);
+		}
+
+		/* Login */
+		.login-card {
+			background: var(--glass);
+			backdrop-filter: blur(20px);
+			padding: 3rem;
+			border-radius: 20px;
+			border: 1px solid var(--border);
+			text-align: center;
+			box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+			animation: float 6s ease-in-out infinite;
+		}
+
+		h1 {
+			font-family: 'Orbitron', sans-serif;
+			font-size: 3rem;
+			margin: 0 0 2rem 0;
+			background: linear-gradient(45deg, var(--primary), var(--secondary));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+		}
+
+		input {
+			background: rgba(0, 0, 0, 0.3);
+			border: 1px solid var(--border);
+			padding: 1rem;
+			border-radius: 10px;
+			color: #fff;
+			width: 300px;
+			font-family: 'Rajdhani', sans-serif;
+			font-size: 1.2rem;
+			text-align: center;
+			margin-bottom: 1.5rem;
+			transition: all 0.3s;
+		}
+
+		input:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+		}
+
+		button {
+			background: linear-gradient(45deg, var(--primary), #00a8ff);
+			border: none;
+			padding: 1rem 3rem;
+			border-radius: 50px;
+			color: #000;
+			font-weight: 900;
+			font-family: 'Orbitron', sans-serif;
+			font-size: 1rem;
+			cursor: pointer;
+			transition: all 0.3s;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+		}
+
+		button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 0 30px var(--primary);
+		}
+
+		button:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			filter: grayscale(1);
+		}
+
+		/* Dashboard */
+		.dashboard-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 2rem;
+			max-width: 1200px;
+			width: 90%;
+		}
+
+		.mode-card {
+			background: var(--glass);
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			padding: 2rem;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.3s;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.mode-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+			transform: translateX(-100%);
+			transition: 0.5s;
+		}
+
+		.mode-card:hover {
+			transform: translateY(-10px);
+			border-color: var(--primary);
+			box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+		}
+
+		.mode-card:hover::before {
+			transform: translateX(100%);
+		}
+
+		.mode-icon {
+			font-size: 4rem;
+			margin-bottom: 1rem;
+			display: block;
+		}
+
+		.mode-title {
+			font-family: 'Orbitron', sans-serif;
+			font-size: 1.5rem;
+			margin-bottom: 0.5rem;
+			color: var(--primary);
+		}
+
+		/* Loading / Queue */
+		.loader {
+			width: 100px;
+			height: 100px;
+			border: 5px solid var(--glass);
+			border-top-color: var(--primary);
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin-bottom: 2rem;
+		}
+
+		/* Game Area */
+		.game-container {
+			position: relative;
+			box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
+			border-radius: 4px;
+			overflow: hidden;
+		}
+
+		canvas {
+			display: block;
+			background: #000;
+		}
+
+		.score-board {
+			position: absolute;
+			top: 20px;
+			width: 100%;
+			display: flex;
+			justify-content: center;
+			gap: 100px;
+			font-family: 'Orbitron', sans-serif;
+			font-size: 4rem;
+			font-weight: 900;
+			color: rgba(255, 255, 255, 0.2);
+			pointer-events: none;
+		}
+
+		/* Bracket */
+		.bracket-container {
+			display: flex;
+			gap: 2rem;
+			overflow-x: auto;
+			padding: 2rem;
+			max-width: 100%;
+		}
+
+		.round {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			min-width: 250px;
+		}
+
+		.match-card {
+			background: #1a1a2e;
+			border: 1px solid var(--border);
+			margin: 1rem 0;
+			padding: 1rem;
+			border-radius: 8px;
+			position: relative;
+		}
+
+		.match-card.active {
+			border-color: var(--primary);
+			box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+		}
+
+		.match-card.scheduled {
+			border-color: #ff9d00;
+		}
+
+		.match-player {
+			display: flex;
+			justify-content: space-between;
+			padding: 4px 0;
+			font-size: 0.9rem;
+		}
+
+		.winner {
+			color: var(--primary);
+			font-weight: bold;
+			text-shadow: 0 0 5px var(--primary);
+		}
+
+		/* Animations */
+		@keyframes float {
+			0% {
+				transform: translateY(0px);
+			}
+
+			50% {
+				transform: translateY(-20px);
+			}
+
+			100% {
+				transform: translateY(0px);
+			}
+		}
+
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
+
+		/* Status Bar */
+		#status-bar {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: rgba(0, 0, 0, 0.8);
+			padding: 10px 20px;
+			border-radius: 20px;
+			font-size: 0.8rem;
+			color: var(--border);
+			z-index: 100;
+		}
+
+		.back-btn {
+			position: fixed;
+			top: 20px;
+			left: 20px;
+			padding: 0.5rem 1.5rem;
+			background: rgba(255, 255, 255, 0.1);
+			font-size: 0.8rem;
+			z-index: 100;
+		}
+
+		.winner-modal {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.9);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			z-index: 20;
+			animation: fadeIn 0.5s;
+		}
+
+		.winner-text {
+			font-size: 5rem;
+			font-family: 'Orbitron', sans-serif;
+			color: #ffd700;
+			text-shadow: 0 0 50px #ffd700;
+			margin-bottom: 2rem;
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- STATUS BAR -->
+	<div id="status-bar">Disconnected</div>
+	<button id="btnBack" class="back-btn" style="display:none;">← DASHBOARD</button>
+
+	<!-- 1. LOGIN SCREEN -->
+	<div id="screen-login" class="screen active">
+		<div class="login-card">
+			<h1>PING PONG<br><span style="font-size:1.5rem; letter-spacing:5px; color:#fff;">ARENA</span></h1>
+			<input type="text" id="usernameInput" placeholder="ENTER PLAYER ID" maxlength="10">
+			<br>
+			<button id="btnEnter">ENTER THE ARENA</button>
+		</div>
+	</div>
+
+	<!-- 2. DASHBOARD -->
+	<div id="screen-dashboard" class="screen">
+		<div style="text-align:center; margin-bottom:3rem;">
+			<h2 style="font-size:2rem; margin:0;">WELCOME, <span id="displayUser" style="color:var(--primary)"></span>
+			</h2>
+			<p style="color:rgba(255,255,255,0.5);">SELECT YOUR BATTLE MODE</p>
+		</div>
+
+		<div class="dashboard-grid">
+			<!-- LOCAL -->
+			<div class="mode-card" onclick="startLocalGame()">
+				<span class="mode-icon">🎮</span>
+				<div class="mode-title">LOCAL MATCH</div>
+				<div style="font-size:0.9rem; opacity:0.7;">1v1 Split Screen</div>
+			</div>
+
+			<!-- MATCHMAKING -->
+			<div class="mode-card" onclick="joinMatchmaking()">
+				<span class="mode-icon">⚔️</span>
+				<div class="mode-title">RANKED</div>
+				<div style="font-size:0.9rem; opacity:0.7;">Online Matchmaking</div>
+			</div>
+
+			<!-- TOURNAMENT -->
+			<div class="mode-card" style="grid-column: span 3; display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+				<div onclick="joinQueue(4)"
+					style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; cursor:pointer;">
+					<span class="mode-icon" style="font-size:2rem;">🏆</span>
+					<div class="mode-title">TOURNAMENT (4)</div>
+					<div style="font-size:0.8rem; opacity:0.7;">Quick Cup</div>
+				</div>
+				<div onclick="joinQueue(8)"
+					style="padding:10px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; cursor:pointer;">
+					<span class="mode-icon" style="font-size:2rem;">👑</span>
+					<div class="mode-title">TOURNAMENT (8)</div>
+					<div style="font-size:0.8rem; opacity:0.7;">Grand Prix</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 3. QUEUE / WAITING -->
+	<div id="screen-queue" class="screen">
+		<div class="loader"></div>
+		<h2 id="queueStatus">SEARCHING FOR OPPONENTS...</h2>
+		<div id="queueCount" style="font-size:1.5rem; color:var(--primary); margin-top:1rem;"></div>
+		<br>
+		<button onclick="leaveQueue()"
+			style="background:transparent; border:1px solid rgba(255,255,255,0.2);">CANCEL</button>
+	</div>
+
+	<!-- 4. BRACKET -->
+	<div id="screen-bracket" class="screen" style="justify-content: flex-start; padding-top: 100px;">
+		<h2 style="color:var(--primary);">TOURNAMENT BRACKET</h2>
+		<div id="bracketContainer" class="bracket-container"></div>
+	</div>
+
+	<!-- 5. GAME -->
+	<div id="screen-game" class="screen">
+		<div class="game-container">
+			<div class="score-board">
+				<span id="scoreLeft">0</span>
+				<span id="scoreRight">0</span>
+			</div>
+			<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+
+
+			<!-- Modal for score/end game if needed -->
+			<div id="modal-score" class="modal" style="display:none; align-items:center; justify-content:center;">
+				<h1 id="modal-msg" style="font-size:3rem; color:#fff;">GOAL!</h1>
+			</div>
+		</div>
+		<div style="margin-top:1rem; opacity:0.5; font-size:0.8rem;">CONTROLS: ARROW KEYS</div>
+	</div>
+
+	<script>
+		// CONFIG
+		const WS_URL = 'ws://' + window.location.host + '/ws/game';
+
+		// STATE
+		let ws = null;
+		let userId = '';
+		let ctx = document.getElementById('gameCanvas').getContext('2d');
+		let currentScreen = 'login';
+
+		// DOM ELEMENTS
+		const screens = {
+			login: document.getElementById('screen-login'),
+			dashboard: document.getElementById('screen-dashboard'),
+			queue: document.getElementById('screen-queue'),
+			bracket: document.getElementById('screen-bracket'),
+			game: document.getElementById('screen-game')
+		};
+
+		const els = {
+			username: document.getElementById('usernameInput'),
+			displayUser: document.getElementById('displayUser'),
+			status: document.getElementById('status-bar'),
+			queueStatus: document.getElementById('queueStatus'),
+			queueCount: document.getElementById('queueCount'),
+			bracketBox: document.getElementById('bracketContainer'),
+			scoreLeft: document.getElementById('scoreLeft'),
+			scoreRight: document.getElementById('scoreRight'),
+			winnerModal: document.getElementById('tournamentWinner'),
+			winnerText: document.getElementById('winnerText'),
+			backBtn: document.getElementById('btnBack')
+		};
+
+		// NAVIGATION
+		function showScreen(name) {
+			console.log("Switching to screen:", name);
+			Object.values(screens).forEach(s => {
+				s.classList.remove('active');
+				s.classList.add('hidden');
+			});
+			// Instant switch to prevent 'hidden' state staying too long during fast updates
+			screens[name].classList.remove('hidden');
+			screens[name].classList.add('active');
+
+			currentScreen = name;
+
+			// Back button logic
+			if (name === 'dashboard' || name === 'login') {
+				els.backBtn.style.display = 'none';
+			} else {
+				els.backBtn.style.display = 'block';
+			}
+		}
+
+		els.backBtn.onclick = () => {
+			if (confirm("Are you sure you want to leave?")) {
+				// Determine leave action
+				if (currentScreen === 'queue') leaveQueue();
+				if (currentScreen === 'game' || currentScreen === 'bracket') {
+					ws.send(JSON.stringify({ type: 'LEAVE_ROOM' }));
+					ws.send(JSON.stringify({ type: 'LEAVE_TOURNAMENT' })); // Safe to send both
+				}
+				showDash();
+			}
+		};
+
+		function showDash() {
+			showScreen('dashboard');
+			els.displayUser.textContent = userId;
+		}
+
+		// WEBSOCKET
+		function connect() {
+			userId = els.username.value.trim().toUpperCase();
+			if (!userId) return alert("Please enter a User ID");
+
+			ws = new WebSocket(WS_URL);
+
+			ws.onopen = () => {
+				els.status.textContent = "CONNECTED: " + userId;
+				els.status.style.color = "#00f3ff";
+				ws.send(JSON.stringify({ type: 'SET_USER_ID', payload: { userId } }));
+				showDash();
+			};
+
+			ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
+
+			ws.onclose = () => {
+				els.status.textContent = "DISCONNECTED";
+				els.status.style.color = "#ff0055";
+				alert("Connection lost");
+				showScreen('login');
+			};
+		}
+
+		function handleMessage(msg) {
+			console.log("MSG:", msg.type, msg.payload);
+
+			switch (msg.type) {
+				// QUEUE
+				case 'MATCHMAKING_SEARCHING':
+				case 'TOURNAMENT_QUEUE_JOINED':
+					showScreen('queue');
+					els.queueStatus.textContent = msg.type === 'MATCHMAKING_SEARCHING' ?
+						"FINDING MATCH..." : "WAITING FOR PLAYERS...";
+					if (msg.payload.waitingCount) {
+						els.queueCount.textContent = `${msg.payload.waitingCount} / ${msg.payload.neededCount}`;
+					} else {
+						els.queueCount.textContent = "";
+					}
+					break;
+
+				case 'TOURNAMENT_QUEUE_LEFT':
+				case 'LEAVE_TOURNAMENT':
+				case 'ROOM_LEFT':
+					showDash();
+					break;
+
+				// TOURNAMENT
+				case 'TOURNAMENT_CREATED':
+					window.currentGameMode = 'tournament';
+					showScreen('bracket');
+					break;
+				case 'TOURNAMENT_STATE':
+					window.currentGameMode = 'tournament'; // Ensure set
+					renderBracket(msg.payload.tournament);
+					// Only switch if we are NOT in an active match
+					if (currentScreen !== 'game' && !window.inActiveMatch) {
+						showScreen('bracket');
+					}
+					break;
+
+				// GAME
+				case 'MATCH_FOUND': // Matchmaking
+					window.currentGameMode = 'online';
+					window.inActiveMatch = true;
+					showScreen('game');
+					console.log("MATCH FOUND! Room:", msg.payload.roomId);
+					els.scoreLeft.textContent = "0";
+					els.scoreRight.textContent = "0";
+					break;
+
+				case 'ROOM_CREATED': // Local
+					window.currentGameMode = 'local';
+					window.inActiveMatch = true;
+					showScreen('game');
+					els.scoreLeft.textContent = "0";
+					els.scoreRight.textContent = "0";
+					break;
+
+				case 'GAME_STATE':
+				case 'STATE_UPDATE':
+					if (currentScreen !== 'game') {
+						// Only switch if strictly necessary and we are supposed to be playing
+						// If we are marked as in active match, force it
+						if (window.inActiveMatch) {
+							showScreen('game');
+						}
+					}
+					if (currentScreen === 'game') {
+						try {
+							renderGame(msg.payload);
+						} catch (e) { console.error("Render Error:", e); }
+					}
+					break;
+
+				case 'GAME_OVER':
+					window.inActiveMatch = false;
+
+					console.log("GAME OVER. Winner:", msg.payload.winnerId);
+					if (currentScreen === 'game') {
+						setTimeout(() => {
+							// If tournament, switch back to bracket to see results
+							if (window.currentGameMode === 'tournament') {
+								showScreen('bracket');
+								// Status will be updated by TOURNAMENT_STATE or we can infer it
+								if (msg.payload.winnerId === userId) {
+									updateBracketStatus("MATCH WON! WAITING FOR NEXT ROUND...");
+								} else {
+									updateBracketStatus("ELIMINATED. YOU CAN WATCH OR LEAVE.");
+									els.backBtn.style.display = 'block'; // Ensure exit option
+								}
+							} else {
+								// Local/Online: Just show overlay or simple text (no alert)
+								renderGameMessage(msg.payload.winnerId === userId ? "VICTORY!" : "DEFEAT");
+								setTimeout(showDash, 3000);
+							}
+						}, 1000);
+					}
+					break;
+
+
+
+				case 'ERROR':
+					console.error("Error:", msg.payload.message);
+					// Show error in status bar instead of alert if possible, or unobtrusive overlay
+					els.status.textContent = "ERROR: " + msg.payload.message;
+					els.status.style.color = "#ff5555";
+					if (currentScreen === 'queue') showDash();
+					break;
+			}
+		}
+
+		// ACTIONS
+		document.getElementById('btnEnter').onclick = connect;
+
+		window.startLocalGame = () => {
+			ws.send(JSON.stringify({ type: 'CREATE_LOCAL_GAME' }));
+		};
+
+		window.joinMatchmaking = () => {
+			ws.send(JSON.stringify({ type: 'JOIN_MATCHMAKING' }));
+		};
+
+		window.joinQueue = (size) => {
+			ws.send(JSON.stringify({ type: 'JOIN_TOURNAMENT_QUEUE', payload: { size } }));
+		};
+
+		window.leaveQueue = () => {
+			// Try both just in case
+			ws.send(JSON.stringify({ type: 'LEAVE_MATCHMAKING' }));
+			ws.send(JSON.stringify({ type: 'LEAVE_TOURNAMENT_QUEUE' }));
+			showDash();
+		};
+
+		window.showDashboard = showDash;
+
+		// RENDERERS
+		function renderGame(state) {
+			// Canvas Reset
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, 800, 600);
+
+			// Grid Lines (Simulated retro effect)
+			ctx.strokeStyle = '#222';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			for (let i = 0; i < 800; i += 40) { ctx.moveTo(i, 0); ctx.lineTo(i, 600); }
+			for (let i = 0; i < 600; i += 40) { ctx.moveTo(0, i); ctx.lineTo(800, i); }
+			ctx.stroke();
+
+			// Center Line
+			ctx.strokeStyle = '#00f3ff';
+			ctx.lineWidth = 2;
+			ctx.setLineDash([10, 20]);
+			ctx.shadowBlur = 10;
+			ctx.shadowColor = '#00f3ff';
+			ctx.beginPath();
+			ctx.moveTo(400, 0);
+			ctx.lineTo(400, 600);
+			ctx.stroke();
+			ctx.setLineDash([]);
+			ctx.shadowBlur = 0;
+
+			// Paddles
+			ctx.shadowBlur = 20;
+			ctx.fillStyle = '#fff';
+
+			// Left
+			if (state.players.left.paddle) {
+				ctx.shadowColor = '#bd00ff';
+				ctx.fillRect(20, state.players.left.paddle.y, 10, 100);
+			}
+			// Right
+			if (state.players.right.paddle) {
+				ctx.shadowColor = '#00f3ff';
+				ctx.fillRect(770, state.players.right.paddle.y, 10, 100);
+			}
+
+			// Ball
+			ctx.shadowColor = '#fff';
+			ctx.fillStyle = '#fff';
+			ctx.beginPath();
+			ctx.arc(state.ball.x, state.ball.y, 8, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.shadowBlur = 0;
+
+			// Scores
+			if (state.players.left.score !== undefined) {
+				els.scoreLeft.textContent = state.players.left.score;
+				els.scoreRight.textContent = state.players.right.score;
+			}
+		}
+
+		function renderBracket(t) {
+			els.bracketBox.innerHTML = '';
+
+			// Status Header
+			let statusMsg = "";
+			if (t.state === 'finished') {
+				const isWinner = t.bracket.winnerId === userId;
+				statusMsg = isWinner ? "CHAMPION! 🏆" : `WINNER: ${t.bracket.winnerId}`;
+			} else {
+				statusMsg = "TOURNAMENT IN PROGRESS";
+			}
+			updateBracketStatus(statusMsg);
+
+			t.bracket.rounds.forEach((round, i) => {
+				const roundDiv = document.createElement('div');
+				roundDiv.className = 'round';
+
+				const title = document.createElement('div');
+				title.textContent = `ROUND ${i + 1}`;
+				title.style.color = '#777';
+				title.style.textAlign = 'center';
+				title.style.marginBottom = '10px';
+				roundDiv.appendChild(title);
+
+				round.matches.forEach(m => {
+					const card = document.createElement('div');
+					card.className = `match-card ${m.status}`;
+
+					// Highlight own match
+					if (m.player1Id === userId || m.player2Id === userId) {
+						card.style.borderColor = '#00f3ff';
+					}
+
+					const p1 = m.player1Id || 'WAITING';
+					const p2 = m.player2Id || 'WAITING';
+
+					const p1Win = m.winnerId === m.player1Id ? 'winner' : '';
+					const p2Win = m.winnerId === m.player2Id ? 'winner' : '';
+
+					card.innerHTML = `
+                        <div class="match-player ${p1Win}"><span>${p1}</span></div>
+                        <div style="height:1px; background:#333; margin:4px 0;"></div>
+                        <div class="match-player ${p2Win}"><span>${p2}</span></div>
+                        <div style="font-size:0.7rem; color:#666; text-align:right; margin-top:5px;">${m.status.toUpperCase()}</div>
+                    `;
+					roundDiv.appendChild(card);
+				});
+				els.bracketBox.appendChild(roundDiv);
+			});
+		}
+
+		function updateBracketStatus(msg) {
+			// Create or update a status element in bracket container
+			let st = document.getElementById('bracketStatus');
+			if (!st) {
+				st = document.createElement('h3');
+				st.id = 'bracketStatus';
+				st.style.color = '#fff';
+				st.style.textAlign = 'center';
+				st.style.width = '100%';
+				st.style.marginBottom = '20px';
+				els.bracketBox.parentElement.insertBefore(st, els.bracketBox);
+			}
+			st.textContent = msg;
+		}
+
+		function renderGameMessage(msg) {
+			// Simple overlay on canvas
+			ctx.fillStyle = "rgba(0,0,0,0.7)";
+			ctx.fillRect(0, 0, 800, 600);
+			ctx.fillStyle = "#fff";
+			ctx.font = "50px Orbitron";
+			ctx.textAlign = "center";
+			ctx.fillText(msg, 400, 300);
+		}
+
+		// INPUT
+		// INPUT
+		const keys = { w: false, s: false, ArrowUp: false, ArrowDown: false };
+
+		function sendInput(action, position = null) {
+			const payload = { action };
+			if (position) payload.playerPosition = position; // Required for Local
+			// console.log("Sending Input:", payload, "Mode:", window.currentGameMode);
+			if (ws && ws.readyState === WebSocket.OPEN) {
+				ws.send(JSON.stringify({ type: 'PLAYER_INPUT', payload }));
+			}
+		}
+
+		document.addEventListener('keydown', (e) => {
+			if (currentScreen !== 'game') return;
+			// Prevent scrolling
+			if (["ArrowUp", "ArrowDown"].indexOf(e.code) > -1) {
+				e.preventDefault();
+			}
+
+			if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+
+			// Local Mode Logic (Splitscreen)
+			if (window.currentGameMode === 'local') {
+				// Player 1 (Left) - W/S
+				if (e.key === 'w' || e.key === 'W') sendInput('move_up', 'left');
+				if (e.key === 's' || e.key === 'S') sendInput('move_down', 'left');
+
+				// Player 2 (Right) - Arrows
+				if (e.key === 'ArrowUp') sendInput('move_up', 'right');
+				if (e.key === 'ArrowDown') sendInput('move_down', 'right');
+			} else {
+				// Online / Tournament (Single Local Player)
+				if (e.key === 'ArrowUp') sendInput('move_up');
+				if (e.key === 'ArrowDown') sendInput('move_down');
+			}
+		});
+
+		document.addEventListener('keyup', (e) => {
+			if (currentScreen !== 'game') return;
+			if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+
+			if (window.currentGameMode === 'local') {
+				if (e.key === 'w' || e.key === 's' || e.key === 'W' || e.key === 'S') sendInput('stop', 'left');
+				if (e.key === 'ArrowUp' || e.key === 'ArrowDown') sendInput('stop', 'right');
+			} else {
+				if (e.key === 'ArrowUp' || e.key === 'ArrowDown') sendInput('stop');
+			}
+		});
+
+	</script>
+</body>
+
+</html>

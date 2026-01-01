@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pong Tournament Client</title>
+	<style>
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background: #1a1a2e;
+			color: #fff;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: 300px 1fr;
+			gap: 20px;
+		}
+
+		.panel {
+			background: rgba(255, 255, 255, 0.05);
+			padding: 20px;
+			border-radius: 10px;
+			margin-bottom: 20px;
+		}
+
+		h2 {
+			border-bottom: 1px solid #444;
+			padding-bottom: 10px;
+			margin-top: 0;
+		}
+
+		input,
+		select,
+		button {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 10px;
+			border-radius: 5px;
+			border: none;
+		}
+
+		button {
+			background: #e94560;
+			color: white;
+			cursor: pointer;
+			font-weight: bold;
+		}
+
+		button:hover {
+			background: #ff2e63;
+		}
+
+		button:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+
+		.status {
+			padding: 10px;
+			border-radius: 5px;
+			text-align: center;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+
+		.status.connected {
+			background: #0f3460;
+			color: #4cc9f0;
+		}
+
+		.status.disconnected {
+			background: #533440;
+			color: #f72585;
+		}
+
+		/* Bracket Styles */
+		.bracket {
+			display: flex;
+			flex-direction: row;
+			overflow-x: auto;
+			gap: 40px;
+			padding: 20px;
+		}
+
+		.round {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			gap: 20px;
+			min-width: 200px;
+		}
+
+		.match {
+			background: #16213e;
+			border: 1px solid #0f3460;
+			border-radius: 8px;
+			padding: 10px;
+			position: relative;
+		}
+
+		.match.scheduled {
+			border-color: #fca311;
+		}
+
+		.match.in_progress {
+			border-color: #4cc9f0;
+			box-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+		}
+
+		.match.finished {
+			border-color: #2ec4b6;
+		}
+
+		.player {
+			padding: 5px;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.player.winner {
+			color: #2ec4b6;
+			font-weight: bold;
+		}
+
+		.player span:first-child {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 120px;
+		}
+
+		.round-title {
+			text-align: center;
+			font-weight: bold;
+			margin-bottom: 10px;
+			color: #fca311;
+		}
+
+		#gameCanvas {
+			background: #000;
+			border: 2px solid #444;
+			border-radius: 8px;
+			display: block;
+			margin: 0 auto;
+		}
+
+		.log {
+			background: #000;
+			height: 200px;
+			overflow-y: auto;
+			padding: 10px;
+			font-family: monospace;
+			font-size: 12px;
+			color: #0f0;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1>🏆 Pong Tournament Mode</h1>
+
+		<div class="grid">
+			<!-- Sidebar / Controls -->
+			<div>
+				<div class="panel">
+					<h2>Connection</h2>
+					<div id="status" class="status disconnected">Disconnected</div>
+					<input type="text" id="wsUrl" value="ws://localhost:3005/ws/game">
+					<input type="text" id="userId" placeholder="User ID">
+					<button id="btnConnect">Connect</button>
+				</div>
+
+				<div class="panel">
+					<h2>Tournament Actions</h2>
+					<!-- Manual creation removed as per request -->
+					<button id="btnJoinQueue4">Enter 4-Player Queue</button>
+					<button id="btnJoinQueue8">Enter 8-Player Queue</button>
+					<button id="btnLeaveQueue" style="background:#555;">Leave Queue</button>
+					<div style="border-top: 1px solid #444; margin: 10px 0;"></div>
+					<!-- Manual Join removed -->
+					<button id="btnLeaveTour" disabled>Leave Tournament/Game</button>
+				</div>
+
+				<div class="panel">
+					<h2>Game Controls</h2>
+					<p style="text-align:center; font-size: 0.9em; color: #aaa;">Use Arrow Keys to Move</p>
+				</div>
+			</div>
+
+			<!-- Main Content: Bracket & Game -->
+			<div>
+				<div class="panel" id="lobbyPanel" style="display:none;">
+					<h2>Tournament Lobby</h2>
+					<p><strong>ID:</strong> <span id="lblTourId">-</span></p>
+					<p><strong>Status:</strong> <span id="lblTourStatus">-</span></p>
+					<p><strong>Players:</strong> <span id="lblPlayerCount">0</span> / <span id="lblMaxPlayers">-</span>
+					</p>
+					<ul id="playerList"></ul>
+				</div>
+
+				<div class="panel" id="bracketPanel" style="display:none;">
+					<h2>Tournament Bracket</h2>
+					<div id="bracketContainer" class="bracket"></div>
+					<div id="winnerDisplay"
+						style="text-align:center; font-size:2em; color:#ffd700; display:none; margin-top:20px;">
+						👑 Winner: <span id="winnerText"></span> 👑
+					</div>
+				</div>
+
+				<div class="panel" id="gamePanel" style="display:none;">
+					<h2>Matches</h2>
+					<canvas id="gameCanvas" width="800" height="600"></canvas>
+				</div>
+
+				<div class="panel">
+					<h2>Logs</h2>
+					<div id="log" class="log"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const elements = {
+			wsUrl: document.getElementById('wsUrl'),
+			userId: document.getElementById('userId'),
+			btnConnect: document.getElementById('btnConnect'),
+			btnConnect: document.getElementById('btnConnect'),
+			// Removed manual controls
+			btnLeaveTour: document.getElementById('btnLeaveTour'),
+			status: document.getElementById('status'),
+			log: document.getElementById('log'),
+			lobbyPanel: document.getElementById('lobbyPanel'),
+			bracketPanel: document.getElementById('bracketPanel'),
+			gamePanel: document.getElementById('gamePanel'),
+			bracketContainer: document.getElementById('bracketContainer'),
+			gameCanvas: document.getElementById('gameCanvas'),
+			lblTourId: document.getElementById('lblTourId'),
+			lblTourStatus: document.getElementById('lblTourStatus'),
+			lblPlayerCount: document.getElementById('lblPlayerCount'),
+			lblMaxPlayers: document.getElementById('lblMaxPlayers'),
+			playerList: document.getElementById('playerList'),
+			winnerDisplay: document.getElementById('winnerDisplay'),
+			winnerText: document.getElementById('winnerText'),
+		};
+
+		let ws = null;
+		let ctx = elements.gameCanvas.getContext('2d');
+		let currentTournament = null;
+
+		function log(msg) {
+			const div = document.createElement('div');
+			div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+			elements.log.appendChild(div);
+			elements.log.scrollTop = elements.log.scrollHeight;
+		}
+
+		function connect() {
+			if (ws) ws.close();
+
+			const userId = elements.userId.value.trim();
+			if (!userId) return alert("Enter User ID");
+
+			ws = new WebSocket(elements.wsUrl.value);
+
+			ws.onopen = () => {
+				elements.status.textContent = "Connected";
+				elements.status.className = "status connected";
+				elements.btnConnect.disabled = true;
+
+				// Send User ID & Connect
+				ws.send(JSON.stringify({ type: 'SET_USER_ID', payload: { userId } }));
+				log("Socket Connected");
+			};
+
+			ws.onmessage = (event) => {
+				const msg = JSON.parse(event.data);
+				handleMessage(msg);
+			};
+
+			ws.onclose = () => {
+				elements.status.textContent = "Disconnected";
+				elements.status.className = "status disconnected";
+				elements.btnConnect.disabled = false;
+				resetUI();
+				log("Socket Disconnected");
+			};
+		}
+
+		function handleMessage(msg) {
+			// log("RX: " + msg.type);
+			switch (msg.type) {
+				case 'TOURNAMENT_CREATED':
+					log(`Tournament Created: ${msg.payload.tournamentId}`);
+					elements.tourId.value = msg.payload.tournamentId;
+					break;
+				case 'TOURNAMENT_STATE':
+					updateTournamentState(msg.payload.tournament);
+					break;
+				case 'LEAVE_TOURNAMENT':
+					resetUI();
+					log("Left tournament");
+					break;
+				case 'TOURNAMENT_QUEUE_JOINED':
+					log(`Joined Queue! Waiting: ${msg.payload.waitingCount}/${msg.payload.neededCount}`);
+					break;
+				case 'TOURNAMENT_QUEUE_LEFT':
+					log("Left Queue");
+					break;
+				case 'GAME_STATE':
+				case 'STATE_UPDATE':
+					// Only render if we are supposedly in a game or watching one
+					renderGame(msg.payload);
+					if (elements.gamePanel.style.display === 'none') {
+						elements.gamePanel.style.display = 'block';
+					}
+					break;
+				case 'GAME_OVER':
+					log(`Game Over! Winner: ${msg.payload.winnerId}`);
+					// Don't hide canvas immediately, let final state show
+					break;
+				case 'ERROR':
+					log("ERROR: " + msg.payload.message);
+					alert(msg.payload.message);
+					break;
+			}
+		}
+
+		function updateTournamentState(data) {
+			currentTournament = data;
+
+			// Lobby Info
+			elements.lobbyPanel.style.display = 'block';
+			elements.bracketPanel.style.display = 'block';
+			elements.btnLeaveTour.disabled = false;
+
+			elements.lblTourId.textContent = data.id;
+			elements.lblTourStatus.textContent = data.state;
+			elements.lblPlayerCount.textContent = data.players.length;
+			elements.lblMaxPlayers.textContent = data.size;
+
+			elements.playerList.innerHTML = data.players.map(p =>
+				`<li>${p.id} ${p.connected ? '🟢' : '🔴'}</li>`
+			).join('');
+
+			// Bracket
+			renderBracket(data.bracket);
+
+			if (data.state === 'finished') {
+				elements.winnerDisplay.style.display = 'block';
+				elements.winnerText.textContent = data.bracket.winnerId;
+			} else {
+				elements.winnerDisplay.style.display = 'none';
+			}
+		}
+
+		function renderBracket(bracket) {
+			elements.bracketContainer.innerHTML = '';
+
+			bracket.rounds.forEach((round, rIndex) => {
+				const roundDiv = document.createElement('div');
+				roundDiv.className = 'round';
+
+				const title = document.createElement('div');
+				title.className = 'round-title';
+				title.textContent = `Round ${rIndex + 1}`;
+				roundDiv.appendChild(title);
+
+				round.matches.forEach(match => {
+					const matchDiv = document.createElement('div');
+					matchDiv.className = `match ${match.status}`;
+
+					const p1Class = match.player1Id === match.winnerId && match.winnerId ? 'winner' : '';
+					const p2Class = match.player2Id === match.winnerId && match.winnerId ? 'winner' : '';
+
+					matchDiv.innerHTML = `
+                        <div class="player ${p1Class}">
+                            <span>${match.player1Id || 'Waiting...'}</span>
+                        </div>
+                        <div style="border-top:1px solid #444; margin: 5px 0;"></div>
+                        <div class="player ${p2Class}">
+                             <span>${match.player2Id || 'Waiting...'}</span>
+                        </div>
+                        <div style="text-align:right; font-size:0.8em; color:#aaa; margin-top:5px;">
+                            ${match.status}
+                        </div>
+                    `;
+
+					if (match.status === 'in_progress') {
+						const btn = document.createElement('button');
+						btn.textContent = 'Watch';
+						btn.style.fontSize = '0.7em';
+						btn.style.padding = '2px 5px';
+						btn.onclick = () => console.log("Watch logic not fully impl in test client yet");
+						// matchDiv.appendChild(btn);
+						// Auto-watching via socket broadcast for now
+					}
+
+					roundDiv.appendChild(matchDiv);
+				});
+
+				elements.bracketContainer.appendChild(roundDiv);
+			});
+		}
+
+		function renderGame(state) {
+			// Basic game render
+			// Clear
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, 800, 600);
+
+			// Net
+			ctx.strokeStyle = '#333';
+			ctx.setLineDash([10, 10]);
+			ctx.beginPath();
+			ctx.moveTo(400, 0);
+			ctx.lineTo(400, 600);
+			ctx.stroke();
+
+			// Paddles
+			ctx.fillStyle = '#fff';
+			if (state.players.left.paddle) {
+				ctx.fillRect(20, state.players.left.paddle.y, 10, 100);
+			}
+			if (state.players.right.paddle) {
+				ctx.fillRect(770, state.players.right.paddle.y, 10, 100);
+			}
+
+			// Ball
+			ctx.beginPath();
+			ctx.arc(state.ball.x, state.ball.y, 8, 0, Math.PI * 2);
+			ctx.fill();
+
+			// Scores (if available in this update payload, regular state update might only have paddle/ball)
+			if (state.players.left.score !== undefined) {
+				ctx.font = '40px Arial';
+				ctx.fillText(state.players.left.score, 350, 50);
+				ctx.fillText(state.players.right.score, 420, 50);
+			}
+		}
+
+		function resetUI() {
+			elements.lobbyPanel.style.display = 'none';
+			elements.bracketPanel.style.display = 'none';
+			elements.gamePanel.style.display = 'none';
+			elements.btnLeaveTour.disabled = true;
+			elements.tourId.value = '';
+			currentTournament = null;
+		}
+
+		// Controls
+		elements.btnConnect.onclick = connect;
+		// Manual handlers removed
+		/*
+		elements.btnCreateTour.onclick = () => { ... };
+		elements.btnJoinTour.onclick = () => { ... };
+		*/
+		elements.btnLeaveTour.onclick = () => {
+			if (!ws) return;
+			ws.send(JSON.stringify({ type: 'LEAVE_TOURNAMENT' }));
+		};
+
+		// Queue Controls
+		document.getElementById('btnJoinQueue4').onclick = () => {
+			if (!ws) return;
+			ws.send(JSON.stringify({ type: 'JOIN_TOURNAMENT_QUEUE', payload: { size: 4 } }));
+		};
+		document.getElementById('btnJoinQueue8').onclick = () => {
+			if (!ws) return;
+			ws.send(JSON.stringify({ type: 'JOIN_TOURNAMENT_QUEUE', payload: { size: 8 } }));
+		};
+		document.getElementById('btnLeaveQueue').onclick = () => {
+			if (!ws) return;
+			ws.send(JSON.stringify({ type: 'LEAVE_TOURNAMENT_QUEUE' }));
+		};
+
+		// Game Input
+		document.addEventListener('keydown', (e) => {
+			if (!ws) return;
+			if (e.key === 'ArrowUp') {
+				ws.send(JSON.stringify({ type: 'PLAYER_INPUT', payload: { action: 'move_up' } }));
+			} else if (e.key === 'ArrowDown') {
+				ws.send(JSON.stringify({ type: 'PLAYER_INPUT', payload: { action: 'move_down' } }));
+			}
+		});
+		document.addEventListener('keyup', (e) => {
+			if (!ws) return;
+			if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+				ws.send(JSON.stringify({ type: 'PLAYER_INPUT', payload: { action: 'stop' } }));
+			}
+		});
+
+	</script>
+</body>
+
+</html>

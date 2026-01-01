@@ -10,6 +10,7 @@
 export enum GameMode {
   LOCAL = 'local',
   MATCHMAKING = 'matchmaking',
+  TOURNAMENT = 'tournament',
 }
 
 export enum GameStatus {
@@ -109,6 +110,12 @@ export enum WSClientMessageType {
   PLAYER_INPUT = 'PLAYER_INPUT',
   LEAVE_ROOM = 'LEAVE_ROOM',
   PING = 'PING',
+  // Tournament
+  CREATE_TOURNAMENT = 'CREATE_TOURNAMENT',
+  JOIN_TOURNAMENT = 'JOIN_TOURNAMENT',
+  LEAVE_TOURNAMENT = 'LEAVE_TOURNAMENT',
+  JOIN_TOURNAMENT_QUEUE = 'JOIN_TOURNAMENT_QUEUE',
+  LEAVE_TOURNAMENT_QUEUE = 'LEAVE_TOURNAMENT_QUEUE',
 }
 
 // ============================================================================
@@ -130,6 +137,14 @@ export enum WSServerMessageType {
   GAME_STATE = 'GAME_STATE',
   STATE_UPDATE = 'STATE_UPDATE',
   GAME_OVER = 'GAME_OVER',
+  // Tournament
+  TOURNAMENT_CREATED = 'TOURNAMENT_CREATED',
+  TOURNAMENT_STATE = 'TOURNAMENT_STATE',
+  TOURNAMENT_ERROR = 'TOURNAMENT_ERROR',
+  LEAVE_TOURNAMENT = 'LEAVE_TOURNAMENT',
+  // Queue
+  TOURNAMENT_QUEUE_JOINED = 'TOURNAMENT_QUEUE_JOINED',
+  TOURNAMENT_QUEUE_LEFT = 'TOURNAMENT_QUEUE_LEFT',
 }
 
 // ============================================================================
@@ -242,4 +257,28 @@ export interface GameOverData {
     right: number;
   };
   timestamp: number;
+}
+// Tournament Payloads
+import type { TournamentData, TournamentSize } from './tournament.types.js';
+
+export interface CreateTournamentPayload {
+  size: TournamentSize;
+}
+
+export interface JoinTournamentPayload {
+  tournamentId: string;
+}
+
+export interface TournamentStateUpdatePayload {
+  tournament: TournamentData;
+}
+
+export interface JoinTournamentQueuePayload {
+  size: TournamentSize;
+}
+
+export interface TournamentQueueJoinedPayload {
+  size: TournamentSize;
+  waitingCount: number;
+  neededCount: number;
 }
