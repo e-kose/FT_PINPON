@@ -339,13 +339,106 @@
 			text-shadow: 0 0 50px #ffd700;
 			margin-bottom: 2rem;
 		}
+
+		/* Toast Notifications */
+		.toast-container {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			z-index: 1000;
+		}
+
+		.toast {
+			background: rgba(5, 5, 16, 0.95);
+			border: 1px solid var(--border);
+			border-left: 4px solid var(--primary);
+			color: #fff;
+			padding: 15px 25px;
+			margin-bottom: 10px;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+			animation: slideIn 0.3s ease;
+			font-family: 'Rajdhani', sans-serif;
+			font-weight: bold;
+			min-width: 300px;
+		}
+
+		.toast.error {
+			border-left-color: #ff5555;
+			background: rgba(30, 10, 10, 0.95);
+		}
+
+		.toast.success {
+			border-left-color: #00ff88;
+			background: rgba(10, 30, 10, 0.95);
+		}
+
+		.toast.info {
+			border-left-color: #00f3ff;
+		}
+
+		@keyframes slideIn {
+			from {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		/* Game Overlay */
+		.game-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.85);
+			backdrop-filter: blur(8px);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			z-index: 20;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.3s;
+		}
+
+		.game-overlay.active {
+			opacity: 1;
+			pointer-events: all;
+		}
+
+		.overlay-title {
+			font-family: 'Orbitron', sans-serif;
+			font-size: 4rem;
+			font-weight: 900;
+			color: #fff;
+			text-shadow: 0 0 30px var(--primary);
+			margin-bottom: 1rem;
+		}
+
+		.overlay-subtitle {
+			font-size: 1.5rem;
+			color: rgba(255, 255, 255, 0.7);
+			margin-bottom: 2rem;
+		}
 	</style>
 </head>
 
 <body>
 
+	<!-- TOASTS -->
+	<div class="toast-container" id="toastContainer"></div>
+
 	<!-- STATUS BAR -->
-	<div id="status-bar">Disconnected</div>
+	<div id="status-bar" style="display:none;">Disconnected</div>
 	<button id="btnBack" class="back-btn" style="display:none;">← DASHBOARD</button>
 
 	<!-- 1. LOGIN SCREEN -->
@@ -424,11 +517,11 @@
 			</div>
 			<canvas id="gameCanvas" width="800" height="600"></canvas>
 
-
-
-			<!-- Modal for score/end game if needed -->
-			<div id="modal-score" class="modal" style="display:none; align-items:center; justify-content:center;">
-				<h1 id="modal-msg" style="font-size:3rem; color:#fff;">GOAL!</h1>
+			<!-- New Overlay -->
+			<div id="gameOverlay" class="game-overlay">
+				<div class="overlay-title" id="overlayTitle">GAME OVER</div>
+				<div class="overlay-subtitle" id="overlaySubtitle"></div>
+				<button onclick="closeOverlay()">CONTINUE</button>
 			</div>
 		</div>
 		<div style="margin-top:1rem; opacity:0.5; font-size:0.8rem;">CONTROLS: ARROW KEYS</div>
@@ -462,10 +555,47 @@
 			bracketBox: document.getElementById('bracketContainer'),
 			scoreLeft: document.getElementById('scoreLeft'),
 			scoreRight: document.getElementById('scoreRight'),
-			winnerModal: document.getElementById('tournamentWinner'),
-			winnerText: document.getElementById('winnerText'),
-			backBtn: document.getElementById('btnBack')
+			backBtn: document.getElementById('btnBack'),
+			toastContainer: document.getElementById('toastContainer'),
+			gameOverlay: document.getElementById('gameOverlay'),
+			overlayTitle: document.getElementById('overlayTitle'),
+			overlaySubtitle: document.getElementById('overlaySubtitle')
 		};
+
+		// TOAST NOTIFICATIONS
+		function showToast(message, type = 'info') {
+			const toast = document.createElement('div');
+			toast.className = `toast ${type}`;
+			toast.textContent = message;
+
+			els.toastContainer.appendChild(toast);
+
+			// Sound effect (Optional)
+			// const audio = new Audio('/notification.mp3'); audio.play().catch(e=>{});
+
+			setTimeout(() => {
+				toast.style.animation = 'slideIn 0.3s ease reverse';
+				setTimeout(() => toast.remove(), 300);
+			}, 4000);
+		}
+
+		// OVERLAY
+		function showOverlay(title, subtitle) {
+			els.overlayTitle.textContent = title;
+			els.overlaySubtitle.textContent = subtitle;
+			els.gameOverlay.classList.add('active');
+		}
+
+		function closeOverlay() {
+			els.gameOverlay.classList.remove('active');
+			if (window.currentGameMode === 'tournament') {
+				showScreen('bracket');
+			} else {
+				showDash();
+			}
+		}
+
+		window.closeOverlay = closeOverlay;
 
 		// NAVIGATION
 		function showScreen(name) {
@@ -474,13 +604,11 @@
 				s.classList.remove('active');
 				s.classList.add('hidden');
 			});
-			// Instant switch to prevent 'hidden' state staying too long during fast updates
 			screens[name].classList.remove('hidden');
 			screens[name].classList.add('active');
 
 			currentScreen = name;
 
-			// Back button logic
 			if (name === 'dashboard' || name === 'login') {
 				els.backBtn.style.display = 'none';
 			} else {
@@ -490,17 +618,17 @@
 
 		els.backBtn.onclick = () => {
 			if (confirm("Are you sure you want to leave?")) {
-				// Determine leave action
 				if (currentScreen === 'queue') leaveQueue();
 				if (currentScreen === 'game' || currentScreen === 'bracket') {
 					ws.send(JSON.stringify({ type: 'LEAVE_ROOM' }));
-					ws.send(JSON.stringify({ type: 'LEAVE_TOURNAMENT' })); // Safe to send both
+					ws.send(JSON.stringify({ type: 'LEAVE_TOURNAMENT' }));
 				}
 				showDash();
 			}
 		};
 
 		function showDash() {
+			els.gameOverlay.classList.remove('active'); // Ensure overlay is closed
 			showScreen('dashboard');
 			els.displayUser.textContent = userId;
 		}
@@ -508,13 +636,12 @@
 		// WEBSOCKET
 		function connect() {
 			userId = els.username.value.trim().toUpperCase();
-			if (!userId) return alert("Please enter a User ID");
+			if (!userId) return showToast("Please enter a User ID", 'error');
 
 			ws = new WebSocket(WS_URL);
 
 			ws.onopen = () => {
-				els.status.textContent = "CONNECTED: " + userId;
-				els.status.style.color = "#00f3ff";
+				showToast("Connected to Server", 'success');
 				ws.send(JSON.stringify({ type: 'SET_USER_ID', payload: { userId } }));
 				showDash();
 			};
@@ -522,9 +649,7 @@
 			ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
 
 			ws.onclose = () => {
-				els.status.textContent = "DISCONNECTED";
-				els.status.style.color = "#ff0055";
-				alert("Connection lost");
+				showToast("Disconnected from Server", 'error');
 				showScreen('login');
 			};
 		}
@@ -538,7 +663,7 @@
 				case 'TOURNAMENT_QUEUE_JOINED':
 					showScreen('queue');
 					els.queueStatus.textContent = msg.type === 'MATCHMAKING_SEARCHING' ?
-						"FINDING MATCH..." : "WAITING FOR PLAYERS...";
+						"FINDING OPPONENT..." : "WAITING FOR TOURNAMENT TO START...";
 					if (msg.payload.waitingCount) {
 						els.queueCount.textContent = `${msg.payload.waitingCount} / ${msg.payload.neededCount}`;
 					} else {
@@ -547,91 +672,93 @@
 					break;
 
 				case 'TOURNAMENT_QUEUE_LEFT':
+					showToast("Left Tournament Queue", 'info');
+					showDash();
+					break;
+
 				case 'LEAVE_TOURNAMENT':
 				case 'ROOM_LEFT':
-					showDash();
+					// Silently handle or show small toast
 					break;
 
 				// TOURNAMENT
 				case 'TOURNAMENT_CREATED':
 					window.currentGameMode = 'tournament';
 					showScreen('bracket');
+					showToast("Tournament Started!", 'success');
 					break;
+
 				case 'TOURNAMENT_STATE':
-					window.currentGameMode = 'tournament'; // Ensure set
+					window.currentGameMode = 'tournament';
 					renderBracket(msg.payload.tournament);
-					// Only switch if we are NOT in an active match
 					if (currentScreen !== 'game' && !window.inActiveMatch) {
 						showScreen('bracket');
 					}
 					break;
 
 				// GAME
-				case 'MATCH_FOUND': // Matchmaking
+				case 'MATCH_FOUND':
 					window.currentGameMode = 'online';
 					window.inActiveMatch = true;
 					showScreen('game');
-					console.log("MATCH FOUND! Room:", msg.payload.roomId);
+					showToast("Match Found! Good Luck!", 'info');
 					els.scoreLeft.textContent = "0";
 					els.scoreRight.textContent = "0";
 					break;
 
-				case 'ROOM_CREATED': // Local
+				case 'ROOM_CREATED':
 					window.currentGameMode = 'local';
 					window.inActiveMatch = true;
 					showScreen('game');
+					showToast("Local Match Started", 'success');
 					els.scoreLeft.textContent = "0";
 					els.scoreRight.textContent = "0";
 					break;
 
 				case 'GAME_STATE':
 				case 'STATE_UPDATE':
-					if (currentScreen !== 'game') {
-						// Only switch if strictly necessary and we are supposed to be playing
-						// If we are marked as in active match, force it
-						if (window.inActiveMatch) {
-							showScreen('game');
-						}
+					if (currentScreen !== 'game' && window.inActiveMatch) {
+						showScreen('game');
 					}
 					if (currentScreen === 'game') {
-						try {
-							renderGame(msg.payload);
-						} catch (e) { console.error("Render Error:", e); }
+						try { renderGame(msg.payload); } catch (e) { }
+					}
+					break;
+
+				case 'PLAYER_DISCONNECTED':
+					if (window.inActiveMatch) {
+						showToast("Opponent Disconnected", 'error');
+						// The server should also send GAME_OVER shortly after,
+						// but if we need immediate feedback:
+						// showOverlay("OPPONENT LEFT", "You Win by Default");
 					}
 					break;
 
 				case 'GAME_OVER':
 					window.inActiveMatch = false;
+					const isWinner = msg.payload.winnerId === userId;
+					const title = isWinner ? "VICTORY" : "DEFEAT";
+					let sub = isWinner ? "You dominated the arena!" : "Better luck next time.";
 
-					console.log("GAME OVER. Winner:", msg.payload.winnerId);
-					if (currentScreen === 'game') {
-						setTimeout(() => {
-							// If tournament, switch back to bracket to see results
-							if (window.currentGameMode === 'tournament') {
-								showScreen('bracket');
-								// Status will be updated by TOURNAMENT_STATE or we can infer it
-								if (msg.payload.winnerId === userId) {
-									updateBracketStatus("MATCH WON! WAITING FOR NEXT ROUND...");
-								} else {
-									updateBracketStatus("ELIMINATED. YOU CAN WATCH OR LEAVE.");
-									els.backBtn.style.display = 'block'; // Ensure exit option
-								}
-							} else {
-								// Local/Online: Just show overlay or simple text (no alert)
-								renderGameMessage(msg.payload.winnerId === userId ? "VICTORY!" : "DEFEAT");
-								setTimeout(showDash, 3000);
-							}
-						}, 1000);
+					if (msg.payload.loserId === userId) {
+						// sub = "You were eliminated.";
 					}
+
+					if (window.currentGameMode === 'tournament') {
+						if (isWinner) sub = "Advancing to next round...";
+						else sub = "Eliminated from tournament.";
+
+						// For tournament, we might want to auto-redirect back to bracket after a delay
+						// or let them click "Continue"
+					}
+
+					showOverlay(title, sub);
+
+					// Optional: Confetti or sound
 					break;
 
-
-
 				case 'ERROR':
-					console.error("Error:", msg.payload.message);
-					// Show error in status bar instead of alert if possible, or unobtrusive overlay
-					els.status.textContent = "ERROR: " + msg.payload.message;
-					els.status.style.color = "#ff5555";
+					showToast(msg.payload.message, 'error');
 					if (currentScreen === 'queue') showDash();
 					break;
 			}

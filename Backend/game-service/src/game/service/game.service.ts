@@ -3,20 +3,23 @@
  * Business logic layer for game management
  */
 
+import { DatabaseService } from '../../plugins/db.service.js';
 import { GameRoom } from '../engine/game.room.js';
 import { RoomManager } from '../engine/room.manager.js';
 import { TournamentManager } from '../engine/tournament.manager.js';
 import { Tournament } from '../engine/tournament.js';
 import type { TournamentSize } from '../types/tournament.types.js';
-import { PlayerPosition, InputAction, type GameConfig } from '../types/game.types.js';
+import { PlayerPosition, InputAction, type GameConfig, type GameOverData, GameMode } from '../types/game.types.js';
 
 export class GameService {
   private roomManager: RoomManager;
   private tournamentManager: TournamentManager;
+  private dbService: DatabaseService;
 
-  constructor() {
+  constructor(dbService: DatabaseService) {
     this.roomManager = new RoomManager();
     this.tournamentManager = new TournamentManager(this.roomManager);
+    this.dbService = dbService;
   }
 
   public createLocalGame(userId: string, config?: Partial<GameConfig>): { roomId: string; room: GameRoom } {
@@ -52,6 +55,16 @@ export class GameService {
 
   public deleteRoom(roomId: string): void {
     this.roomManager.deleteRoom(roomId);
+  }
+
+  public async processGameResult(data: GameOverData, mode: GameMode): Promise<void> {
+    if (mode !== GameMode.LOCAL) {
+      try {
+        await this.dbService.saveGameResult(data, mode);
+      } catch (error) {
+        console.error('[GAME_SERVICE] Failed to save game result:', error);
+      }
+    }
   }
 
   // ==========================================================================
@@ -95,3 +108,4 @@ export class GameService {
     this.tournamentManager.cleanup();
   }
 }
+

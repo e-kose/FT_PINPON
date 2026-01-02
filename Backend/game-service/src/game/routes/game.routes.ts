@@ -10,8 +10,8 @@ import { GameHttpController } from '../controller/game-http.controller.js';
 import { DatabaseService } from '../../plugins/db.service.js';
 
 export async function registerGameRoutes(fastify: FastifyInstance) {
-  const gameService = new GameService();
   const dbService = new DatabaseService();
+  const gameService = new GameService(dbService);
   const wsController = new GameWebSocketController(gameService, dbService);
   const httpController = new GameHttpController(dbService);
 

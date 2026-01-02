@@ -124,6 +124,43 @@ export class GameRoom extends EventEmitter {
     this.isPaused = false;
   }
 
+  public handlePlayerDisconnect(userId: string): void {
+    const state = this.engine.getState();
+    let disconnectedPosition: PlayerPosition | null = null;
+
+    if (state.players.left.id === userId) {
+      disconnectedPosition = PlayerPosition.LEFT;
+    } else if (state.players.right.id === userId) {
+      disconnectedPosition = PlayerPosition.RIGHT;
+    }
+
+    if (!disconnectedPosition) return;
+
+    this.stop();
+
+    // Determine winner (opponent)
+    const winner = disconnectedPosition === PlayerPosition.LEFT ? PlayerPosition.RIGHT : PlayerPosition.LEFT;
+
+    const gameOverData: GameOverData = {
+      roomId: this.roomId,
+      winner: winner,
+      winnerId: state.players[winner].id,
+      loserId: userId,
+      finalScore: {
+        left: state.players.left.score,
+        right: state.players.right.score,
+      },
+      timestamp: Date.now(),
+    };
+
+    this.emit('gameOver', gameOverData);
+    this.emit('playerDisconnected', {
+      userId,
+      playerPosition: disconnectedPosition,
+      timestamp: Date.now()
+    });
+  }
+
   public cleanup(): void {
     this.stop();
     this.removeAllListeners();

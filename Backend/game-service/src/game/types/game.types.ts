@@ -19,6 +19,17 @@ export enum GameStatus {
   FINISHED = 'finished',
 }
 
+export interface UserConnection {
+  socket: any; // Using any to avoid circular dependency with fastify-websocket, or import it if possible.
+  // Ideally we should keep types clean. Let's use 'any' or a generic WebSocket interface for now to be safe,
+  // or better, just import WebSocket from @fastify/websocket in the file that uses it, and keep this interface where it is needed or generic.
+  // Actually, let's look at how it was used. It imported WebSocket.
+  // Ideally, domain types shouldn't depend on framework specific types.
+  // But for now, let's define it here properly.
+  // Wait, I can't easily import 'WebSocket' here without adding deps.
+  // I will just put UserConnection in a new file `src/game/socket/socket.types.ts` to avoid cluttering domain types with transport types.
+}
+
 export enum PlayerPosition {
   LEFT = 'left',
   RIGHT = 'right',
