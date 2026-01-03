@@ -26,9 +26,7 @@ export class TournamentHandler extends BaseGameHandler {
 			this.sendMessage(socket, {
 				type: WSServerMessageType.TOURNAMENT_QUEUE_JOINED,
 				payload: {
-					size,
-					waitingCount: waiting,
-					neededCount: size
+					size
 				}
 			});
 		}

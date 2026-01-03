@@ -46,13 +46,13 @@ export class TournamentManager extends EventEmitter {
 		// Auto-cleanup finished tournaments
 		tournament.on('stateUpdate', (data) => {
 			if (data.state === 'finished') {
-				console.log(`[TOURNAMENT_MANAGER] Tournament ${id} finished. Scheduling cleanup in 60s.`);
+				console.log(`[TOURNAMENT_MANAGER] Tournament ${id} finished. Scheduling cleanup in 5s.`);
 				setTimeout(() => {
 					if (this.tournaments.has(id)) {
 						console.log(`[TOURNAMENT_MANAGER] Auto-cleaning finished tournament ${id}`);
 						this.deleteTournament(id);
 					}
-				}, 60000);
+				}, 5000);
 			}
 		});
 
@@ -72,7 +72,7 @@ export class TournamentManager extends EventEmitter {
 	public leaveTournament(tournamentId: string, userId: string): void {
 		const tournament = this.tournaments.get(tournamentId);
 		if (tournament) {
-			tournament.removePlayer(userId);
+			tournament.removePlayer(userId, true);
 			// If empty, maybe delete?
 			if (tournament.getPlayers().length === 0) {
 				this.deleteTournament(tournamentId);
@@ -136,7 +136,8 @@ export class TournamentManager extends EventEmitter {
 
 	public getTournamentByPlayer(userId: string): Tournament | undefined {
 		for (const tournament of this.tournaments.values()) {
-			if (tournament.getPlayer(userId)) {
+			const player = tournament.getPlayer(userId);
+			if (player && !player.exited) {
 				return tournament;
 			}
 		}

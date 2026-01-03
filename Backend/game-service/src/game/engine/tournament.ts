@@ -56,18 +56,49 @@ export class Tournament extends EventEmitter {
 		return true;
 	}
 
-	public removePlayer(userId: string): void {
+	public removePlayer(userId: string, isExplicitLeave: boolean = false): void {
 		if (this.state === TournamentState.WAITING) {
 			this.players.delete(userId);
 			this.emitStateUpdate();
 		} else {
-			// If tournament is in progress, mark as disconnected but keep in tournament
-			// They might reconnect or forfeit automatically
+			// Tournament in progress
 			const player = this.players.get(userId);
 			if (player) {
+				console.log(`[TOURNAMENT] Player ${userId} disconnected. Marking as exited/disqualified.`);
 				player.connected = false;
+				player.exited = true; // Strict rule: Any disconnect = disqualification/exit
+
+				// Check if player is in an active match and forfeit it
+				this.checkAndForfeitActiveMatch(userId);
+
 				this.emitStateUpdate();
-				// TODO: Handle auto-forfeit if they are currently in a match?
+			}
+		}
+	}
+
+	private checkAndForfeitActiveMatch(userId: string): void {
+		// Find active match this player is involved in
+		for (const round of this.bracket.rounds) {
+			for (const match of round.matches) {
+				if (match.status === 'in_progress' && (match.player1Id === userId || match.player2Id === userId)) {
+					console.log(`[TOURNAMENT] Forfeiting active match ${match.id} for disconnected player ${userId}`);
+
+					// If we have a roomId, let the GameRoom handle it (it emits gameOver)
+					if (match.roomId) {
+						const room = this.roomManager.getRoom(match.roomId);
+						if (room) {
+							// This triggers gameOver event which we listen to in startMatch
+							room.handlePlayerDisconnect(userId);
+							return;
+						}
+					}
+
+					// If no room found (edge case) or room already gone, handle forfeit manually
+					const winnerId = match.player1Id === userId ? match.player2Id : match.player1Id;
+					if (winnerId) {
+						this.handleMatchResult(match, winnerId);
+					}
+				}
 			}
 		}
 	}
@@ -172,18 +203,23 @@ export class Tournament extends EventEmitter {
 		const p2 = this.players.get(match.player2Id);
 
 		// Check for offline players
-		if (p1 && !p1.connected && p2 && !p2.connected) {
+		const p1Offline = !p1 || !p1.connected;
+		const p2Offline = !p2 || !p2.connected;
+
+		if (p1Offline && p2Offline) {
 			console.log(`[TOURNAMENT] Both players offline for match ${match.id}. Randomly advancing ${match.player1Id}`);
+			// If both are offline, we just pick one to advance so the tournament doesn't stall,
+			// but they will likely forfeit the next match too.
 			this.handleMatchResult(match, match.player1Id);
 			return;
 		}
-		if (p1 && !p1.connected) {
-			console.log(`[TOURNAMENT] Player ${match.player1Id} offline. Auto-win for ${match.player2Id}`);
+		if (p1Offline) {
+			console.log(`[TOURNAMENT] Player ${match.player1Id} offline/missing. Auto-win for ${match.player2Id}`);
 			this.handleMatchResult(match, match.player2Id!);
 			return;
 		}
-		if (p2 && !p2.connected) {
-			console.log(`[TOURNAMENT] Player ${match.player2Id} offline. Auto-win for ${match.player1Id}`);
+		if (p2Offline) {
+			console.log(`[TOURNAMENT] Player ${match.player2Id} offline/missing. Auto-win for ${match.player1Id}`);
 			this.handleMatchResult(match, match.player1Id);
 			return;
 		}

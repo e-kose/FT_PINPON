@@ -18,6 +18,7 @@ export interface TournamentPlayer extends Omit<Player, 'position' | 'paddle' | '
 	// For now we just reuse the basic player info (id)
 	displayName?: string;
 	connected: boolean;
+	exited?: boolean;
 }
 
 export interface TournamentMatch {

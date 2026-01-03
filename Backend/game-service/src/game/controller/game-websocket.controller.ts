@@ -175,8 +175,9 @@ export class GameWebSocketController {
       const oldConn = this.socketRegistry.getConnectionByUserId(userId);
       if (oldConn) {
         this.sendError(oldConn.socket, 'New connection established');
+        // Explicitly cleanup the old connection state (remove from rooms, tournaments, etc.)
+        this.cleanupConnection(oldConn.socketId);
         oldConn.socket.close();
-        this.socketRegistry.removeConnection(oldConn.socketId);
       }
 
       // Check for active tournament
@@ -292,6 +293,14 @@ export class GameWebSocketController {
   }
 
   private handleDisconnect(socketId: string): void {
+    this.cleanupConnection(socketId);
+  }
+
+  /**
+   * Centralized cleanup logic for a connection.
+   * Removes user from rooms, matchmaking, tournaments, and the registry.
+   */
+  private cleanupConnection(socketId: string): void {
     const userConnection = this.socketRegistry.getConnection(socketId);
     if (!userConnection) return;
 
@@ -307,11 +316,6 @@ export class GameWebSocketController {
           // Local
           room.stop();
           this.gameService.deleteRoom(currentRoomId);
-          // Socket registry cleanup happens in removeConnection below?
-          // No, explicit cleanup for room listeners?
-          // The room listeners are on the room object. If room is deleted, they go away?
-          // Need to make sure we don't leak listeners.
-          // room.cleanup() called in deleteRoom does removeListeners.
         }
       }
     }
