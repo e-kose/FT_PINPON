@@ -38,9 +38,10 @@ services:
       - auth-service
       - user-service
       - chat-service
-      - notification-service
     env_file:
       - ./api-gateway/.env
+    environment:
+      - GAME_SERVICE_URL=http://game-service:3005
     networks:
       - internal-network
     restart: always
@@ -179,23 +180,17 @@ services:
       - internal-network
     restart: always
 
-  notification-service:
+  game-service:
     build:
-      context: ./notification-service
+      context: ./game-service
     expose:
-      - "3004"
+      - "3005"
     volumes:
-      - ./notification-service/db:/app/db
+      - ./game-service/db:/app/db
     env_file:
-      - ./notification-service/.env
+      - ./game-service/.env
     networks:
       - internal-network
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
     restart: always
 
 volumes:
