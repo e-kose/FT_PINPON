@@ -10,7 +10,7 @@ import "../components/sideBarComponents/Play";
 import "../components/sideBarComponents/Tournament";
 import "../components/sideBarComponents/Friends";
 import "../components/sideBarComponents/Chat";
-
+import "../components/sideBarComponents/Game/Game";
 
 class Router
 {
@@ -111,7 +111,7 @@ function initializeRouter(): void {
 	router.addRoute('/profile', '<my-profile></my-profile>');
 	router.addRoute('/2fa', '<twofa-auth></twofa-auth>');
 	router.addRoute('/2fa-login', '<twofa-login></twofa-login>');
-	router.addRoute('/play', '<play-component></play-component>');
+	router.addRoute('/play', '<game-component></game-component>');
 	router.addRoute('/tournament', '<tournament-component></tournament-component>');
 	router.addRoute('/friends', '<friends-component></friends-component>');
 	router.addRoute('/chat', '<chat-component></chat-component>');

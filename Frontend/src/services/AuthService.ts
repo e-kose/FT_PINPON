@@ -1,7 +1,6 @@
 import { setUser, clearUser, getUser } from "../store/UserStore";
 import { router } from "../router/Router";
 import type { UserLogin } from "../types/AuthType";
-import { initializeNotifications } from "./NotificationService";
 
 
 
@@ -41,7 +40,7 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 		})
 }
 
-export async function 	fetchUser(token: string): Promise<boolean> {
+export async function fetchUser(token: string): Promise<boolean> {
 	const res = await fetch("http://localhost:3000/auth/me", {
 		method: "GET",
 		headers: {
@@ -56,7 +55,6 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	const data = await res.json();
 	if (data.success) {
 		setUser(data.user, token);
-		await initializeNotifications();
 		return true;
 	}
 	return false;
