@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import * as dotenv from "dotenv";
 import jwtPlugin from "./plugins/jwt.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
+import metricsPlugin from "./plugins/metrics.plugin.js";
 import { startLogError } from "./utils/log.utils.js";
 import proxyPlugin from "./plugins/proxy.plugin.js";
 import wsProxy from "./plugins/ws-proxy.js";
@@ -23,6 +24,7 @@ app.register(import('@fastify/cors'), {
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
 });
 
+app.register(metricsPlugin);
 app.register(jwtPlugin);
 app.register(loggerPlugin);
 app.register(proxyPlugin);

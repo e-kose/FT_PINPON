@@ -11,6 +11,7 @@ import { chatRoute } from "./chat/routes/chat.route.js";
 import swaggerPlugin from "./plugins/swagger.plugin.js";
 import redisPlugin from "./plugins/redis.plugin.js";
 import fastifyWebsocket from "@fastify/websocket";
+import metricsPlugin from "./plugins/metrics.plugin.js";
 
 dotenv.config();
 const port = +(process.env.PORT || "3003");
@@ -21,6 +22,7 @@ const app = fastify({ logger: true });
 app.decorate("messageRepo", null);
 app.decorate("messageService", null);
 
+app.register(metricsPlugin);
 app.register(fastifyWebsocket);
 app.register(dbPlugin);
 app.register(redisPlugin)

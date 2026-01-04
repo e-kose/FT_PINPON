@@ -9,6 +9,7 @@ import OAuthPlugins from "./plugins/OAuth.plugins.js";
 import { dbPlug } from "./plugins/db.plugin.js";
 import sensiblePlugin from "./plugins/sensible.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
+import metricsPlugin from "./plugins/metrics.plugin.js";
 import { startLogError } from "./auth/utils/log.utils.js";
 import fastifyStatic from "@fastify/static";
 import path from "path";
@@ -28,6 +29,7 @@ const app = fastify({
   },
 });
 
+app.register(metricsPlugin);
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
 app.register(dbPlug);

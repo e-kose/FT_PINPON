@@ -14,6 +14,7 @@ import swaggerPlugin from "./plugins/swagger.plugin.js";
 import multipart from "@fastify/multipart";
 import r2Plugin from "./plugins/r2.plugin.js";
 import loggerPlugin from "./plugins/logger.plugin.js";
+import metricsPlugin from "./plugins/metrics.plugin.js";
 import { startLogError } from "./user/utils/log.utils.js";
 import fastifyStatic from "@fastify/static";
 import path from "path";
@@ -28,6 +29,7 @@ const host = process.env.HOST || "localhost";
 const port = +(process.env.PORT || "3002");
 const app = fastify({ logger: true });
 
+app.register(metricsPlugin);
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
 app.register(multipart);
