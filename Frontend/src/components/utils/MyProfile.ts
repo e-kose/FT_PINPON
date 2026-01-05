@@ -106,6 +106,15 @@ class MyProfile extends LocalizedComponent {
 		const twoFaWarning = !user.is_2fa_enabled
 			? `<div class="bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/20"><span class="text-yellow-200">${t("my_profile_2fa_enable_prompt")}</span></div>`
 			: "";
+		
+		// Online status
+		const isOnline = user.status?.isOnline ?? false;
+		const statusDotColor = isOnline ? 'bg-green-500' : 'bg-gray-400';
+		const statusBorderColor = isOnline ? 'border-green-300' : 'border-gray-300';
+		const statusText = isOnline ? t("my_profile_status_online") : t("my_profile_status_offline");
+		const statusBadgeClass = isOnline 
+			? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 text-green-200' 
+			: 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/50 text-gray-300';
 
 		this.innerHTML = `
             <div class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
@@ -136,8 +145,8 @@ class MyProfile extends LocalizedComponent {
                                                 alt="${t("my_profile_avatar_alt")}" 
                                                 class="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-white/30 shadow-2xl ring-4 ring-white/20"
                                             >
-                                            <div class="absolute -bottom-2 -right-2 bg-green-500 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center">
-                                                <div class="w-3 h-3 bg-white rounded-full"></div>
+                                            <div class="absolute -bottom-2 -right-2 ${statusDotColor} w-8 h-8 rounded-full border-4 ${statusBorderColor} flex items-center justify-center shadow-lg">
+                                                <div class="w-3 h-3 bg-white rounded-full ${isOnline ? 'animate-pulse' : ''}"></div>
                                             </div>
                                         </div>
                                         
@@ -149,6 +158,12 @@ class MyProfile extends LocalizedComponent {
                                             
                                             <!-- Security Status in Header -->
                                             <div class="flex flex-wrap justify-center lg:justify-start gap-3">
+                                                <div class="${statusBadgeClass} backdrop-blur-sm px-4 py-2 rounded-full text-sm border">
+                                                    <div class="flex items-center space-x-2">
+                                                        <div class="w-2 h-2 rounded-full ${statusDotColor} ${isOnline ? 'animate-pulse' : ''}"></div>
+                                                        <span class="font-medium">${statusText}</span>
+                                                    </div>
+                                                </div>
                                                 <div class="bg-gradient-to-r ${twoFaStatusClass} backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/20">
                                                     <div class="flex items-center space-x-2">
                                                         <div class="w-2 h-2 rounded-full ${twoFaStatusIndicator}"></div>

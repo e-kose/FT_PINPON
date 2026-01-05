@@ -8,6 +8,7 @@ import { LocalizedComponent } from "../base/LocalizedComponent";
 import { APP_CONTAINER, MAIN_CONTENT_SCROLL, PAGE_TOP_OFFSET } from "../utils/Layout";
 import FriendService from "../../services/FriendService";
 import type { FriendProfile as FriendProfileType } from "../../types/FriendsType";
+import { getUserOnlineStatus } from "../../services/NotificationService";
 
 class FriendProfile extends LocalizedComponent {
 	private sidebarListener: SidebarStateListener | null = null;
@@ -31,8 +32,15 @@ class FriendProfile extends LocalizedComponent {
 	}
 
 	private extractFriendIdAndFetch(): void {
+		// Path'ten ID al: /friend/:id formatı
+		const pathParts = window.location.pathname.split('/');
+		const idFromPath = pathParts[pathParts.length - 1];
+		
+		// Fallback: Query parametresinden de kontrol et (geriye dönük uyumluluk için)
 		const urlParams = new URLSearchParams(window.location.search);
-		const id = urlParams.get('id');
+		const idFromQuery = urlParams.get('id');
+		
+		const id = idFromPath && idFromPath !== 'friend' ? idFromPath : idFromQuery;
 		
 		if (!id) {
 			this.error = t("friend_profile_error_no_id");
@@ -71,6 +79,23 @@ class FriendProfile extends LocalizedComponent {
 			} else {
 				console.log("------------------------------------------------------------------------------Friend profile data:", response.data);
 				this.friendData = response.data.user || response.data;
+				
+				// Fetch online status in background (non-blocking)
+				if (this.friendData && this.friendData.id) {
+					getUserOnlineStatus(this.friendData.id)
+						.then(statusResponse => {
+							if (statusResponse.ok && statusResponse.data.success && statusResponse.data.data) {
+								if (this.friendData) {
+									this.friendData.status = statusResponse.data.data;
+									console.log("Friend online status updated:", statusResponse.data.data);
+									this.renderAndBind();
+								}
+							}
+						})
+						.catch(error => {
+							console.error("Failed to fetch friend online status:", error);
+						});
+				}
 			}
 		} catch (err) {
 			console.error("Error fetching friend profile:", err);
@@ -167,6 +192,15 @@ class FriendProfile extends LocalizedComponent {
 		const displayName = friend.profile?.full_name?.trim() || friend.username;
 		const bio = friend.profile?.bio?.trim() || t("friend_profile_bio_empty");
 		const bioClass = friend.profile?.bio ? "" : "text-gray-500 italic";
+		
+		// Online status
+		const isOnline = friend.status?.isOnline ?? false;
+		const statusDotColor = isOnline ? 'bg-green-500' : 'bg-gray-400';
+		const statusBorderColor = isOnline ? 'border-green-300' : 'border-gray-300';
+		const statusText = isOnline ? t("friend_profile_status_online") : t("friend_profile_status_offline");
+		const statusBadgeClass = isOnline 
+			? 'bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white' 
+			: 'bg-gradient-to-r from-gray-400/90 to-slate-400/90 text-white';
 
 		this.innerHTML = `
 			<div class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
@@ -183,14 +217,25 @@ class FriendProfile extends LocalizedComponent {
 										<div class="absolute inset-0 bg-gradient-to-br from-slate-50/80 via-white/80 to-slate-100/80 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70"></div>
 										<div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 											<div class="flex items-center gap-5">
-												<img 
-													src="${friend.profile?.avatar_url || '/default-avatar.png'}" 
-													alt="${t("friend_profile_avatar_alt")}" 
-													class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-1 ring-slate-200/80 dark:ring-slate-700/80 shadow-md"
-												>
+												<div class="relative">
+													<img 
+														src="${friend.profile?.avatar_url || '/default-avatar.png'}" 
+														alt="${t("friend_profile_avatar_alt")}" 
+														class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-1 ring-slate-200/80 dark:ring-slate-700/80 shadow-md"
+													>
+													<div class="absolute -bottom-1 -right-1 ${statusDotColor} w-7 h-7 rounded-full border-3 ${statusBorderColor} flex items-center justify-center shadow-lg">
+														<div class="w-2.5 h-2.5 bg-white rounded-full ${isOnline ? 'animate-pulse' : ''}"></div>
+													</div>
+												</div>
 												<div>
 													<h1 class="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white">${displayName}</h1>
 													<p class="text-slate-500 dark:text-slate-300">@${friend.username}</p>
+													<div class="mt-2">
+														<span class="${statusBadgeClass} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 shadow-md">
+															<span class="w-1.5 h-1.5 rounded-full bg-white ${isOnline ? 'animate-pulse' : ''}"></span>
+															${statusText}
+														</span>
+													</div>
 												</div>
 											</div>
 											<div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">

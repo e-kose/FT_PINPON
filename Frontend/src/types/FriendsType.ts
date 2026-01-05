@@ -1,3 +1,5 @@
+import type { UserOnlineStatus } from './NotificationTypes';
+
 export type Friend = {
   id: number;
   friend_id: number;
@@ -44,5 +46,6 @@ export type FriendProfile = {
     username: string;
     created_at: string;
     profile: FriendProfileDetail;
+    status?: UserOnlineStatus;
 };
 

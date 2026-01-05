@@ -519,8 +519,8 @@ class Friends extends LocalizedComponent {
 		if (!id) return;
 		const friendId = parseInt(id, 10);
 		
-		// Navigate to friend profile page with ID as query parameter
-		router.navigate(`/Friend?id=${friendId}`);
+		// Navigate to friend profile page with ID as path parameter
+		router.navigate(`/friend/${friendId}`);
 	}
 
 	private setupSidebarListener(): void {
