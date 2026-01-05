@@ -49,6 +49,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
       message: "User successfully logged in",
     });
   } catch (error) {
+    console.error("❌ Login error:", error);
     logError(req.server, req, error);
     if (error instanceof UserNotFound || error instanceof InvalidCredentials) {
       return reply

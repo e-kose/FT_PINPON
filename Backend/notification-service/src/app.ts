@@ -33,7 +33,6 @@ const fastifyOptions = {
 };
 
 const app = fastify(fastifyOptions);
-
 app.register(fastifyWebsocket);
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
