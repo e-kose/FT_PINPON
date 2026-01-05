@@ -28,6 +28,10 @@ const host = process.env.HOST || "localhost";
 const port = +(process.env.PORT || "3002");
 const app = fastify({ logger: true });
 
+app.get('/health', async (request, reply) => {
+  return { status: 'ok' };
+});
+
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
 app.register(multipart);

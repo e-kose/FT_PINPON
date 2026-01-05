@@ -35,15 +35,25 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - auth-service
-      - user-service
-      - chat-service
-      - notification-service
+      auth-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      chat-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
     env_file:
       - ./api-gateway/.env
     networks:
       - internal-network
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   auth-service:
     build:
@@ -57,6 +67,13 @@ services:
     networks:
       - internal-network
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 
   user-service:
     build:
@@ -70,6 +87,12 @@ services:
     networks:
       - internal-network
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   chat-service:
     build:
@@ -83,6 +106,13 @@ services:
     networks:
       - internal-network
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
@@ -141,10 +171,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9600"]
-      interval: 30s
+      interval: 20s
       timeout: 10s
       retries: 5
-      start_period: 40s
+      start_period: 90s
     mem_limit: 2g
     restart: always
 
@@ -179,6 +209,28 @@ services:
       - internal-network
     restart: always
 
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certs:/etc/nginx/certs:ro 
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - internal-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
   notification-service:
     build:
       context: ./notification-service
@@ -190,13 +242,28 @@ services:
       - ./notification-service/.env
     networks:
       - internal-network
-    # healthcheck:
-    #   test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+  frontend:
+    build:
+      context: ./../Frontend
+    expose:
+      - "5173"
+    env_file:
+      - ./../Frontend/.env
+    volumes:
+      - ./../Frontend:/app
+      - /app/node_modules
+    networks:
+      - internal-network
+    restart: always
+    tty: true
 
 volumes:
   es_data:

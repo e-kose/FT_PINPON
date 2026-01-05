@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache curl
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -10,6 +12,6 @@ COPY . .
 
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 3002
 
 CMD ["npm", "run", "start"]

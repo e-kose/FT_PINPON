@@ -17,7 +17,9 @@ const port = +(process.env.PORT || "3003");
 const host = process.env.HOST || "0.0.0.0";
 
 const app = fastify({ logger: true });
-
+app.get('/health', async (request, reply) => {
+  return { status: 'ok' };
+});
 app.decorate("messageRepo", null);
 app.decorate("messageService", null);
 
