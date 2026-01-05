@@ -16,12 +16,15 @@ class FriendProfile extends LocalizedComponent {
 	private friendData: FriendProfileType | null = null;
 	private error: string | null = null;
 	private friendId: number | null = null;
+	private isOnline = false;
+	private onlineStatusInterval: number | null = null;
 
 	protected onConnected(): void {
 		if (!this.sidebarListener) {
 			this.setupSidebarListener();
 		}
 		this.extractFriendIdAndFetch();
+		this.startOnlineStatusInterval();
 	}
 
 	protected onDisconnected(): void {
@@ -29,6 +32,8 @@ class FriendProfile extends LocalizedComponent {
 			sidebarStateManager.removeListener(this.sidebarListener);
 			this.sidebarListener = null;
 		}
+		this.stopOnlineStatusInterval();
+		this.isOnline = false;
 	}
 
 	private extractFriendIdAndFetch(): void {
@@ -80,22 +85,8 @@ class FriendProfile extends LocalizedComponent {
 				console.log("------------------------------------------------------------------------------Friend profile data:", response.data);
 				this.friendData = response.data.user || response.data;
 				
-				// Fetch online status in background (non-blocking)
-				if (this.friendData && this.friendData.id) {
-					getUserOnlineStatus(this.friendData.id)
-						.then(statusResponse => {
-							if (statusResponse.ok && statusResponse.data.success && statusResponse.data.data) {
-								if (this.friendData) {
-									this.friendData.status = statusResponse.data.data;
-									console.log("Friend online status updated:", statusResponse.data.data);
-									this.renderAndBind();
-								}
-							}
-						})
-						.catch(error => {
-							console.error("Failed to fetch friend online status:", error);
-						});
-				}
+				// Fetch online status
+				await this.fetchOnlineStatus();
 			}
 		} catch (err) {
 			console.error("Error fetching friend profile:", err);
@@ -112,6 +103,37 @@ class FriendProfile extends LocalizedComponent {
 		};
 		sidebarStateManager.addListener(this.sidebarListener);
 		this.updateMainContentMargin(sidebarStateManager.getState().isCollapsed);
+	}
+
+	private async fetchOnlineStatus(): Promise<void> {
+		if (!this.friendData?.id) return;
+
+		try {
+			const statusResponse = await getUserOnlineStatus(this.friendData.id);
+			if (statusResponse.ok && statusResponse.data.success && statusResponse.data.data) {
+				this.isOnline = statusResponse.data.data.isOnline;
+			} else {
+				this.isOnline = false;
+			}
+		} catch (error) {
+			console.error("Failed to fetch friend online status:", error);
+			this.isOnline = false;
+		}
+	}
+
+	private startOnlineStatusInterval(): void {
+		this.stopOnlineStatusInterval();
+		this.onlineStatusInterval = window.setInterval(async () => {
+			await this.fetchOnlineStatus();
+			this.renderAndBind();
+		}, 30000); // 30 saniyede bir güncelle
+	}
+
+	private stopOnlineStatusInterval(): void {
+		if (this.onlineStatusInterval) {
+			clearInterval(this.onlineStatusInterval);
+			this.onlineStatusInterval = null;
+		}
 	}
 
 	private updateMainContentMargin(isCollapsed: boolean): void {
@@ -194,11 +216,10 @@ class FriendProfile extends LocalizedComponent {
 		const bioClass = friend.profile?.bio ? "" : "text-gray-500 italic";
 		
 		// Online status
-		const isOnline = friend.status?.isOnline ?? false;
-		const statusDotColor = isOnline ? 'bg-green-500' : 'bg-gray-400';
-		const statusBorderColor = isOnline ? 'border-green-300' : 'border-gray-300';
-		const statusText = isOnline ? t("friend_profile_status_online") : t("friend_profile_status_offline");
-		const statusBadgeClass = isOnline 
+		const statusDotColor = this.isOnline ? 'bg-green-500' : 'bg-gray-400';
+		const statusBorderColor = this.isOnline ? 'border-green-300' : 'border-gray-300';
+		const statusText = this.isOnline ? t("friend_profile_status_online") : t("friend_profile_status_offline");
+		const statusBadgeClass = this.isOnline 
 			? 'bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white' 
 			: 'bg-gradient-to-r from-gray-400/90 to-slate-400/90 text-white';
 
@@ -224,7 +245,7 @@ class FriendProfile extends LocalizedComponent {
 														class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-1 ring-slate-200/80 dark:ring-slate-700/80 shadow-md"
 													>
 													<div class="absolute -bottom-1 -right-1 ${statusDotColor} w-7 h-7 rounded-full border-3 ${statusBorderColor} flex items-center justify-center shadow-lg">
-														<div class="w-2.5 h-2.5 bg-white rounded-full ${isOnline ? 'animate-pulse' : ''}"></div>
+													<div class="w-2.5 h-2.5 bg-white rounded-full ${this.isOnline ? 'animate-pulse' : ''}"></div>
 													</div>
 												</div>
 												<div>
@@ -232,7 +253,7 @@ class FriendProfile extends LocalizedComponent {
 													<p class="text-slate-500 dark:text-slate-300">@${friend.username}</p>
 													<div class="mt-2">
 														<span class="${statusBadgeClass} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 shadow-md">
-															<span class="w-1.5 h-1.5 rounded-full bg-white ${isOnline ? 'animate-pulse' : ''}"></span>
+														<span class="w-1.5 h-1.5 rounded-full bg-white ${this.isOnline ? 'animate-pulse' : ''}"></span>
 															${statusText}
 														</span>
 													</div>

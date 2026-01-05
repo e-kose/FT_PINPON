@@ -9,6 +9,7 @@ import FriendService from "../../services/FriendService";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
 import { APP_CONTAINER, MAIN_CONTENT_SCROLL, PAGE_TOP_OFFSET } from "../utils/Layout";
+import { getMultipleUsersOnlineStatus } from "../../services/NotificationService";
 
 type FriendsTab = "incoming" | "sent" | "blocked";
 
@@ -21,12 +22,15 @@ class Friends extends LocalizedComponent {
 	private blocked: BlockedUser[] = [];
 	private sentRequests: SentRequest[] = [];
 	private activeTab: FriendsTab = "incoming";
+	private friendsOnlineStatus: Record<string, boolean> = {};
+	private onlineStatusInterval: number | null = null;
 
 	protected onConnected(): void {
 		if (!this.sidebarListener) {
 			this.setupSidebarListener();
 		}
 		void this.fetchData();
+		this.startOnlineStatusInterval();
 	}
 
 	protected onDisconnected(): void {
@@ -34,6 +38,8 @@ class Friends extends LocalizedComponent {
 			sidebarStateManager.removeListener(this.sidebarListener);
 			this.sidebarListener = null;
 		}
+		this.stopOnlineStatusInterval();
+		this.friendsOnlineStatus = {};
 	}
 
 	protected renderComponent(): void {
@@ -99,6 +105,9 @@ class Friends extends LocalizedComponent {
 			this.friends = friendsRes.ok && friendsRes.data.success ? friendsRes.data.friends : [];
 			this.blocked = blockedRes.ok && blockedRes.data.success ? blockedRes.data.blocked : [];
 			this.sentRequests = sentRes.ok && sentRes.data.success ? sentRes.data.sent : [];
+			
+			// Fetch online status for friends
+			await this.fetchFriendsOnlineStatus();
 		} catch (error) {
 			console.error(t("friends_fetch_error_log"), error);
 			this.loadError = true;
@@ -136,13 +145,18 @@ class Friends extends LocalizedComponent {
 			`;
 		} else {
 			content = `<div class="grid grid-cols-1 gap-2">` + this.friends
-				.map((friend) => `
+				.map((friend) => {
+					const isOnline = this.friendsOnlineStatus[friend.friend_id.toString()] || false;
+					return `
 					<div class="bg-gray-50 dark:bg-gray-800/60 rounded-lg p-2 sm:p-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
 						<!-- Profile section - always visible -->
 						<div class="profile-view-trigger flex items-center gap-2 sm:gap-3 cursor-pointer mb-2 sm:mb-3" data-id="${friend.friend_id}">
-							<img src="${friend.friend_avatar_url || "/default-avatar.png"}" 
-								class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 flex-shrink-0" 
-								alt="${t("friends_avatar_alt")}">
+							<div class="relative flex-shrink-0">
+								<img src="${friend.friend_avatar_url || "/default-avatar.png"}" 
+									class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" 
+									alt="${t("friends_avatar_alt")}">
+								<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+							</div>
 							<div class="flex-1 min-w-0">
 								<h3 class="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white truncate">
 									${friend.friend_username}
@@ -176,8 +190,7 @@ class Friends extends LocalizedComponent {
 							</button>
 						</div>
 					</div>
-				`)
-				.join("") + `</div>`;
+				`;}).join("") + `</div>`;
 		}
 
 		return `
@@ -195,6 +208,48 @@ class Friends extends LocalizedComponent {
 				<div class="flex-1 lg:overflow-y-auto -mr-2 pr-2">${content}</div>
 			</aside>
 		`;
+	}
+
+	private async fetchFriendsOnlineStatus(): Promise<void> {
+		if (this.friends.length === 0) {
+			this.friendsOnlineStatus = {};
+			return;
+		}
+
+		try {
+			const friendIds = this.friends.map(f => f.friend_id);
+			const onlineStatusResponse = await getMultipleUsersOnlineStatus(friendIds);
+			
+			if (onlineStatusResponse.ok && onlineStatusResponse.data.success) {
+				this.friendsOnlineStatus = {};
+				if (onlineStatusResponse.data.data?.onlineStatus) {
+					for (const statusItem of onlineStatusResponse.data.data.onlineStatus) {
+						this.friendsOnlineStatus[statusItem.userId.toString()] = statusItem.isOnline;
+					}
+				}
+			} else {
+				console.error("Failed to fetch friends online status:", onlineStatusResponse);
+				this.friendsOnlineStatus = {};
+			}
+		} catch (error) {
+			console.error("Failed to fetch friends online status:", error);
+			this.friendsOnlineStatus = {};
+		}
+	}
+
+	private startOnlineStatusInterval(): void {
+		this.stopOnlineStatusInterval();
+		this.onlineStatusInterval = window.setInterval(async () => {
+			await this.fetchFriendsOnlineStatus();
+			this.renderAndBind();
+		}, 30000); // Her 30 saniyede bir güncelle
+	}
+
+	private stopOnlineStatusInterval(): void {
+		if (this.onlineStatusInterval) {
+			clearInterval(this.onlineStatusInterval);
+			this.onlineStatusInterval = null;
+		}
 	}
 
 	private renderManagementSection(): string {
