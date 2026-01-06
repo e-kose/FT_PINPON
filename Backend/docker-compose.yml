@@ -62,6 +62,7 @@ services:
       - "3001"
     volumes:
       - ./auth-service/db:/app/db
+      - ./auth-service/public:/app/public
     env_file:
       - ./auth-service/.env
     depends_on:

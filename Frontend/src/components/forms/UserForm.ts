@@ -60,21 +60,33 @@ export abstract class UserForm extends HTMLElement {
 		return;
 	}
 
-	const apiOrigin = new URL(import.meta.env.VITE_API_BASE_URL).origin;
+	// The backend sends postMessage to window.location.origin (frontend origin)
+	// So we need to check against our own origin, not the API origin
+	const expectedOrigin = window.location.origin;
 
+	console.log("-----------------------------> Listening for messages from origin:", expectedOrigin);
 	const onMessage = (event: MessageEvent) => {
-		if (event.origin !== apiOrigin) return;
-		if (!event.data || event.data.type !== "GOOGLE_AUTH_RESULT") return;
+		console.log("event.origin:", event.origin);
+		// Check if message is from our own origin (where backend sends the postMessage)
+		if (event.origin !== expectedOrigin) {
+			console.warn("Ignored message from unexpected origin:", event.origin);
+			return;
+		}
+		console.log("-----------------------------> Message received from origin:", event.origin);
+		if (!event.data || event.data.type !== "GOOGLE_AUTH_RESULT") {
+			console.log("Ignored message with wrong type:", event.data?.type);
+			return;
+		}
 		window.removeEventListener("message", onMessage);
 		try {
 			const payload = event.data.data;
-			
+			console.log("-----------------------------> Received Google auth response:", payload);
 			void this.handleGoogleAuthResponse(payload, messageContainer);
 		} finally {
 			try {
 				popup.close();
 			} catch {
-				// ignore
+				console.warn("Popup could not be closed automatically.");
 			}
 		}
 	};
