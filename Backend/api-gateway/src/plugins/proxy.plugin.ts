@@ -13,7 +13,7 @@ export default fp(async (app: FastifyInstance) => {
       if (req.url.startsWith("/auth/static/")) {
         return;
       }
-      
+
       if (
         req.url.startsWith("/auth/2fa/setup") ||
         req.url.startsWith("/auth/2fa/enable") ||
@@ -38,7 +38,7 @@ export default fp(async (app: FastifyInstance) => {
       if (req.url.startsWith("/user/static/avatars/")) {
         return;
       }
-      
+
       if (req.url.startsWith("/user") && !req.url.startsWith("/user/docs")) {
         await app.jwtAuth(req, reply);
         if (req.user) {
@@ -66,6 +66,19 @@ export default fp(async (app: FastifyInstance) => {
   upstream: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3004",
   prefix: "/notification",
   rewritePrefix: "/notification",
+  preHandler: async (req, reply) => {
+    await app.jwtAuth(req, reply);
+    if (req.user) {
+      req.headers["x-user-id"] = (req.user as any).id;
+      req.headers["x-user-email"] = (req.user as any).email;
+    }
+  },
+});
+
+  app.register(proxy, {
+  upstream: process.env.GAME_SERVICE_URL || "http://localhost:3005",
+  prefix: "/game",
+  rewritePrefix: "/game",
   preHandler: async (req, reply) => {
     await app.jwtAuth(req, reply);
     if (req.user) {
