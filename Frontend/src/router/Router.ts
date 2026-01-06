@@ -7,7 +7,7 @@ import "../components/utils/TwoFaAuth";
 import "../components/forms/TwoFaLogin";
 import "../components/sideBarComponents/Settings/Settings";
 import "../components/sideBarComponents/Play";
-import "../components/sideBarComponents/Tournament";
+import "../components/sideBarComponents/Game/Game";
 import "../components/sideBarComponents/Friends";
 import "../components/sideBarComponents/FriendProfile";
 import "../components/sideBarComponents/Chat";
@@ -151,7 +151,7 @@ function initializeRouter(): void {
 	router.addRoute('/2fa', '<twofa-auth></twofa-auth>');
 	router.addRoute('/2fa-login', '<twofa-login></twofa-login>');
 	router.addRoute('/play', '<play-component></play-component>');
-	router.addRoute('/tournament', '<tournament-component></tournament-component>');
+	router.addRoute('/game', '<game-component></game-component>');
 	router.addRoute('/friends', '<friends-component></friends-component>');
 	router.addRoute('/friend/:id', '<friend-profile></friend-profile>');
 	router.addRoute('/chat', '<chat-component></chat-component>');

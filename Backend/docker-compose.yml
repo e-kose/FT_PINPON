@@ -279,6 +279,27 @@ services:
       - internal-network
     restart: always
     tty: true
+  game-service:
+    build:
+      context: ./game-service
+    expose:
+      - "3005"
+    volumes:
+      - ./game-service/db:/app/db
+    env_file:
+      - ./game-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
+    networks:
+      - internal-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   es_data:
