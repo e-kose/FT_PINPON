@@ -64,6 +64,9 @@ services:
       - ./auth-service/db:/app/db
     env_file:
       - ./auth-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -84,6 +87,9 @@ services:
       - ./user-service/db:/app/db
     env_file:
       - ./user-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -103,6 +109,9 @@ services:
       - ./chat-service/db:/app/db
     env_file:
       - ./chat-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
@@ -164,17 +173,19 @@ services:
     volumes:
       - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./elastic-search/logstash-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro
     networks:
       - internal-network
     depends_on:
       elasticsearch:
         condition: service_healthy
+    command: ["/bin/bash", "/usr/local/bin/custom-entrypoint.sh"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9600"]
-      interval: 20s
-      timeout: 10s
-      retries: 5
-      start_period: 90s
+      test: ["CMD-SHELL", "test -f /tmp/logstash.ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
     mem_limit: 2g
     restart: always
 
@@ -240,6 +251,9 @@ services:
       - ./notification-service/db:/app/db
     env_file:
       - ./notification-service/.env
+    depends_on:
+      logstash:
+        condition: service_healthy
     networks:
       - internal-network
     restart: always
