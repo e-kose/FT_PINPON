@@ -1,5 +1,3 @@
-import type { UserOnlineStatus } from './NotificationTypes';
-
 export type UserProfile = {
   user_id: number;
   user_google_id?: string;
@@ -22,7 +20,6 @@ export type User = {
   updated_at: string;
   profile: UserProfile;
   accesstoken?: string;
-  status?: UserOnlineStatus;
 }
 
 

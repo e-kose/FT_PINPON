@@ -1,7 +1,6 @@
 import "../utils/Header";
 import "../utils/SideBar";
-import "../utils/Statistics";
-import "../utils/LastGames";
+import "./Game/GameStatistics";
 import { getUser } from "../../store/UserStore";
 import { router } from "../../router/Router";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
@@ -46,44 +45,32 @@ class Dashboard extends LocalizedComponent {
 					<sidebar-component current-route="dashboard"></sidebar-component>
 					<div class="${marginClass} ${MAIN_CONTENT_SCROLL} min-w-0" id="mainContent" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3))">
 						<div class="${APP_CONTAINER} space-y-6 sm:space-y-8">
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-4 sm:p-6 lg:p-8 rounded-lg lg:rounded-xl shadow-xl border border-white/20 text-center">
-								<h2 id="welcomeMessage" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 lg:mb-3 break-words">
-									${t("dashboard_welcome_heading", { name })}
-								</h2>
-								<p class="text-gray-600 dark:text-gray-300 text-sm sm:text-base lg:text-lg max-w-prose mx-auto">
-									${t("dashboard_welcome_subtitle")}
-								</p>
-							</div>
-
-							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
-								<button id="playNowBtn" class="group bg-blue-900 hover:bg-blue-800 dark:bg-blue-800 dark:hover:bg-blue-700 text-white font-semibold py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 rounded-lg lg:rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl min-h-[52px]">
-									<div class="flex items-center justify-center space-x-2 lg:space-x-3">
-										<span class="text-xl lg:text-2xl">🎮</span>
-										<div class="text-left">
-											<div class="text-lg lg:text-xl font-bold">${t("dashboard_quick_play_title")}</div>
-											<div class="text-blue-200 text-xs lg:text-sm">${t("dashboard_quick_play_subtitle")}</div>
-										</div>
+							<div class="relative overflow-hidden rounded-2xl lg:rounded-3xl border border-blue-200/60 dark:border-blue-900/40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-2xl p-6 sm:p-8 lg:p-10">
+								<div class="absolute inset-0 pointer-events-none">
+									<div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-indigo-500/10"></div>
+									<div class="absolute top-6 right-6 w-16 h-16 rounded-full border border-blue-500/20"></div>
+									<div class="absolute bottom-6 left-6 w-20 h-20 rounded-full border border-indigo-500/15"></div>
+									<div class="absolute top-1/2 left-1/2 w-24 h-1 bg-blue-500/20 -translate-x-1/2 -translate-y-1/2"></div>
+								</div>
+								<div class="relative z-10 grid grid-cols-1 lg:grid-cols-[1.4fr_0.6fr] gap-6 lg:gap-10 items-center">
+									<div class="min-w-0">
+										<h2 id="welcomeMessage" class="text-2xl sm:text-3xl lg:text-5xl font-bold text-slate-900 dark:text-white leading-tight break-words">
+											${t("dashboard_welcome_heading", { name })}
+										</h2>
+										<p class="mt-3 text-sm sm:text-base lg:text-xl text-slate-600 dark:text-slate-300 max-w-prose">
+											${t("dashboard_welcome_subtitle")}
+										</p>
 									</div>
-								</button>
-
-								<button id="inviteFriendBtn" class="group bg-green-700 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-white font-semibold py-4 sm:py-5 lg:py-6 px-4 sm:px-6 lg:px-8 rounded-lg lg:rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl min-h-[52px]">
-									<div class="flex items-center justify-center space-x-2 lg:space-x-3">
-										<span class="text-xl lg:text-2xl">👥</span>
-										<div class="text-left">
-											<div class="text-lg lg:text-xl font-bold">${t("dashboard_quick_invite_title")}</div>
-											<div class="text-green-200 text-xs lg:text-sm">${t("dashboard_quick_invite_subtitle")}</div>
-										</div>
+									<div class="flex flex-col items-start lg:items-end gap-4">
+										<button id="playNowBtn" class="group inline-flex items-center justify-center gap-3 px-7 sm:px-9 lg:px-10 py-3.5 sm:py-4 rounded-2xl min-h-[54px] text-base sm:text-lg lg:text-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 transition-all duration-200 hover:-translate-y-0.5">
+											<span class="text-lg">▶</span>
+											<span>${t("dashboard_welcome_cta")}</span>
+										</button>
 									</div>
-								</button>
+								</div>
 							</div>
 
-							<div class="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 p-4 sm:p-6 rounded-lg lg:rounded-xl shadow-xl border border-white/20">
-								<statistics-component></statistics-component>
-							</div>
-
-							<div class="bg-white/40 backdrop-blur-sm dark:bg-gray-800/20 p-4 sm:p-6 rounded-lg lg:rounded-xl shadow-xl border border-white/20">
-								<last-games-component></last-games-component>
-							</div>
+							<game-statistics mode="summary"></game-statistics>
 						</div>
 					</div>
 				</div>
@@ -226,7 +213,7 @@ class Dashboard extends LocalizedComponent {
 	}
 
 	private handlePlayNow(): void {
-		// TODO: Navigate to game page
+		router.navigate('/play');
 	}
 
 	private handleInviteFriend(): void {
