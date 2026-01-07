@@ -74,19 +74,19 @@ class Header extends LocalizedComponent {
         const user = getUser();
         this.innerHTML = `
             <nav class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200/70 dark:border-slate-800/70 shadow-sm fixed top-0 w-full z-50">
-                <div class="${APP_CONTAINER} relative flex items-center justify-between min-h-14 sm:min-h-16 md:min-h-20 lg:min-h-24 py-2 sm:py-3">
+                <div class="${APP_CONTAINER} relative flex items-center justify-between gap-2 min-h-14 sm:min-h-16 md:min-h-20 lg:min-h-24 py-2 sm:py-3 min-w-0">
                     ${user ? `
                     <button id="mobileSidebarToggle" aria-label="${t("sidebar_toggle_aria")}" class="md:hidden ${ICON_BUTTON}">
                         ${ICONS.menu("w-5 h-5")}
                     </button>
                     ` : ""}
                     <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
-                    <div id="logoSection" class="flex items-center space-x-2 sm:space-x-3 md:space-x-4 cursor-pointer hover:opacity-90 transition-opacity duration-200 ml-0 md:ml-8 min-w-0 flex-1" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
+                    <div id="logoSection" class="flex items-center gap-2 sm:gap-3 md:gap-4 cursor-pointer hover:opacity-90 transition-opacity duration-200 ml-0 md:ml-16 min-w-0 flex-1 overflow-hidden pr-2 sm:pr-4" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
                         <img class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex-shrink-0" src="/pong.png" alt="${t("header_logo_alt")}">
-                        <h1 class="text-[11px] xs:text-sm sm:text-lg md:text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-tight break-words whitespace-normal">Ft_Transcendance</h1>
+                        <h1 class="text-[11px] xs:text-sm sm:text-lg md:text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-tight truncate max-w-full">Ft_Transcendance</h1>
                     </div>
                     <!-- User Section -->
-                    <div class="ml-auto flex items-center mr-0 sm:mr-1 md:mr-2 lg:mr-3 relative select-none">
+                    <div class="ml-auto flex items-center mr-0 sm:mr-1 md:mr-2 lg:mr-3 relative select-none flex-shrink-0">
                         ${user ? `
                         <div id="userDropdownBtn" class="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 px-2 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-3 rounded-xl cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors min-w-0">
                             <!-- Avatar with Status Indicator -->
@@ -109,7 +109,7 @@ class Header extends LocalizedComponent {
                                 </span>
                             </div>
                         </div>
-                        <div id="userDropdownMenu" class="hidden absolute right-0 top-12 sm:top-14 md:top-16 lg:top-20 w-[calc(100vw-2rem)] max-w-xs sm:w-56 md:w-60 lg:w-64 ${SURFACE_ELEVATED} z-50 overflow-hidden">
+                        <div id="userDropdownMenu" class="hidden absolute top-full mt-2 left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 w-[calc(100vw-2rem)] max-w-[22rem] sm:w-56 md:w-60 lg:w-64 ${SURFACE_ELEVATED} z-50 overflow-hidden">
                             <!-- Menu Items -->
                             <div class="py-2 sm:py-3">
                                 <button id="profileBtn" class="flex items-center gap-3 w-full px-4 py-2.5 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors text-sm sm:text-base font-medium group">
@@ -264,12 +264,12 @@ class Header extends LocalizedComponent {
             
             if (isCollapsed) {
                 // Sidebar kapalı - margin'i azalt
-                logoSection.classList.remove('md:ml-56');
-                logoSection.classList.add('md:ml-8');
+                logoSection.classList.remove('md:ml-72');
+                logoSection.classList.add('md:ml-16');
             } else {
                 // Sidebar açık - margin'i artır
-                logoSection.classList.remove('md:ml-8');
-                logoSection.classList.add('md:ml-56');
+                logoSection.classList.remove('md:ml-16');
+                logoSection.classList.add('md:ml-72');
             }
         }
     }

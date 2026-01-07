@@ -61,3 +61,5 @@ Backend/**/db/*.sqlite3
 *.webp
 *.mp4
 *.mp3
+*.pem
+certs/

@@ -1,5 +1,6 @@
 import "../utils/Header";
 import "../utils/SideBar";
+import "./Game/GameStatistics";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { router } from "../../router/Router";
@@ -323,30 +324,7 @@ class FriendProfile extends LocalizedComponent {
 									</div>
 								</div>
 
-								<div class="bg-white/90 backdrop-blur-sm dark:bg-slate-900/80 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-700/60 p-6">
-									<div class="flex items-center gap-4 mb-4">
-										<h3 class="text-lg font-semibold text-slate-900 dark:text-white">${t("friend_profile_stats_title")}</h3>
-										<div class="h-px flex-1 bg-slate-200/70 dark:bg-slate-700/70"></div>
-									</div>
-									<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-										<div class="rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-4 text-center">
-											<div class="text-xs uppercase tracking-widest text-slate-400 mb-2">${t("friend_profile_stats_total_games")}</div>
-											<div class="text-2xl font-semibold text-slate-900 dark:text-white">0</div>
-										</div>
-										<div class="rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-4 text-center">
-											<div class="text-xs uppercase tracking-widest text-slate-400 mb-2">${t("friend_profile_stats_wins")}</div>
-											<div class="text-2xl font-semibold text-slate-900 dark:text-white">0</div>
-										</div>
-										<div class="rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-4 text-center">
-											<div class="text-xs uppercase tracking-widest text-slate-400 mb-2">${t("friend_profile_stats_losses")}</div>
-											<div class="text-2xl font-semibold text-slate-900 dark:text-white">0</div>
-										</div>
-										<div class="rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-4 text-center">
-											<div class="text-xs uppercase tracking-widest text-slate-400 mb-2">${t("friend_profile_stats_rank")}</div>
-											<div class="text-2xl font-semibold text-slate-900 dark:text-white">-</div>
-										</div>
-									</div>
-								</div>
+								<game-statistics user-id="${friend.id}" mode="summary"></game-statistics>
 							</div>
 						</div>
 					</div>

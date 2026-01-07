@@ -1,7 +1,7 @@
 import { setUser, clearUser, getUser } from "../store/UserStore";
 import { router } from "../router/Router";
 import type { UserLogin } from "../types/AuthType";
-import { getUserOnlineStatus, initializeNotifications } from "./NotificationService";
+import { initializeNotifications } from "./NotificationService";
 
 
 
@@ -61,22 +61,6 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	if (data.success) {
 		setUser(data.user, token);
 		await initializeNotifications();
-		
-		// Try to fetch online status in background - non-blocking
-		getUserOnlineStatus(data.user.id)
-			.then(statusResponse => {
-				if (statusResponse.ok && statusResponse.data.success && statusResponse.data.data) {
-					const currentUser = getUser();
-					if (currentUser) {
-						currentUser.status = statusResponse.data.data;
-						setUser(currentUser, token);
-						console.log("User online status updated:", statusResponse.data.data);
-					}
-				}
-			})
-			.catch(error => {
-				console.error("Failed to fetch user online status:", error);
-			});
 		
 		console.log("✅ FETCH USER SUCCESS - User set");
 		return true;

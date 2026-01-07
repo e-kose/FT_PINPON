@@ -118,19 +118,6 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			}
 		}
 
-		// Handle status object
-		if (userData.status && typeof userData.status === 'object') {
-			const userId = parseInt(userData.status.userId);
-			const isOnline = Boolean(userData.status.isOnline);
-			if (!isNaN(userId) && userId > 0) {
-				sanitizedUser.status = {
-					userId: userId,
-					isOnline: isOnline,
-					timestamp: userData.status.timestamp ? String(userData.status.timestamp) : undefined
-				};
-			}
-		}
-
 		return sanitizedUser;
 	} catch (error) {
 		console.error('Error validating user data:', error);

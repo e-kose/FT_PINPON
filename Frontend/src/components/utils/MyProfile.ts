@@ -1,5 +1,6 @@
 import "./Header";
 import "./SideBar";
+import "../sideBarComponents/Game/GameStatistics";
 import { getUser } from "../../store/UserStore";
 import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
@@ -106,15 +107,6 @@ class MyProfile extends LocalizedComponent {
 		const twoFaWarning = !user.is_2fa_enabled
 			? `<div class="bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/20"><span class="text-yellow-200">${t("my_profile_2fa_enable_prompt")}</span></div>`
 			: "";
-		
-		// Online status
-		const isOnline = user.status?.isOnline ?? false;
-		const statusDotColor = isOnline ? 'bg-green-500' : 'bg-gray-400';
-		const statusBorderColor = isOnline ? 'border-green-300' : 'border-gray-300';
-		const statusText = isOnline ? t("my_profile_status_online") : t("my_profile_status_offline");
-		const statusBadgeClass = isOnline 
-			? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/50 text-green-200' 
-			: 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/50 text-gray-300';
 
 		this.innerHTML = `
             <div class="min-h-screen bg-gray-50 dark:bg-gray-900" style="background-image: url('/DashboardBackground.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
@@ -145,9 +137,6 @@ class MyProfile extends LocalizedComponent {
                                                 alt="${t("my_profile_avatar_alt")}" 
                                                 class="w-32 h-32 md:w-36 md:h-36 rounded-full object-cover border-4 border-white/30 shadow-2xl ring-4 ring-white/20"
                                             >
-                                            <div class="absolute -bottom-2 -right-2 ${statusDotColor} w-8 h-8 rounded-full border-4 ${statusBorderColor} flex items-center justify-center shadow-lg">
-                                                <div class="w-3 h-3 bg-white rounded-full ${isOnline ? 'animate-pulse' : ''}"></div>
-                                            </div>
                                         </div>
                                         
                                         <div class="text-center lg:text-left flex-1">
@@ -158,12 +147,6 @@ class MyProfile extends LocalizedComponent {
                                             
                                             <!-- Security Status in Header -->
                                             <div class="flex flex-wrap justify-center lg:justify-start gap-3">
-                                                <div class="${statusBadgeClass} backdrop-blur-sm px-4 py-2 rounded-full text-sm border">
-                                                    <div class="flex items-center space-x-2">
-                                                        <div class="w-2 h-2 rounded-full ${statusDotColor} ${isOnline ? 'animate-pulse' : ''}"></div>
-                                                        <span class="font-medium">${statusText}</span>
-                                                    </div>
-                                                </div>
                                                 <div class="bg-gradient-to-r ${twoFaStatusClass} backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/20">
                                                     <div class="flex items-center space-x-2">
                                                         <div class="w-2 h-2 rounded-full ${twoFaStatusIndicator}"></div>
@@ -243,54 +226,9 @@ class MyProfile extends LocalizedComponent {
                                         </div>
                                     </div>
 
-                                    <!-- Quick Stats -->
+                                    <!-- Game Statistics Component -->
                                     <div class="border-t border-gray-200/50 dark:border-gray-600/50 pt-8">
-                                        <div class="flex items-center space-x-3 mb-6">
-                                            <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                                </svg>
-                                            </div>
-                                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">${t("my_profile_stats_title")}</h3>
-                                        </div>
-                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-xl text-center border border-blue-200/50 dark:border-blue-700/50 hover:shadow-lg transition-all duration-300">
-                                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                                    </svg>
-                                                </div>
-                                                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">0</div>
-                                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("my_profile_stats_total_games")}</div>
-                                            </div>
-                                            <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 rounded-xl text-center border border-green-200/50 dark:border-green-700/50 hover:shadow-lg transition-all duration-300">
-                                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                </div>
-                                                <div class="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">0</div>
-                                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("my_profile_stats_wins")}</div>
-                                            </div>
-                                            <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-6 rounded-xl text-center border border-red-200/50 dark:border-red-700/50 hover:shadow-lg transition-all duration-300">
-                                                <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                    </svg>
-                                                </div>
-                                                <div class="text-3xl font-bold text-red-600 dark:text-red-400 mb-1">0</div>
-                                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("my_profile_stats_losses")}</div>
-                                            </div>
-                                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 rounded-xl text-center border border-purple-200/50 dark:border-purple-700/50 hover:shadow-lg transition-all duration-300">
-                                                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                                                    </svg>
-                                                </div>
-                                                <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">-</div>
-                                                <div class="text-sm font-medium text-gray-600 dark:text-gray-400">${t("my_profile_stats_rank")}</div>
-                                            </div>
-                                        </div>
+                                        <game-statistics mode="summary"></game-statistics>
                                     </div>
                                 </div>
                             </div>
