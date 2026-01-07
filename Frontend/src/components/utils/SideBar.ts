@@ -62,7 +62,6 @@ class SideBar extends LocalizedComponent {
 						${this.renderNavItem("/", "dashboard", "🏠", t("sidebar_nav_dashboard"), t("sidebar_nav_dashboard_title"))}
 						${this.renderNavItem("/profile", "profile", "👤", t("sidebar_nav_profile"), t("sidebar_nav_profile_title"))}
 						${this.renderNavItem("/play", "play", "🎮", t("sidebar_nav_play"), t("sidebar_nav_play_title"))}
-						${this.renderNavItem("/tournament", "tournament", "🏆", t("sidebar_nav_tournament"), t("sidebar_nav_tournament_title"))}
 						${this.renderNavItem("/friends", "friends", "👥", t("sidebar_nav_friends"), t("sidebar_nav_friends_title"))}
 						${this.renderNavItem("/chat", "chat", "💬", t("sidebar_nav_chat"), t("sidebar_nav_chat_title"))}
 						${this.renderNavItem("/settings", "settings", "⚙️", t("sidebar_nav_settings"), t("sidebar_nav_settings_title"))}
@@ -111,9 +110,6 @@ class SideBar extends LocalizedComponent {
 				break;
 			case "/play":
 				this.activeRoute = "play";
-				break;
-			case "/tournament":
-				this.activeRoute = "tournament";
 				break;
 			case "/friends":
 				this.activeRoute = "friends";
@@ -176,9 +172,6 @@ class SideBar extends LocalizedComponent {
 				break;
 			case "play":
 				path = "/play";
-				break;
-			case "tournament":
-				path = "/tournament";
 				break;
 			case "friends":
 				path = "/friends";

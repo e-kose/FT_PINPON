@@ -52,3 +52,12 @@ dist/
 Backend/**/db/*.db
 Backend/**/db/*.sqlite
 Backend/**/db/*.sqlite3
+
+*png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.mp4
+*.mp3

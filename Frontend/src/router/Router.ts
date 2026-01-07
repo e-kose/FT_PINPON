@@ -7,7 +7,7 @@ import "../components/utils/TwoFaAuth";
 import "../components/forms/TwoFaLogin";
 import "../components/sideBarComponents/Settings/Settings";
 import "../components/sideBarComponents/Play";
-import "../components/sideBarComponents/Tournament";
+import "../components/sideBarComponents/Game/Game";
 import "../components/sideBarComponents/Friends";
 import "../components/sideBarComponents/FriendProfile";
 import "../components/sideBarComponents/Chat";
@@ -19,6 +19,42 @@ class Router
 
 	public addRoute(path: string, component: string): void {
 		this.routes.push({ path, component });
+	}
+
+	// Dinamik route eşleştirme (/:id gibi parametreler için)
+	private matchRoute(pathname: string): { route: { path: string; component: string } | undefined; params: Record<string, string> } {
+		for (const route of this.routes) {
+			// Exact match
+			if (route.path === pathname) {
+				return { route, params: {} };
+			}
+			
+			// Dynamic route match (e.g., /friend/:id)
+			const routeParts = route.path.split('/');
+			const pathParts = pathname.split('/');
+			
+			if (routeParts.length !== pathParts.length) continue;
+			
+			const params: Record<string, string> = {};
+			let isMatch = true;
+			
+			for (let i = 0; i < routeParts.length; i++) {
+				if (routeParts[i].startsWith(':')) {
+					// Dynamic segment
+					const paramName = routeParts[i].slice(1);
+					params[paramName] = pathParts[i];
+				} else if (routeParts[i] !== pathParts[i]) {
+					isMatch = false;
+					break;
+				}
+			}
+			
+			if (isMatch) {
+				return { route, params };
+			}
+		}
+		
+		return { route: undefined, params: {} };
 	}
 
 	// Error routing helper methods
@@ -61,7 +97,7 @@ class Router
 		const app = document.getElementById("app");
 		// Query parametrelerini ayır
 		const [pathWithoutQuery] = path.split('?');
-		const route = this.routes.find(r => r.path === pathWithoutQuery);
+		const { route } = this.matchRoute(pathWithoutQuery);
 		console.log("Navigating to:", path);
 		if (route) {
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
@@ -103,7 +139,7 @@ function fillIndex(htmlValue: string, app: HTMLElement | null): void {
 
 const router = new Router();
 addEventListener('popstate', (event) => {
-	const path = (event.state && event.state.path) ? event.state.path : window.location.pathname;
+	const path = (event.state && event.state.path) ? event.state.path : window.location.pathname + window.location.search;
 	router.navigate(path);
 });
 
@@ -115,9 +151,9 @@ function initializeRouter(): void {
 	router.addRoute('/2fa', '<twofa-auth></twofa-auth>');
 	router.addRoute('/2fa-login', '<twofa-login></twofa-login>');
 	router.addRoute('/play', '<play-component></play-component>');
-	router.addRoute('/tournament', '<tournament-component></tournament-component>');
+	router.addRoute('/game', '<game-component></game-component>');
 	router.addRoute('/friends', '<friends-component></friends-component>');
-	router.addRoute('/Friend', '<friend-profile></friend-profile>');
+	router.addRoute('/friend/:id', '<friend-profile></friend-profile>');
 	router.addRoute('/chat', '<chat-component></chat-component>');
 	router.addRoute('/settings', '<settings-component></settings-component>');
 	router.addRoute('/settings/profile', '<settings-component></settings-component>');
@@ -147,7 +183,7 @@ function initializeRouter(): void {
 			router.navigate(path);
 		}
 	});
-	router.navigate(window.location.pathname);
+	router.navigate(window.location.pathname + window.location.search);
 }
 
 export { fillIndex, router, initializeRouter };

@@ -1,14 +1,11 @@
-import { LocalizedComponent } from "../base/LocalizedComponent";
-import { t } from "../../i18n/lang";
+import "./Game/Game";
 
-class Tournament extends LocalizedComponent {
-	protected renderComponent(): void {
-		this.innerHTML = `
-			<div class="p-8">
-				<h1 class="text-2xl font-bold">${t("placeholder_tournament_title")}</h1>
-				<p class="text-gray-600 dark:text-gray-400 mt-2">${t("placeholder_tournament_description")}</p>
-			</div>
-		`;
+// Tournament route now redirects to Game component which handles tournament mode
+class Tournament extends HTMLElement {
+	connectedCallback(): void {
+		// Replace this element with the game component
+		const gameComponent = document.createElement('game-component');
+		this.replaceWith(gameComponent);
 	}
 }
 

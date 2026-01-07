@@ -1,7 +1,7 @@
 import { setUser, clearUser, getUser } from "../store/UserStore";
 import { router } from "../router/Router";
 import type { UserLogin } from "../types/AuthType";
-import { initializeNotifications } from "./NotificationService";
+import { getUserOnlineStatus, initializeNotifications } from "./NotificationService";
 
 
 
@@ -53,14 +53,35 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	});
 
 	if (!res.ok) {
+		console.log("❌ FETCH USER FAILED - Response not OK:", res.status);
 		return false;
 	}
 	const data = await res.json();
+	console.log("✅ FETCH USER Response data:", data);
 	if (data.success) {
 		setUser(data.user, token);
 		await initializeNotifications();
+		
+		// Try to fetch online status in background - non-blocking
+		getUserOnlineStatus(data.user.id)
+			.then(statusResponse => {
+				if (statusResponse.ok && statusResponse.data.success && statusResponse.data.data) {
+					const currentUser = getUser();
+					if (currentUser) {
+						currentUser.status = statusResponse.data.data;
+						setUser(currentUser, token);
+						console.log("User online status updated:", statusResponse.data.data);
+					}
+				}
+			})
+			.catch(error => {
+				console.error("Failed to fetch user online status:", error);
+			});
+		
+		console.log("✅ FETCH USER SUCCESS - User set");
 		return true;
 	}
+	console.log("❌ FETCH USER FAILED - data.success is false");
 	return false;
 }
 

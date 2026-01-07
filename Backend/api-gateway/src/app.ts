@@ -6,10 +6,11 @@ import { startLogError } from "./utils/log.utils.js";
 import proxyPlugin from "./plugins/proxy.plugin.js";
 import wsProxy from "./plugins/ws-proxy.js";
 import notificationWsProxy from "./plugins/notification.ws-proxy.js";
+import gameWsProxy from "./plugins/game.ws-proxy.js";
 
 dotenv.config();
 
-const app = Fastify({ logger: true });
+const app = Fastify({ logger: true, trustProxy: true });
 const port: number = +(process.env.PORT || "3000");
 const host = process.env.HOST || "0.0.0.0";
 
@@ -18,15 +19,21 @@ app.register(import('@fastify/cors'), {
     'http://localhost:5173',
     'http://localhost:3000',
     'http://127.0.0.1:5173',
+    'https://localhost'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
+});
+
+app.get('/health', async () => {
+  return { status: 'ok' };
 });
 
 app.register(jwtPlugin);
 app.register(loggerPlugin);
 app.register(proxyPlugin);
 app.register(wsProxy);
+app.register(gameWsProxy);
 app.register(notificationWsProxy);
 
 

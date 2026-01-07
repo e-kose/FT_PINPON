@@ -28,6 +28,10 @@ const app = fastify({
   },
 });
 
+app.get('/health', async (request, reply) => {
+  return { status: 'ok' };
+});
+
 app.register(loggerPlugin);
 app.register(sensiblePlugin);
 app.register(dbPlug);
