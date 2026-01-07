@@ -25,8 +25,10 @@ export interface TournamentMatch {
 	matchIndex: number;
 	player1Id: string | null;
 	player1Username: string | null;
+	player1Score?: number;
 	player2Id: string | null;
 	player2Username: string | null;
+	player2Score?: number;
 	winnerId: string | null;
 	winnerUsername: string | null;
 	nextMatchId: string | null;

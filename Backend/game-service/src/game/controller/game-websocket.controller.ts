@@ -166,10 +166,10 @@ export class GameWebSocketController {
                 round: roundIndex,
                 player1Id: match.player1Id,
                 player1Username: match.player1Username || 'Unknown',
-                player1Score: match.player1Score || 0,
+                player1Score: match.player1Score ?? 0,
                 player2Id: match.player2Id,
                 player2Username: match.player2Username || 'Unknown',
-                player2Score: match.player2Score || 0,
+                player2Score: match.player2Score ?? 0,
                 winnerId: match.winnerId,
               });
             }

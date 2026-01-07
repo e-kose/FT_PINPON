@@ -232,11 +232,16 @@ export class Tournament extends EventEmitter {
 			player2Id: match.player2Id
 		});
 
-		room.once('gameOver', (data) => {
-			this.handleMatchResult(match, data.winnerId);
-		});
-
-		this.emitStateUpdate();
+	room.once('gameOver', (data) => {
+		// Store scores in the match object
+		const room = this.roomManager.getRoom(roomId);
+		if (room) {
+			const state = room.getState();
+			match.player1Score = state.players.left.score;
+			match.player2Score = state.players.right.score;
+		}
+		this.handleMatchResult(match, data.winnerId);
+	});		this.emitStateUpdate();
 	}
 
 	private handleMatchResult(match: TournamentMatch, winnerId: string): void {
