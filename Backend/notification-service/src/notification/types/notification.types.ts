@@ -1,4 +1,4 @@
-export type NotificationType = 'chat_message';
+type NotificationType = 'chat_message';
 
 export interface Notification {
     id: number;
@@ -38,11 +38,4 @@ export interface NotificationStats {
     total: number;
     unread: number;
     read: number;
-}
-
-export interface NotificationResponse {
-    success: boolean;
-    data?: Notification | Notification[] | NotificationStats;
-    message?: string;
-    error?: string;
 }

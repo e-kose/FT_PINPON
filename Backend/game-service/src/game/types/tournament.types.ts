@@ -66,9 +66,3 @@ export interface JoinTournamentPayload {
 export interface TournamentStateUpdatePayload {
 	tournament: TournamentData;
 }
-
-export interface TournamentMatchUpdatePayload {
-	matchId: string;
-	status: string;
-	winnerId?: string;
-}

@@ -17,7 +17,7 @@ if (!fs.existsSync(path.dirname(resDbPath))) {
   fs.mkdirSync(path.dirname(resDbPath), { recursive: true });
 }
 
-export const db = new Database(resDbPath);
+const db = new Database(resDbPath);
 
 fs.readdir(migrationsDir, (error, files) => {
   if (error) throw error;

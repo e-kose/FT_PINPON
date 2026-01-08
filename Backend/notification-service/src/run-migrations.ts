@@ -67,5 +67,3 @@ if (import.meta.url === `file://${__filename}`) {
         process.exit(1);
     });
 }
-
-export { runMigrations };
