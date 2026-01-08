@@ -2,7 +2,7 @@ import { checkAndGetAccessToken } from './AuthService';
 import { getUser } from '../store/UserStore';
 import type { BlockedUser, ReceivedRequest, SentRequest } from '../types/FriendsType';
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://localhost:4343/api';
 
 async function baseHeaders(hasBody = false): Promise<HeadersInit> {
   const token = await checkAndGetAccessToken();
