@@ -186,4 +186,4 @@ function initializeRouter(): void {
 	router.navigate(window.location.pathname + window.location.search);
 }
 
-export { fillIndex, router, initializeRouter };
+export { router, initializeRouter };
