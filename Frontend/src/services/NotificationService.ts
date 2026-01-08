@@ -18,8 +18,8 @@ import type {
   MarkAllReadResponse
 } from '../types/NotificationTypes';
 
-const API_BASE = 'https://localhost:4343/api';
-const WS_BASE = 'wss://localhost:4343/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const WS_BASE = import.meta.env.VITE_WS_BASE_URL;
 
 let notificationSocket: WebSocket | null = null;
 
@@ -265,7 +265,7 @@ export async function connectNotificationWebSocket(): Promise<WebSocket> {
     throw new Error(t("notification_access_token_missing"));
   }
 
-  const ws = new WebSocket(`${WS_BASE}?token=${encodeURIComponent(token)}`);
+  const ws = new WebSocket(`${WS_BASE}/notification/ws?token=${encodeURIComponent(token)}`);
 
   // Heartbeat setup (25 saniyede bir ping)
   const heartbeatInterval = setInterval(() => {

@@ -2,8 +2,8 @@ import { checkAndGetAccessToken } from './AuthService';
 import { getUser } from '../store/UserStore';
 import type { Friend } from '../types/FriendsType';
 
-const API_BASE = 'https://localhost:4343/api';
-const WS_BASE = 'wss://localhost:4343/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const WS_BASE = import.meta.env.VITE_WS_BASE_URL;
 
 async function baseHeaders(hasBody = false): Promise<HeadersInit> {
   const token = await checkAndGetAccessToken();
