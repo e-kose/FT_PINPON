@@ -280,7 +280,7 @@ class Chat extends LocalizedComponent {
 									` : ''}
 								</div>
 								<div class="flex items-center gap-1.5 mt-0.5">
-									<span class="text-xs ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+									<span class="text-xs ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? t("chat_status_online") : t("chat_status_offline")}</span>
 									${friend.friend_full_name ? `<span class="text-slate-600">•</span><span class="text-xs text-slate-500 truncate">${friend.friend_full_name}</span>` : ''}
 								</div>
 							</div>
@@ -376,7 +376,7 @@ class Chat extends LocalizedComponent {
 			<div class="flex flex-row gap-2 w-full">
 				<input class="chat-input flex-1 min-w-0 px-4 py-3 text-slate-100 bg-slate-800/60 border border-slate-600/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 text-sm min-h-[44px] placeholder-slate-500 transition-all" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
 				<button class="chat-send-btn send-button w-auto px-5 py-3 text-white rounded-xl font-medium min-h-[44px] flex items-center justify-center gap-2" aria-label="${t("chat_send_button_label")}">
-					<span class="hidden sm:inline">Gönder</span>
+					<span class="hidden sm:inline">${t("chat_send_button_label")}</span>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
 					</svg>
@@ -404,7 +404,7 @@ class Chat extends LocalizedComponent {
 					</div>
 					<div class="min-w-0">
 						<div class="font-medium text-white truncate text-sm">${owner.friend_username}</div>
-						<div class="text-xs text-slate-400">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</div>
+						<div class="text-xs text-slate-400">${isOnline ? t("chat_status_online") : t("chat_status_offline")}</div>
 					</div>
 				</div>
 			</div>
@@ -429,7 +429,7 @@ class Chat extends LocalizedComponent {
 						<div class="font-semibold text-slate-100 truncate">${owner.friend_username}</div>
 						<div class="flex items-center gap-1.5">
 							<span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
-							<span class="text-xs ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+							<span class="text-xs ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? t("chat_status_online") : t("chat_status_offline")}</span>
 						</div>
 					</div>
 				</div>

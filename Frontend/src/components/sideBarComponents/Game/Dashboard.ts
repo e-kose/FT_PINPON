@@ -139,13 +139,13 @@ export class Dashboard extends LocalizedComponent {
                                     </div>
                                     <div class="flex flex-col items-end gap-2">
                                         <div class="px-3 py-1.5 bg-emerald-500/15 border border-emerald-500/30 rounded-full backdrop-blur-sm">
-                                            <span class="text-emerald-400 text-xs font-bold tracking-wide">LOKAL</span>
+                                            <span class="text-emerald-400 text-xs font-bold tracking-wide">${t("game_dashboard_local_badge")}</span>
                                         </div>
                                         <div class="flex items-center gap-1.5 text-gray-500 text-xs">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                             </svg>
-                                            <span>2 Oyuncu</span>
+                                            <span>${t("game_dashboard_local_players")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -163,14 +163,14 @@ export class Dashboard extends LocalizedComponent {
                                 <!-- Action Button -->
                                 <div class="mt-5 lg:mt-6 flex items-center justify-between">
                                     <div class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 rounded-xl group-hover:from-emerald-500/30 group-hover:to-cyan-500/20 group-hover:border-emerald-400/50 transition-all duration-300">
-                                        <span class="text-emerald-400 text-sm font-semibold">Oyna</span>
+                                        <span class="text-emerald-400 text-sm font-semibold">${t("game_dashboard_local_action")}</span>
                                         <svg class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                         </svg>
                                     </div>
                                     <div class="flex items-center gap-1.5 text-gray-500 text-xs">
                                         <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                                        <span>Aynı klavye</span>
+                                        <span>${t("game_dashboard_local_hint")}</span>
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +196,7 @@ export class Dashboard extends LocalizedComponent {
                                     <div class="flex flex-col items-end gap-2">
                                         <div class="px-3 py-1.5 bg-violet-500/15 border border-violet-500/30 rounded-full backdrop-blur-sm flex items-center gap-1.5">
                                             <span class="w-2 h-2 bg-green-400 rounded-full glow-effect"></span>
-                                            <span class="text-violet-400 text-xs font-bold tracking-wide">ONLINE</span>
+                                            <span class="text-violet-400 text-xs font-bold tracking-wide">${t("game_dashboard_ranked_badge")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -214,14 +214,14 @@ export class Dashboard extends LocalizedComponent {
                                 <!-- Action Button -->
                                 <div class="mt-5 lg:mt-6 flex items-center justify-between">
                                     <div class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/10 border border-violet-500/30 rounded-xl group-hover:from-violet-500/30 group-hover:to-fuchsia-500/20 group-hover:border-violet-400/50 transition-all duration-300">
-                                        <span class="text-violet-400 text-sm font-semibold">Eşleş</span>
+                                        <span class="text-violet-400 text-sm font-semibold">${t("game_dashboard_ranked_action")}</span>
                                         <svg class="w-4 h-4 text-violet-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                         </svg>
                                     </div>
                                     <div class="flex items-center gap-1.5 text-gray-500 text-xs">
                                         <span class="w-1.5 h-1.5 bg-violet-400 rounded-full"></span>
-                                        <span>Rastgele rakip</span>
+                                        <span>${t("game_dashboard_ranked_hint")}</span>
                                     </div>
                                 </div>
                             </div>
@@ -245,7 +245,7 @@ export class Dashboard extends LocalizedComponent {
                                     </div>
                                     <div class="flex flex-col items-end gap-2">
                                         <div class="px-3 py-1.5 bg-amber-500/15 border border-amber-500/30 rounded-full backdrop-blur-sm">
-                                            <span class="text-amber-400 text-xs font-bold tracking-wide">TURNUVA</span>
+                                            <span class="text-amber-400 text-xs font-bold tracking-wide">${t("game_dashboard_tournament_badge")}</span>
                                         </div>
                                         <div class="flex items-center gap-1 mt-1">
                                             <div class="flex -space-x-1">
@@ -271,14 +271,14 @@ export class Dashboard extends LocalizedComponent {
                                 <!-- Action Button -->
                                 <div class="mt-5 lg:mt-6 flex items-center justify-between">
                                     <div class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500/20 to-orange-500/10 border border-amber-500/30 rounded-xl group-hover:from-amber-500/30 group-hover:to-orange-500/20 group-hover:border-amber-400/50 transition-all duration-300">
-                                        <span class="text-amber-400 text-sm font-semibold">Katıl</span>
+                                        <span class="text-amber-400 text-sm font-semibold">${t("game_dashboard_tournament_action")}</span>
                                         <svg class="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                         </svg>
                                     </div>
                                     <div class="flex items-center gap-1.5 text-gray-500 text-xs">
                                         <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
-                                        <span>4 Oyuncu</span>
+                                        <span>${t("game_dashboard_tournament_players_4")}</span>
                                     </div>
                                 </div>
                             </div>
@@ -305,7 +305,7 @@ export class Dashboard extends LocalizedComponent {
                                             <svg class="w-3 h-3 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                                             </svg>
-                                            <span class="text-rose-400 text-xs font-bold tracking-wide">ŞAMPİYONA</span>
+                                            <span class="text-rose-400 text-xs font-bold tracking-wide">${t("game_dashboard_championship_badge")}</span>
                                         </div>
                                         <div class="flex items-center gap-1 mt-1">
                                             <div class="flex -space-x-0.5">
@@ -332,14 +332,14 @@ export class Dashboard extends LocalizedComponent {
                                 <!-- Action Button -->
                                 <div class="mt-5 lg:mt-6 flex items-center justify-between">
                                     <div class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-rose-500/20 to-pink-500/10 border border-rose-500/30 rounded-xl group-hover:from-rose-500/30 group-hover:to-pink-500/20 group-hover:border-rose-400/50 transition-all duration-300">
-                                        <span class="text-rose-400 text-sm font-semibold">Katıl</span>
+                                        <span class="text-rose-400 text-sm font-semibold">${t("game_dashboard_tournament_action")}</span>
                                         <svg class="w-4 h-4 text-rose-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                         </svg>
                                     </div>
                                     <div class="flex items-center gap-1.5 text-gray-500 text-xs">
                                         <span class="w-1.5 h-1.5 bg-rose-400 rounded-full"></span>
-                                        <span>8 Oyuncu</span>
+                                        <span>${t("game_dashboard_tournament_players_8")}</span>
                                     </div>
                                 </div>
                             </div>

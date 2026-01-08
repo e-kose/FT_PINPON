@@ -154,7 +154,7 @@ class Friends extends LocalizedComponent {
 						</svg>
 					</div>
 					<p class="text-gray-500 dark:text-gray-400 text-sm font-medium text-center">${t("friends_none")}</p>
-					<p class="text-gray-400 dark:text-gray-500 text-xs text-center mt-1">Yeni arkadaş ekle!</p>
+					<p class="text-gray-400 dark:text-gray-500 text-xs text-center mt-1">${t("friends_empty_hint")}</p>
 				</div>
 			`;
 		} else {

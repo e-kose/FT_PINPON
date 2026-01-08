@@ -47,7 +47,12 @@ export class Bracket extends LocalizedComponent {
 
 	private isCleanupActive: boolean = false;
 
-	public updateStatus(message: string, showAction: boolean = false, actionType: 'leave' | 'return' = 'leave'): void {
+	public updateStatus(
+		message: string,
+		showAction: boolean = false,
+		actionType: 'leave' | 'return' = 'leave',
+		variant: 'info' | 'success' | 'danger' = 'info'
+	): void {
 		if (this.isCleanupActive) return;
 
 		const statusEl = this.querySelector('#statusMessage');
@@ -56,8 +61,8 @@ export class Bracket extends LocalizedComponent {
 		if (statusEl) {
 			statusEl.textContent = message;
 			statusEl.className = "text-xl font-bold tracking-wider animate-pulse transition-colors duration-300";
-			if (message.includes(t('game_status_victory')) || message.includes("CHAMPION")) statusEl.className += " text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]";
-			else if (message.includes("Eliminated") || message.includes("ELIMINATED")) statusEl.className += " text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]";
+			if (variant === "success") statusEl.className += " text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]";
+			else if (variant === "danger") statusEl.className += " text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]";
 			else statusEl.className += " text-blue-300/80";
 		}
 

@@ -50,7 +50,7 @@ class GameStatistics extends LocalizedComponent {
 		try {
 			const response = await getUserStatistic(this.userId || undefined);
 			if (!response.ok || !response.data.success || !response.data.data) {
-				this.error = response.data.error || response.data.message || t("game_stats_error_fetch");
+				this.error = t("game_stats_error_fetch");
 				this.profile = null;
 			} else {
 				this.profile = response.data.data;
@@ -357,7 +357,7 @@ class GameStatistics extends LocalizedComponent {
 							</div>
 							<p class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-0.5 min-w-0">
 								<span class="text-slate-700 dark:text-slate-200 truncate max-w-[40%]">${this.profile.username}</span>
-								<span class="text-slate-400 flex-shrink-0">vs</span>
+								<span class="text-slate-400 flex-shrink-0">${t("game_stats_vs")}</span>
 								<span class="text-slate-600 dark:text-slate-300 truncate max-w-[40%]">${opponent.username}</span>
 							</p>
 						</div>
@@ -510,7 +510,7 @@ class GameStatistics extends LocalizedComponent {
 									<div class="min-w-0 overflow-hidden">
 										<div class="text-[10px] font-bold ${lastMatch.won ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'} whitespace-nowrap">${t("game_stats_round_label", { round: lastMatch.round + 1 })}</div>
 										<div class="text-[9px] text-slate-500 dark:text-slate-400 flex items-center gap-0.5 min-w-0">
-											<span class="flex-shrink-0">vs</span>
+											<span class="flex-shrink-0">${t("game_stats_vs")}</span>
 											<span class="font-medium truncate">${lastMatch.opponentUsername}</span>
 											</div>
 										</div>
@@ -561,7 +561,7 @@ class GameStatistics extends LocalizedComponent {
 						<span class="text-3xl sm:text-4xl">😕</span>
 					</div>
 					<h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2">${t("game_stats_error_fetch")}</h3>
-					<p class="text-sm text-rose-600 dark:text-rose-400 mb-5 max-w-sm">${this.error}</p>
+					<p class="text-sm text-rose-600 dark:text-rose-400 mb-5 max-w-sm">${this.error || t("game_stats_error_fetch")}</p>
 					<button data-refresh="true" class="group bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40 transition-all duration-300 flex items-center gap-2">
 						<span class="group-hover:rotate-180 transition-transform duration-500">🔄</span>
 						${t("game_stats_retry")}
@@ -582,7 +582,7 @@ class GameStatistics extends LocalizedComponent {
 					<p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-4">${t("game_stats_empty_description")}</p>
 					<div class="flex items-center gap-2 text-slate-400">
 						<span>🏓</span>
-						<span class="text-xs">Let's play!</span>
+						<span class="text-xs">${t("game_stats_empty_cta")}</span>
 						<span>🏓</span>
 					</div>
 				</div>
@@ -596,7 +596,7 @@ class GameStatistics extends LocalizedComponent {
 				<div class="flex flex-col items-center">
 					<span class="text-3xl sm:text-4xl mb-3">⚔️</span>
 					<p class="text-sm font-medium text-slate-500 dark:text-slate-400">${t("game_stats_empty_matches")}</p>
-					<p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Start playing to see your matches here!</p>
+					<p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${t("game_stats_empty_matches_hint")}</p>
 				</div>
 			</div>
 		`;
@@ -608,7 +608,7 @@ class GameStatistics extends LocalizedComponent {
 				<div class="flex flex-col items-center">
 					<span class="text-3xl sm:text-4xl mb-3">🏟️</span>
 					<p class="text-sm font-medium text-slate-500 dark:text-slate-400">${t("game_stats_empty_tournaments")}</p>
-					<p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Join a tournament to compete!</p>
+					<p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${t("game_stats_empty_tournaments_hint")}</p>
 				</div>
 			</div>
 		`;

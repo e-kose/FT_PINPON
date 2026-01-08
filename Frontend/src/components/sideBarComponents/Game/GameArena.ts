@@ -155,7 +155,8 @@ export class GameArena extends LocalizedComponent {
 		}
 
 		if (subtitle) {
-			subtitle.textContent = payload.message || `Winner: ${payload.winnerId}`;
+			const fallbackMessage = t("game_arena_winner_label", { winner: payload.winnerId ?? "-" });
+			subtitle.textContent = payload.message || fallbackMessage;
 		}
 		overlay?.classList.remove('opacity-0', 'pointer-events-none');
 	}

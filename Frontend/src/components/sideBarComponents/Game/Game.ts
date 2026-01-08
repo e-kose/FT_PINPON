@@ -98,8 +98,8 @@ export class Game extends LocalizedComponent {
                 <header-component></header-component>
                 <div class="${PAGE_TOP_OFFSET}">
                     <sidebar-component current-route="game"></sidebar-component>
-                    <div id="mainContent" class="${sidebarStateManager.getMarginClass()} ${MAIN_CONTENT_SCROLL} min-w-0">
-                        <div class="${APP_CONTAINER}">
+                    <div id="mainContent" class="${sidebarStateManager.getMarginClass()} ${MAIN_CONTENT_SCROLL} min-w-0 flex flex-col">
+                        <div class="${APP_CONTAINER} flex-1 flex flex-col justify-center items-center">
                             <!-- STATUS BAR -->
                             <div id="statusBar" role="status" aria-live="polite" class="status-toast fixed top-36 right-6 z-50 max-w-[90vw] sm:max-w-sm rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs sm:text-sm font-medium text-white/80 shadow-lg shadow-black/30 backdrop-blur-md">
                                 ${t('game_status_connecting')}
@@ -259,9 +259,9 @@ export class Game extends LocalizedComponent {
 						const winnerName = winner ? winner.username : winnerId;
 
 						if (winnerId === myId) {
-							bracket?.updateStatus(t('game_bracket_champion'), true, 'return');
+							bracket?.updateStatus(t('game_bracket_champion'), true, 'return', 'success');
 						} else {
-							bracket?.updateStatus(t('game_bracket_won_by', { username: winnerName }), true, 'return');
+							bracket?.updateStatus(t('game_bracket_won_by', { username: winnerName }), true, 'return', 'info');
 						}
 					}
 				}
@@ -320,9 +320,9 @@ export class Game extends LocalizedComponent {
 		this.switchScreen('bracket');
 
 		if (isWinner) {
-			bracket?.updateStatus(t('game_bracket_victory'), false);
+			bracket?.updateStatus(t('game_bracket_victory'), false, 'leave', 'success');
 		} else {
-			bracket?.updateStatus(t('game_bracket_eliminated', { username: data.winnerUsername }), true, 'leave');
+			bracket?.updateStatus(t('game_bracket_eliminated', { username: data.winnerUsername }), true, 'leave', 'danger');
 		}
 	}
 

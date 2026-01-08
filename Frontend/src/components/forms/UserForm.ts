@@ -142,7 +142,7 @@ export abstract class UserForm extends HTMLElement {
 							<div class="flex flex-col sm:flex-row items-center mb-3 md:mb-4">
 								<img class="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mb-2 sm:mb-0 sm:mr-3 md:mr-4 drop-shadow-2xl" src="/pong.png" alt="${t("auth_brand_logo_alt")}">
 								<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-2xl tracking-wide text-center sm:text-left break-words">
-									Ft_Transcendance
+									${t("app_brand_name")}
 								</h1>
 							</div>
 							<p class="text-sm sm:text-base md:text-lg text-white/90 drop-shadow-lg font-light max-w-prose">

@@ -81,7 +81,7 @@ class FriendProfile extends LocalizedComponent {
 			} else if (response.status === 500) {
 				this.error = t("friend_profile_error_server");
 			} else if (!response.ok || !response.data.success) {
-				this.error = response.data.message || t("friend_profile_error_general");
+				this.error = t("friend_profile_error_general");
 			} else {
 				console.log("------------------------------------------------------------------------------Friend profile data:", response.data);
 				this.friendData = response.data.user || response.data;
