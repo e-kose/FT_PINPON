@@ -166,7 +166,7 @@ class GameStatistics extends LocalizedComponent {
 								<div class="text-[9px] sm:text-[10px] uppercase tracking-widest text-rose-500/70 dark:text-rose-400/70 font-semibold mt-1 leading-tight break-words whitespace-normal">${t("game_stats_losses")}</div>
 							</div>
 							<div class="col-span-2 bg-white/60 dark:bg-slate-800/40 rounded-xl p-4 sm:p-5 min-w-0 flex items-center justify-center">
-								<div class="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36">
+								<div class="relative w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40">
 									<svg class="transform -rotate-90 w-full h-full" viewBox="0 0 100 100">
 										<circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="7" fill="none" class="text-slate-200 dark:text-slate-700" />
 										<circle cx="50" cy="50" r="40" stroke="url(#emeraldGradient)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${2 * Math.PI * 40}" stroke-dashoffset="${2 * Math.PI * 40 * (1 - winRate / 100)}" class="transition-all duration-1000 ease-out" />
@@ -178,9 +178,9 @@ class GameStatistics extends LocalizedComponent {
 											</linearGradient>
 										</defs>
 									</svg>
-									<div class="absolute inset-0 flex flex-col items-center justify-center p-2">
+									<div class="absolute inset-0 flex flex-col items-center justify-center px-3 py-2">
 										<span class="text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600 dark:text-emerald-400 leading-none">${winRate}%</span>
-										<span class="text-[10px] sm:text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mt-1.5 text-center leading-tight font-semibold">${t("game_stats_win_rate")}</span>
+										<span class="text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-tight text-slate-500 dark:text-slate-400 mt-1 text-center leading-tight font-semibold max-w-full px-1">${t("game_stats_win_rate")}</span>
 									</div>
 								</div>
 							</div>
@@ -206,7 +206,7 @@ class GameStatistics extends LocalizedComponent {
 								<div class="text-[9px] sm:text-[10px] uppercase tracking-widest text-yellow-600/70 dark:text-yellow-400/70 font-semibold mt-1 leading-tight break-words whitespace-normal">${t("game_stats_championships")}</div>
 							</div>
 							<div class="col-span-2 bg-white/60 dark:bg-slate-800/40 rounded-xl p-4 sm:p-5 min-w-0 flex items-center justify-center">
-								<div class="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36">
+								<div class="relative w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40">
 									<svg class="transform -rotate-90 w-full h-full" viewBox="0 0 100 100">
 										<circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="7" fill="none" class="text-slate-200 dark:text-slate-700" />
 										<circle cx="50" cy="50" r="40" stroke="url(#amberGradient)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${2 * Math.PI * 40}" stroke-dashoffset="${2 * Math.PI * 40 * (1 - tournamentRate / 100)}" class="transition-all duration-1000 ease-out" />
@@ -218,9 +218,9 @@ class GameStatistics extends LocalizedComponent {
 											</linearGradient>
 										</defs>
 									</svg>
-									<div class="absolute inset-0 flex flex-col items-center justify-center p-2">
+									<div class="absolute inset-0 flex flex-col items-center justify-center px-3 py-2">
 										<span class="text-2xl sm:text-3xl lg:text-4xl font-black text-amber-600 dark:text-amber-400 leading-none">${tournamentRate}%</span>
-										<span class="text-[10px] sm:text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mt-1.5 text-center leading-tight font-semibold">${t("game_stats_championship_rate")}</span>
+										<span class="text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-tight text-slate-500 dark:text-slate-400 mt-1 text-center leading-tight font-semibold max-w-full px-1">${t("game_stats_championship_rate")}</span>
 									</div>
 								</div>
 							</div>
