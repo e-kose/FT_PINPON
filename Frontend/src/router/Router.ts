@@ -162,7 +162,7 @@ function initializeRouter(): void {
 	router.addRoute('/settings/account', '<settings-component></settings-component>');
 	router.addRoute('/signup', '<signup-form></signup-form>');
 	router.addRoute('/login', '<login-form></login-form>');
-	router.addRoute('/auth/google', 'http://localhost:3000/auth/google');
+	router.addRoute('/auth/google', 'https://localhost:4343/api/auth/google');
 
 	// Error page route'ları
 	router.addRoute('/error/404', '<error-page error-type="404" error-title="error_404_title" error-description="error_404_description"></error-page>');

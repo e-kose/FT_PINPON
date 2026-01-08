@@ -18,8 +18,8 @@ import type {
   MarkAllReadResponse
 } from '../types/NotificationTypes';
 
-const API_BASE = 'http://localhost:3000';
-const WS_BASE = 'ws://localhost:3000/notification/ws';
+const API_BASE = 'https://localhost:4343/api';
+const WS_BASE = 'wss://localhost:4343/api';
 
 let notificationSocket: WebSocket | null = null;
 
