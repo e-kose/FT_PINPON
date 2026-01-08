@@ -1,4 +1,4 @@
-export type NotificationType = 'game_invite' | 'chat_message' | 'friend_request';
+export type NotificationType = 'chat_message';
 
 export interface Notification {
     id: number;

@@ -14,7 +14,6 @@ export class NotificationRepository {
         this.db = db;
     }
 
-    // Create a new notification
     create(fromUserId: number, data: CreateNotificationRequest): Notification {
         const stmt = this.db.prepare(`
             INSERT INTO notifications (from_user_id, to_user_id, title, message, type)
@@ -32,7 +31,6 @@ export class NotificationRepository {
         return this.findById(result.lastInsertRowid as number)!;
     }
 
-    // Find notification by ID
     findById(id: number): Notification | null {
         const stmt = this.db.prepare(`
             SELECT * FROM notifications WHERE id = ?
@@ -42,14 +40,12 @@ export class NotificationRepository {
         return row ? this.mapRowToNotification(row) : null;
     }
 
-    // Find notifications for a specific user with filters
     findByUserId(userId: number, filters: NotificationFilters = {}): Notification[] {
         let query = `SELECT * FROM notifications WHERE to_user_id = ?`;
         const params: any[] = [userId];
 
         if (filters.is_read !== undefined) {
             query += ` AND is_read = ?`;
-            // Convert boolean to 0/1 for SQLite
             params.push(filters.is_read ? 1 : 0);
         }
 
@@ -81,14 +77,12 @@ export class NotificationRepository {
         return rows.map(row => this.mapRowToNotification(row));
     }
 
-    // Update notification
     update(id: number, userId: number, data: UpdateNotificationRequest): Notification | null {
         const fields: string[] = [];
         const params: any[] = [];
 
         if (data.is_read !== undefined) {
             fields.push('is_read = ?');
-            // Convert boolean to 0/1 for SQLite
             params.push(data.is_read ? 1 : 0);
         }
 
@@ -126,7 +120,6 @@ export class NotificationRepository {
         return result.changes > 0 ? this.findById(id) : null;
     }
 
-    // Delete notification
     delete(id: number, userId: number): boolean {
         const stmt = this.db.prepare(`
             DELETE FROM notifications
@@ -137,7 +130,6 @@ export class NotificationRepository {
         return result.changes > 0;
     }
 
-    // Mark all notifications as read for a user
     markAllAsRead(userId: number, filters: { type?: string; from_user_id?: number } = {}): number {
         let query = `UPDATE notifications SET is_read = 1, updated_at = CURRENT_TIMESTAMP WHERE to_user_id = ? AND is_read = 0`;
         const params: any[] = [userId];
@@ -157,7 +149,6 @@ export class NotificationRepository {
         return result.changes;
     }
 
-    // Get notification stats for a user
     getStats(userId: number): NotificationStats {
         const stmt = this.db.prepare(`
             SELECT
@@ -176,7 +167,6 @@ export class NotificationRepository {
         };
     }
 
-    // Get unread notifications count
     getUnreadCount(userId: number): number {
         const stmt = this.db.prepare(`
             SELECT COUNT(*) as count
@@ -188,7 +178,6 @@ export class NotificationRepository {
         return row.count || 0;
     }
 
-    // Helper method to map database row to Notification object
     private mapRowToNotification(row: any): Notification {
         return {
             id: row.id,

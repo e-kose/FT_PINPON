@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyReply, FastifyError } from "fastify";
 import { logError } from "../utils/log.utils.js";
 
 export default fp(async (app: FastifyInstance) => {
-  app.setErrorHandler(function (error: FastifyError, request:any, reply: FastifyReply) {
+  app.setErrorHandler(function (error: FastifyError, request: any, reply: FastifyReply) {
     if ((error as any).validation) {
       logError(app, request, error);
       return reply.status(400).send({
@@ -14,7 +14,7 @@ export default fp(async (app: FastifyInstance) => {
       });
     }
 
-    if(error.code === 'FORBIDDEN'){
+    if (error.code === 'FORBIDDEN') {
       return reply.status(403).send({
         success: false,
         message: error.message || "Invalid data",

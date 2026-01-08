@@ -7,9 +7,9 @@ import pino from "pino";
 dotenv.config();
 
 export default fp(async (app: FastifyInstance) => {
-  const serviceName = process.env.SERVICE_NAME || "user-service";
+  const serviceName = "notification-service";
   const logLevel = process.env.LOG_LEVEL || "info";
-  const logstashHost = process.env.LOGSTASH_HOST || "localhost";
+  const logstashHost = process.env.LOGSTASH_HOST || "logstash";
   const logstashPort = parseInt(process.env.LOGSTASH_PORT || "5044");
   const tcpClient = new net.Socket();
 
@@ -27,14 +27,16 @@ export default fp(async (app: FastifyInstance) => {
       write: (msg) => tcpClient.write(msg + "\n"),
     }
   );
+
   app.decorate("logger", logger);
+
   app.addHook("onRequest", async(req) => {
-	app.logger.info({
-		service : serviceName,
-		url : req.url,
-		method : req.method,
-		msg : "Incoming Request",
-		time: new Date().toISOString(),
-	})
+    app.logger.info({
+      service: serviceName,
+      url: req.url,
+      method: req.method,
+      msg: "Incoming Request",
+      time: new Date().toISOString(),
+    })
   })
 });

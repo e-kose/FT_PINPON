@@ -10,13 +10,13 @@ export default fp(async (app: FastifyInstance) => {
   await app.register(fastifySwagger, {
     openapi: {
       info: {
-        title: "Auth API",
-        description: "Kullanıcı servisinin dökümantasyonu",
+        title: "Notification Service API",
+        description: "Notification service documentation",
         version: "1.0.0",
       },
       servers: [
         {
-          url: process.env.SWAGGER_SERVER_URL || "http://localhost:3000",
+          url: process.env.SWAGGER_SERVER_URL || "http://localhost:3004",
           description: "Development server",
         },
       ],
@@ -33,24 +33,11 @@ export default fp(async (app: FastifyInstance) => {
   });
 
   await app.register(fastifySwaggerUi, {
-    routePrefix: "/user/docs",
+    routePrefix: "/notification/docs",
     uiConfig: {
       docExpansion: "full",
       deepLinking: false,
     },
-    uiHooks: {
-      onRequest: function (request, reply, next) {
-        next();
-      },
-      preHandler: function (request, reply, next) {
-        next();
-      },
-    },
     staticCSP: true,
-    transformStaticCSP: (header) => header,
-    transformSpecification: (swaggerObject, request, reply) => {
-      return swaggerObject;
-    },
-    transformSpecificationClone: true,
   });
 });

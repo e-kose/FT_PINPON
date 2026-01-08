@@ -4,12 +4,10 @@ import { WebSocketController } from '../controller/websocket.controller.js';
 export async function webSocketRoutes(fastify: FastifyInstance) {
     const controller = new WebSocketController(fastify.webSocketManager);
 
-    // WebSocket connection endpoint
     fastify.register(async function (fastify) {
         fastify.get('/notification/ws', { websocket: true }, controller.handleConnection);
     });
 
-    // REST endpoints for WebSocket management
     fastify.get('/notification/ws/stats', {
         handler: controller.getStats
     });
@@ -31,7 +29,6 @@ export async function webSocketRoutes(fastify: FastifyInstance) {
         handler: controller.checkUserOnlineStatus
     });
 
-    // Check multiple users online status (for friends list)
     fastify.post('/notification/ws/users/online-status', {
         schema: {
             body: {

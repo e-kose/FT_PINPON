@@ -17,14 +17,11 @@ export class NotificationService {
         this.webSocketManager = webSocketManager;
     }
 
-    // Set WebSocket manager (for dependency injection)
     setWebSocketManager(webSocketManager: WebSocketManager): void {
         this.webSocketManager = webSocketManager;
     }
 
-    // Create a new notification
     async createNotification(fromUserId: number, data: CreateNotificationRequest): Promise<Notification> {
-        // Basic validation
         if (fromUserId === data.to_user_id) {
             throw new Error('Cannot send notification to yourself');
         }
@@ -48,7 +45,6 @@ export class NotificationService {
             type: data.type || 'chat_message'
         });
 
-        // Send real-time notification via WebSocket
         if (this.webSocketManager) {
             this.webSocketManager.sendNotificationToUser(data.to_user_id, notification, 'created');
         }
@@ -56,7 +52,6 @@ export class NotificationService {
         return notification;
     }
 
-    // Get notification by ID (only if user owns it)
     async getNotificationById(id: number, userId: number): Promise<Notification | null> {
         const notification = this.notificationRepo.findById(id);
 
@@ -71,7 +66,6 @@ export class NotificationService {
         return notification;
     }
 
-    // Get notifications for a user
     async getUserNotifications(userId: number, filters: NotificationFilters = {}): Promise<Notification[]> {
         const defaultedFilters = {
             ...filters,
@@ -86,7 +80,6 @@ export class NotificationService {
         return this.notificationRepo.findByUserId(userId, defaultedFilters);
     }
 
-    // Update notification (only if user owns it)
     async updateNotification(id: number, userId: number, data: UpdateNotificationRequest): Promise<Notification | null> {
         const updatedNotification = this.notificationRepo.update(id, userId, data);
 
@@ -101,7 +94,6 @@ export class NotificationService {
         return updatedNotification;
     }
 
-    // Mark notification as read
     async markAsRead(id: number, userId: number): Promise<Notification | null> {
         const notification = await this.updateNotification(id, userId, { is_read: true });
 
@@ -112,7 +104,6 @@ export class NotificationService {
         return notification;
     }
 
-    // Delete notification (only if user owns it)
     async deleteNotification(id: number, userId: number): Promise<boolean> {
         const notification = this.notificationRepo.findById(id);
 
@@ -129,22 +120,18 @@ export class NotificationService {
         return true;
     }
 
-    // Mark all notifications as read for a user
     async markAllAsRead(userId: number, filters: { type?: string; from_user_id?: number } = {}): Promise<number> {
         return this.notificationRepo.markAllAsRead(userId, filters);
     }
 
-    // Get notification statistics for a user
     async getNotificationStats(userId: number): Promise<NotificationStats> {
         return this.notificationRepo.getStats(userId);
     }
 
-    // Get unread notifications count
     async getUnreadCount(userId: number): Promise<number> {
         return this.notificationRepo.getUnreadCount(userId);
     }
 
-    // Get recent unread notifications
     async getRecentUnreadNotifications(userId: number, limit: number = 5): Promise<Notification[]> {
         return this.notificationRepo.findByUserId(userId, {
             is_read: false,

@@ -13,7 +13,7 @@ export const createNotificationSchema = {
       message: { type: "string", minLength: 1, pattern: "^[^<>&\\x22\\x27]+$" },
       type: {
         type: "string",
-        enum: ["game_invite", "chat_message", "friend_request"],
+        enum: ["chat_message"],
         default: "chat_message",
       },
     },
@@ -41,7 +41,7 @@ export const updateNotificationSchema = {
       message: { type: "string", minLength: 1, pattern: "^[^<>&\\x22\\x27]+$" },
       type: {
         type: "string",
-        enum: ["game_invite", "chat_message", "friend_request"],
+        enum: ["chat_message"],
       },
     },
   },
@@ -74,7 +74,7 @@ export const getNotificationsSchema = {
       is_read: { type: "boolean" },
       type: {
         type: "string",
-        enum: ["game_invite", "chat_message", "friend_request"],
+        enum: ["chat_message"],
       },
       from_user_id: { type: "number", minimum: 1 },
       limit: { type: "number", minimum: 1, maximum: 100, default: 20 },
@@ -89,7 +89,7 @@ export const markAllAsReadSchema = {
     properties: {
       type: {
         type: "string",
-        enum: ["game_invite", "chat_message", "friend_request"],
+        enum: ["chat_message"],
       },
       from_user_id: { type: "number", minimum: 1 },
     },

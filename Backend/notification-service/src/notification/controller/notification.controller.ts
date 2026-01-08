@@ -13,7 +13,6 @@ export class NotificationController {
         this.notificationService = notificationService;
     }
 
-    // Helper method to extract user ID from headers
     private getCurrentUserId(request: FastifyRequest): number {
         const currentUser = +(request.headers["x-user-id"]!);
 
@@ -24,7 +23,6 @@ export class NotificationController {
         return currentUser;
     }
 
-    // Create a new notification
     createNotification = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -45,13 +43,11 @@ export class NotificationController {
         }
     };
 
-    // Get user's notifications
     getUserNotifications = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
             const queryFilters = request.query as any;
 
-            // Convert query string parameters to proper types
             const filters: NotificationFilters = {};
 
             if (queryFilters.type) {
@@ -59,7 +55,6 @@ export class NotificationController {
             }
 
             if (queryFilters.is_read !== undefined) {
-                // Convert string to boolean: "true" -> true, "false" -> false
                 filters.is_read = queryFilters.is_read === 'true';
             }
 
@@ -99,7 +94,6 @@ export class NotificationController {
         }
     };
 
-    // Get notification by ID
     getNotificationById = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -128,7 +122,6 @@ export class NotificationController {
         }
     };
 
-    // Update notification
     updateNotification = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -151,7 +144,6 @@ export class NotificationController {
         }
     };
 
-    // Mark notification as read
     markAsRead = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -173,7 +165,6 @@ export class NotificationController {
         }
     };
 
-    // Delete notification
     deleteNotification = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -194,7 +185,6 @@ export class NotificationController {
         }
     };
 
-    // Mark all notifications as read
     markAllAsRead = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -215,7 +205,6 @@ export class NotificationController {
         }
     };
 
-    // Get notification statistics
     getNotificationStats = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -235,7 +224,6 @@ export class NotificationController {
         }
     };
 
-    // Get unread notifications count
     getUnreadCount = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);
@@ -255,7 +243,6 @@ export class NotificationController {
         }
     };
 
-    // Get recent unread notifications
     getRecentUnread = async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const currentUserId = this.getCurrentUserId(request);

@@ -3,8 +3,6 @@ import {
     WebSocketConnection,
     WebSocketMessage,
     NotificationWebSocketMessage,
-    ErrorWebSocketMessage,
-    SuccessWebSocketMessage,
     WebSocketStats
 } from '../types/websocket.types.js';
 import { Notification } from '../types/notification.types.js';
@@ -19,9 +17,7 @@ export class WebSocketManager extends EventEmitter {
         this.startHeartbeat();
     }
 
-    // Add a new WebSocket connection
     addConnection(connectionId: string, userId: number, socket: any): void {
-        // Validate socket object
         if (!socket || typeof socket.on !== 'function') {
             console.error(`Invalid socket provided for connection ${connectionId}:`, socket);
             return;
@@ -37,17 +33,14 @@ export class WebSocketManager extends EventEmitter {
 
         this.connections.set(connectionId, connection);
 
-        // Track user connections
         const wasOffline = !this.userConnections.has(userId);
         if (!this.userConnections.has(userId)) {
             this.userConnections.set(userId, new Set());
         }
         this.userConnections.get(userId)!.add(connectionId);
 
-        // Setup socket event handlers
         this.setupSocketHandlers(connection);
 
-        // Emit user came online event if this is their first connection
         if (wasOffline) {
             this.emit('user_online', { userId, timestamp: new Date().toISOString() });
             console.log(`User ${userId} came online`);
@@ -56,24 +49,19 @@ export class WebSocketManager extends EventEmitter {
         console.log(`WebSocket connection added: ${connectionId} for user ${userId}`);
     }
 
-    // Remove a WebSocket connection
     removeConnection(connectionId: string): void {
         const connection = this.connections.get(connectionId);
         if (!connection) return;
 
         const { userId } = connection;
 
-        // Remove from connections
         this.connections.delete(connectionId);
 
-        // Remove from user connections
         const userConnections = this.userConnections.get(userId);
         if (userConnections) {
             userConnections.delete(connectionId);
-            // If this was the user's last connection, they are now offline
             if (userConnections.size === 0) {
                 this.userConnections.delete(userId);
-                // Emit user went offline event
                 this.emit('user_offline', { userId, timestamp: new Date().toISOString() });
                 console.log(`User ${userId} went offline`);
             }
@@ -82,7 +70,6 @@ export class WebSocketManager extends EventEmitter {
         console.log(`WebSocket connection removed: ${connectionId} for user ${userId}`);
     }
 
-    // Send notification to specific user
     sendNotificationToUser(userId: number, notification: Notification, action: 'created' | 'updated' | 'deleted' | 'marked_read' | 'marked_unread'): void {
         const message: NotificationWebSocketMessage = {
             type: 'notification',
@@ -96,7 +83,6 @@ export class WebSocketManager extends EventEmitter {
         this.sendToUser(userId, message);
     }
 
-    // Send message to a specific user (all their connections)
     sendToUser(userId: number, message: WebSocketMessage): void {
         const connectionIds = this.userConnections.get(userId);
         if (!connectionIds) return;
@@ -113,7 +99,6 @@ export class WebSocketManager extends EventEmitter {
         }
     }
 
-    // Get WebSocket statistics
     getStats(): WebSocketStats {
         const connectionsPerUser: Record<number, number> = {};
 
@@ -128,17 +113,14 @@ export class WebSocketManager extends EventEmitter {
         };
     }
 
-    // Check if user is online
     isUserOnline(userId: number): boolean {
         return this.userConnections.has(userId);
     }
 
-    // Get all online users
     getOnlineUsers(): number[] {
         return Array.from(this.userConnections.keys());
     }
 
-    // Private method to send message to a connection
     private sendMessage(connection: WebSocketConnection, message: WebSocketMessage): void {
         try {
             if (!connection.socket || typeof connection.socket.send !== 'function') {
@@ -147,7 +129,7 @@ export class WebSocketManager extends EventEmitter {
                 return;
             }
 
-            if (connection.socket.readyState === 1) { // WebSocket.OPEN
+            if (connection.socket.readyState === 1) {
                 connection.socket.send(JSON.stringify(message));
             } else {
                 this.removeConnection(connection.id);
@@ -158,11 +140,9 @@ export class WebSocketManager extends EventEmitter {
         }
     }
 
-    // Setup socket event handlers
     private setupSocketHandlers(connection: WebSocketConnection): void {
         const { socket } = connection;
 
-        // Check if socket is valid
         if (!socket || typeof socket.on !== 'function') {
             console.error(`Invalid socket object for connection ${connection.id}:`, socket);
             this.removeConnection(connection.id);
@@ -183,7 +163,6 @@ export class WebSocketManager extends EventEmitter {
             connection.lastPong = new Date();
         });
 
-        // Handle incoming messages
         socket.on('message', (data: Buffer) => {
             try {
                 const message = JSON.parse(data.toString()) as WebSocketMessage;
@@ -194,7 +173,6 @@ export class WebSocketManager extends EventEmitter {
         });
     }
 
-    // Handle incoming messages from clients
     private handleIncomingMessage(connection: WebSocketConnection, message: WebSocketMessage): void {
         switch (message.type) {
             case 'ping':
@@ -212,7 +190,6 @@ export class WebSocketManager extends EventEmitter {
         }
     }
 
-    // Start heartbeat to check connection health
     private startHeartbeat(): void {
         this.heartbeatInterval = setInterval(() => {
             this.connections.forEach(connection => {
@@ -231,7 +208,6 @@ export class WebSocketManager extends EventEmitter {
         }, 30000);
     }
 
-    // Cleanup method
     destroy(): void {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
