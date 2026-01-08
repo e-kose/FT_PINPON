@@ -46,7 +46,7 @@ class LastGames extends LocalizedComponent {
             const response = await getUserStatistic(this.userId || undefined);
             
             if (!response.ok || !response.data.success || !response.data.data) {
-                this.error = response.data.error || response.data.message || t("last_games_error_fetch");
+                this.error = t("last_games_error_fetch");
                 this.games = [];
             } else {
                 const profile = response.data.data;
@@ -118,7 +118,7 @@ class LastGames extends LocalizedComponent {
             case "casual":
                 return { label: t("last_games_mode_casual"), icon: "🎮" };
             default:
-                return { label: mode, icon: "🎮" };
+                return { label: t("last_games_mode_unknown", { mode }), icon: "🎮" };
         }
     }
 

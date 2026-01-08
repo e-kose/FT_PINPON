@@ -70,26 +70,94 @@ class Chat extends LocalizedComponent {
 	protected renderComponent(): void {
 		const marginClass = sidebarStateManager.getMarginClass();
 		this.innerHTML = `
-			<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+			<style>
+				@keyframes chat-float {
+					0%, 100% { transform: translateY(0px); }
+					50% { transform: translateY(-6px); }
+				}
+				@keyframes online-pulse {
+					0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+					50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+				}
+				.chat-container {
+					background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.75), rgba(2, 6, 23, 0.65)),
+						linear-gradient(145deg, rgba(15, 23, 42, 0.7), rgba(8, 15, 28, 0.85));
+					border: 1px solid rgba(148, 163, 184, 0.1);
+					backdrop-filter: blur(12px);
+				}
+				.friend-card {
+					transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+				}
+				.friend-card:hover {
+					transform: translateX(4px);
+					background: linear-gradient(135deg, rgba(51, 65, 85, 0.5), rgba(30, 41, 59, 0.4));
+				}
+				.friend-card.active {
+					background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(139, 92, 246, 0.1));
+					border-left: 3px solid #06b6d4;
+				}
+				.message-bubble-sent {
+					background: linear-gradient(135deg, #06b6d4, #0891b2);
+					border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+				}
+				.message-bubble-received {
+					background: linear-gradient(135deg, rgba(51, 65, 85, 0.8), rgba(30, 41, 59, 0.9));
+					border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+				}
+				.online-indicator {
+					animation: online-pulse 2s ease-in-out infinite;
+				}
+				.chat-input-wrapper {
+					background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.5));
+					border: 1px solid rgba(148, 163, 184, 0.12);
+					backdrop-filter: blur(8px);
+				}
+				.send-button {
+					background: linear-gradient(135deg, #06b6d4, #0891b2);
+					transition: all 0.3s ease;
+				}
+				.send-button:hover {
+					background: linear-gradient(135deg, #0891b2, #0e7490);
+					transform: scale(1.05);
+					box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+				}
+				.friends-panel {
+					background: linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(8, 15, 28, 0.9));
+					border: 1px solid rgba(148, 163, 184, 0.1);
+					backdrop-filter: blur(12px);
+				}
+				.conversation-panel {
+					background: linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(8, 15, 28, 0.88));
+					border: 1px solid rgba(148, 163, 184, 0.1);
+					backdrop-filter: blur(12px);
+				}
+				.chat-header {
+					background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8));
+					border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+				}
+				.empty-chat-icon {
+					animation: chat-float 3s ease-in-out infinite;
+				}
+			</style>
+			
+			<div class="min-h-screen bg-slate-950 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed">
 				<header-component></header-component>
 				<div class="${PAGE_TOP_OFFSET}">
 					<sidebar-component current-route="chat"></sidebar-component>
 					<div id="mainContent" class="${marginClass} ${MAIN_CONTENT_SCROLL} min-w-0">
-						<div class="${APP_CONTAINER} space-y-4 sm:space-y-6">
-							<div class="lg:hidden flex items-center justify-between">
-								<h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">${t("chat_sidebar_title")}</h2>
-								<button data-action="open-friends-drawer" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px]">
-									<span>👥</span>
-									<span>${t("chat_sidebar_title")}</span>
-								</button>
+						<div class="${APP_CONTAINER}">
+							
+							<!-- DESKTOP LAYOUT (lg+) -->
+							<div class="hidden lg:grid lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)] p-4 rounded-2xl chat-container">
+								${this.renderDesktopFriendPanel()}
+								${this.renderDesktopConversationPanel()}
 							</div>
 
-							${this.renderMobileFriendDrawer()}
-
-							<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:min-h-[calc(100vh-6rem)]">
-								${this.renderFriendList("panel")}
-								${this.renderConversationArea()}
+							<!-- MOBILE LAYOUT (<lg) -->
+							<div class="lg:hidden h-[calc(100vh-7rem)] relative chat-container rounded-2xl overflow-hidden flex flex-col">
+								${this.renderMobileLayout()}
 							</div>
+
 						</div>
 					</div>
 				</div>
@@ -166,13 +234,27 @@ class Chat extends LocalizedComponent {
 		}
 	}
 
-	private renderFriendListContent(showClose: boolean): string {
+	private renderFriendListContent(): string {
 		let content: string;
 
 		if (this.isLoadingFriends) {
-			content = `<p class="text-gray-400 text-sm">${t("chat_friends_loading")}</p>`;
+			content = `
+				<div class="flex items-center justify-center py-8">
+					<div class="flex flex-col items-center gap-3">
+						<div class="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+						<p class="text-slate-400 text-sm">${t("chat_friends_loading")}</p>
+					</div>
+				</div>
+			`;
 		} else if (!this.friends.length) {
-			content = `<p class="text-gray-400 text-sm">${t("chat_no_friends")}</p>`;
+			content = `
+				<div class="flex flex-col items-center justify-center py-8 text-center">
+					<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mb-3 border border-slate-600/30">
+						<span class="text-2xl">👥</span>
+					</div>
+					<p class="text-slate-400 text-sm">${t("chat_no_friends")}</p>
+				</div>
+			`;
 		} else {
 			content = this.friends
 				.map((friend) => {
@@ -183,90 +265,149 @@ class Chat extends LocalizedComponent {
 
 					return `
 						<div data-id="${friendId}"
-							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
-							<div class="relative">
-								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
-								<!-- Online/Offline Badge -->
-								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+							class="friend-card conversation-item flex items-center gap-3 p-3 rounded-xl cursor-pointer ${isActive ? "active" : ""}">
+							<div class="relative flex-shrink-0">
+								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-11 h-11 rounded-xl object-cover border-2 ${isOnline ? 'border-cyan-500/50' : 'border-slate-600/50'}" alt="${t("chat_friend_avatar_alt")}">
+								<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${isOnline ? 'bg-emerald-500 online-indicator' : 'bg-slate-500'}"></div>
 							</div>
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 min-w-0">
-									<div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${friend.friend_username}</div>
-									${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center">${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}</span>` : ''}
+									<div class="font-medium text-slate-100 truncate text-sm">${friend.friend_username}</div>
+									${unreadCount > 0 ? `
+										<span class="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] px-2 py-0.5 rounded-full min-w-[18px] text-center font-bold shadow-lg shadow-rose-500/30">
+											${unreadCount > 99 ? t("chat_unread_badge_overflow") : unreadCount}
+										</span>
+									` : ''}
 								</div>
-								<div class="text-sm text-gray-500 dark:text-gray-400 truncate">${friend.friend_full_name || t("chat_friend_no_name")}</div>
+								<div class="flex items-center gap-1.5 mt-0.5">
+									<span class="text-xs ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? t("chat_status_online") : t("chat_status_offline")}</span>
+									${friend.friend_full_name ? `<span class="text-slate-600">•</span><span class="text-xs text-slate-500 truncate">${friend.friend_full_name}</span>` : ''}
+								</div>
 							</div>
+							<svg class="w-4 h-4 text-slate-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+							</svg>
 						</div>`;
 				})
 				.join("");
 		}
 
+		return `<div class="space-y-1">${content}</div>`;
+	}
+
+	private renderDesktopFriendPanel(): string {
 		return `
-			<div class="flex items-center justify-between gap-3 mb-4">
-				<div class="text-lg font-semibold text-gray-900 dark:text-gray-100">${t("chat_sidebar_title")}</div>
-				${showClose ? `
-					<button data-action="close-friends-drawer" class="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="${t("common_close")}">✕</button>
-				` : ""}
+			<div class="friends-panel rounded-xl lg:rounded-2xl p-4 overflow-hidden flex flex-col min-h-0 col-span-1">
+				<div class="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
+					<div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">👥</div>
+					<div class="font-semibold text-white">${t("chat_friends_button")}</div>
+				</div>
+				<div class="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent" data-friend-list="desktop-list">
+					${this.renderFriendListContent()}
+				</div>
 			</div>
-			<div class="divide-y flex-1 min-h-0 overflow-y-auto pr-1">${content}</div>
 		`;
 	}
 
-	private renderFriendList(variant: "panel" | "drawer" = "panel"): string {
-		const panelVisibilityClass = this.activeConversationId ? "hidden lg:flex" : "flex lg:flex";
-		const panelClasses =
-			`${panelVisibilityClass} lg:col-span-1 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border p-4 max-h-none lg:max-h-[calc(100vh-6rem)] overflow-hidden flex-col min-h-0`;
-		const drawerClasses =
-			"fixed left-0 top-0 h-screen w-[85%] max-w-sm bg-white dark:bg-gray-900 shadow-2xl border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col min-h-0";
-
-		if (variant === "drawer") {
-			return `
-				<div class="lg:hidden">
-					<div class="fixed inset-0 bg-black/40 backdrop-blur-sm" data-action="close-friends-drawer"></div>
-					<aside data-friend-list="drawer" class="${drawerClasses}">
-						${this.renderFriendListContent(true)}
-					</aside>
-				</div>
-			`;
-		}
-
+	private renderDesktopConversationPanel(): string {
 		return `
-			<aside data-friend-list="panel" class="${panelClasses}">
-				${this.renderFriendListContent(false)}
-			</aside>
+			<div class="conversation-panel rounded-xl lg:rounded-2xl col-span-2 flex flex-col overflow-hidden min-h-0">
+				${this.activeConversationId ? this.renderConversationContent() : this.renderEmptyState()}
+			</div>
 		`;
 	}
 
-	private renderMobileFriendDrawer(): string {
-		if (!this.isFriendListOpen) return "";
-		return this.renderFriendList("drawer");
+	private renderMobileLayout(): string {
+		return `
+			<!-- View 1: Friend List (Visible when no chat active) -->
+			<div class="${this.activeConversationId ? 'hidden' : 'flex'} flex-col h-full w-full">
+				<div class="p-4 border-b border-white/10 flex items-center gap-3 bg-slate-900/50">
+					<span class="text-xl">💬</span>
+					<h2 class="text-lg font-bold text-white">${t("chat_sidebar_title")}</h2>
+				</div>
+				<div class="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-700" data-friend-list="mobile-list">
+					${this.renderFriendListContent()}
+				</div>
+			</div>
+
+			<!-- View 2: Chat Overlay (Visible when chat active) -->
+			${this.activeConversationId ? `
+				<div class="absolute inset-0 z-50 bg-slate-900 flex flex-col h-full w-full">
+					${this.renderMobileConversationHeader()}
+					<div class="flex-1 overflow-y-auto px-4 py-2 messages scrollbar-thin scrollbar-thumb-slate-700">
+						${this.renderMessagesHTML()}
+					</div>
+					<div class="p-3 bg-slate-900/90 border-t border-white/10">
+						${this.renderInputArea()}
+					</div>
+				</div>
+			` : ''}
+		`;
 	}
 
-	private renderConversationArea(): string {
-		const conversationVisibilityClass = this.activeConversationId ? "flex" : "hidden lg:flex";
-		const conversationContent = this.activeConversationId
-			? `
-				${this.renderMessagesOwnerInfo()}
-				<div class="flex-1 px-3 sm:px-4 overflow-y-auto messages p-2 mb-3 min-h-[30vh] sm:min-h-[40vh]">
-					${this.renderMessagesHTML()}
+	private renderConversationContent(): string {
+		return `
+			${this.renderMessagesOwnerInfo()}
+			<div class="flex-1 min-h-0 px-3 sm:px-4 overflow-y-auto messages p-3 mb-3 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+				${this.renderMessagesHTML()}
+			</div>
+			<div class="p-3 sm:p-4">
+				<div class="chat-input-wrapper flex flex-col sm:flex-row gap-2 p-2 rounded-xl">
+					${this.renderInputArea()}
 				</div>
-				<div class="flex flex-col sm:flex-row gap-2 text-base">
-					<input id="chatInput" class="flex-1 min-w-0 px-3 py-3 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-l-lg sm:rounded-r-none focus:outline-none focus:ring-2 focus:ring-green-500 text-base min-h-[44px]" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
-					<button id="chatSend" class="w-full sm:w-auto px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg sm:rounded-r-lg sm:rounded-l-none transition-colors min-h-[44px]" aria-label="${t("chat_send_button_label")}">➤</button>
+			</div>
+		`;
+	}
+
+	private renderEmptyState(): string {
+		return `
+			<div class="flex flex-col items-center justify-center text-center h-full p-6">
+				<div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-violet-500/10 flex items-center justify-center mb-5 border border-cyan-500/20">
+					<span class="text-5xl empty-chat-icon">💬</span>
 				</div>
-			`
-			: `
-				<div class="flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 h-full p-6">
-					<div class="text-6xl mb-4">💬</div>
-					<p class="text-lg font-semibold mb-2">${t("chat_empty_title")}</p>
-					<p class="text-sm text-gray-500 dark:text-gray-400">${t("chat_empty_description")}</p>
-				</div>
-			`;
+				<p class="text-lg font-semibold text-slate-200 mb-2">${t("chat_empty_title")}</p>
+				<p class="text-sm text-slate-500 max-w-xs">${t("chat_empty_description")}</p>
+			</div>
+		`;
+	}
+
+	private renderInputArea(): string {
+		return `
+			<div class="flex flex-row gap-2 w-full">
+				<input class="chat-input flex-1 min-w-0 px-4 py-3 text-slate-100 bg-slate-800/60 border border-slate-600/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 text-sm min-h-[44px] placeholder-slate-500 transition-all" placeholder="${t("chat_input_placeholder")}" aria-label="${t("chat_input_placeholder")}">
+				<button class="chat-send-btn send-button w-auto px-5 py-3 text-white rounded-xl font-medium min-h-[44px] flex items-center justify-center gap-2" aria-label="${t("chat_send_button_label")}">
+					<span class="hidden sm:inline">${t("chat_send_button_label")}</span>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+					</svg>
+				</button>
+			</div>
+		`;
+	}
+
+	private renderMobileConversationHeader(): string {
+		const owner = this.friends.find((friend) => friend.friend_id.toString() === this.activeConversationId);
+		if (!owner) return "";
+		const isOnline = this.friendsOnlineStatus[this.activeConversationId || ""] || false;
 
 		return `
-			<section class="${conversationVisibilityClass} lg:col-span-2 bg-white/80 dark:bg-gray-800/70 rounded-lg shadow border flex-col min-h-[60vh] lg:h-[calc(100vh-6rem)] min-w-0">
-				${conversationContent}
-			</section>
+			<div class="flex items-center gap-3 p-4 border-b border-white/10 bg-slate-900/95 backdrop-blur shrink-0">
+				<button data-action="close-conversation" class="p-2 rounded-lg bg-slate-800/50 text-slate-300 hover:text-white hover:bg-slate-700/50">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+					</svg>
+				</button>
+				<div class="flex items-center gap-3 flex-1 min-w-0">
+					<div class="relative flex-shrink-0">
+						<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-9 h-9 rounded-lg object-cover">
+						<div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></div>
+					</div>
+					<div class="min-w-0">
+						<div class="font-medium text-white truncate text-sm">${owner.friend_username}</div>
+						<div class="text-xs text-slate-400">${isOnline ? t("chat_status_online") : t("chat_status_offline")}</div>
+					</div>
+				</div>
+			</div>
 		`;
 	}
 
@@ -278,15 +419,26 @@ class Chat extends LocalizedComponent {
 		const isOnline = this.friendsOnlineStatus[this.activeConversationId] || false;
 
 		return `
-			<div data-chat-header="true" class="flex items-center gap-3 p-3 border-b border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/60 min-w-0">
-				<div class="relative flex-shrink-0">
-					<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
-					<!-- Online/Offline Badge -->
-					<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
+			<div data-chat-header="true" class="chat-header flex flex-wrap sm:flex-nowrap sm:flex-row sm:items-center gap-3 p-4 min-w-0">
+				<div class="flex items-center gap-3 min-w-0 flex-1">
+					<div class="relative flex-shrink-0">
+						<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-11 h-11 rounded-xl object-cover border-2 ${isOnline ? 'border-cyan-500/50' : 'border-slate-600/50'}" alt="${t("chat_friend_avatar_alt")}">
+						<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${isOnline ? 'bg-emerald-500 online-indicator' : 'bg-slate-500'}"></div>
+					</div>
+					<div class="min-w-0 flex-1">
+						<div class="font-semibold text-slate-100 truncate">${owner.friend_username}</div>
+						<div class="flex items-center gap-1.5">
+							<span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></span>
+							<span class="text-xs ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${isOnline ? t("chat_status_online") : t("chat_status_offline")}</span>
+						</div>
+					</div>
 				</div>
-				<div class="min-w-0">
-					<div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${owner.friend_username}</div>
-					<div class="text-sm text-gray-500 dark:text-gray-400 truncate">${owner.friend_full_name || t("chat_friend_no_name")}</div>
+				<div class="flex items-center gap-2 w-full sm:w-auto justify-end sm:ml-auto">
+					<button class="w-9 h-9 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/30 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+						</svg>
+					</button>
 				</div>
 			</div>
 		`;
@@ -297,19 +449,25 @@ class Chat extends LocalizedComponent {
 		const currentUser = getUser();
 
 		if (!messages.length) {
-			return `<div class="flex items-center justify-center h-full text-sm text-gray-400">${t("chat_no_messages_placeholder")}</div>`;
+			return `
+				<div class="flex flex-col items-center justify-center h-full text-center">
+					<div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700/40 to-slate-800/40 flex items-center justify-center mb-3 border border-slate-600/20">
+						<span class="text-2xl">✉️</span>
+					</div>
+					<p class="text-sm text-slate-500">${t("chat_no_messages_placeholder")}</p>
+				</div>
+			`;
 		}
 
 		return messages
 			.map((message) => {
 				const isMine = message.sender?.id === currentUser?.id;
-				const bubbleClass = isMine
-					? "bg-green-600 text-white rounded-bl-2xl rounded-t-2xl"
-					: "bg-gray-900 text-gray-200 rounded-br-2xl rounded-t-2xl";
+				const bubbleClass = isMine ? "message-bubble-sent" : "message-bubble-received";
+				const alignClass = isMine ? "justify-end" : "justify-start";
 
 				return `
-					<div class="flex ${isMine ? "justify-end" : "justify-start"} mb-2">
-					<div class="inline-block px-3 py-2 ${bubbleClass} break-words text-sm" style="max-width: 75%;">
+					<div class="flex ${alignClass} mb-3">
+						<div class="${bubbleClass} px-4 py-2.5 break-words text-sm text-white shadow-lg max-w-[75%]">
 							${message.content}
 						</div>
 					</div>
@@ -335,6 +493,17 @@ class Chat extends LocalizedComponent {
 			this.eventListeners.push({ element: item, type: "click", handler });
 		});
 
+		// Close conversation (back button on mobile)
+		const closeConversationBtn = this.querySelector('[data-action="close-conversation"]');
+		if (closeConversationBtn) {
+			const handler = () => {
+				this.activeConversationId = null;
+				this.renderAndBind();
+			};
+			closeConversationBtn.addEventListener("click", handler);
+			this.eventListeners.push({ element: closeConversationBtn, type: "click", handler });
+		}
+
 		this.querySelectorAll<HTMLElement>(".conversation-item").forEach((item) => {
 			const handler = () => {
 				const id = item.getAttribute("data-id");
@@ -346,25 +515,30 @@ class Chat extends LocalizedComponent {
 			this.eventListeners.push({ element: item, type: "click", handler });
 		});
 
-		const sendBtn = this.querySelector("#chatSend");
-		const input = this.querySelector<HTMLInputElement>("#chatInput");
-
-		if (sendBtn) {
-			const sendHandler = () => this.handleSend();
-			sendBtn.addEventListener("click", sendHandler);
-			this.eventListeners.push({ element: sendBtn, type: "click", handler: sendHandler });
-		}
-
-		if (input) {
+		// Setup Inputs & Send Buttons
+		this.querySelectorAll<HTMLInputElement>(".chat-input").forEach((input) => {
 			const keyHandler = (event: Event) => {
 				if ((event as KeyboardEvent).key === "Enter") {
 					event.preventDefault();
-					this.handleSend();
+					this.handleSend(input);
 				}
 			};
 			input.addEventListener("keydown", keyHandler);
 			this.eventListeners.push({ element: input, type: "keydown", handler: keyHandler });
-		}
+		});
+
+		this.querySelectorAll(".chat-send-btn").forEach((btn) => {
+			const handler = (e: Event) => {
+				// Butonun bulunduğu container içindeki input'u bul (sibling)
+				// Yapı: div.flex.gap-2 > input + button
+				// Bu yüzden parent element'in içinde .chat-input'u arayabiliriz
+				const parent = (e.currentTarget as HTMLElement).parentElement;
+				const input = parent?.querySelector(".chat-input") as HTMLInputElement;
+				this.handleSend(input);
+			};
+			btn.addEventListener("click", handler);
+			this.eventListeners.push({ element: btn, type: "click", handler });
+		});
 	}
 
 	private async handleConversationClick(friendId: string): Promise<void> {
@@ -436,8 +610,23 @@ class Chat extends LocalizedComponent {
 		this.renderAndBind();
 	}
 
-	private handleSend(): void {
-		const input = this.querySelector<HTMLInputElement>("#chatInput");
+	private handleSend(sourceInput?: HTMLInputElement): void {
+		let input: HTMLInputElement | null = sourceInput || null;
+
+		if (!input) {
+			// Fallback: find the first non-empty visible input or just the first input
+			const inputs = this.querySelectorAll<HTMLInputElement>(".chat-input");
+			for (const inp of Array.from(inputs)) {
+				// Basit bir kontrol: eğer görünürse ve değeri varsa (veya sadece ilk bulduğunu al)
+				// Ancak en doğrusu sourceInput'un gelmesi.
+				if (inp.offsetParent !== null) { // Check visibility
+					input = inp;
+					break;
+				}
+			}
+			if (!input && inputs.length > 0) input = inputs[0];
+		}
+
 		const currentUser = getUser();
 		const socket = this.socket;
 
@@ -470,22 +659,24 @@ class Chat extends LocalizedComponent {
 		// Notification oluştur
 		void this.createMessageNotification(parseInt(conversationId), text);
 
-		input.value = "";
+		// Clear all inputs
+		this.querySelectorAll<HTMLInputElement>(".chat-input").forEach(el => el.value = "");
 	}
 
 	private renderMessages(): void {
-		const messagesContainer = this.querySelector(".messages");
-		if (messagesContainer) {
-			messagesContainer.innerHTML = this.renderMessagesHTML();
-			this.scrollMessagesToBottom();
-		}
+		const containers = this.querySelectorAll(".messages");
+		const html = this.renderMessagesHTML();
+		containers.forEach(container => {
+			container.innerHTML = html;
+			container.scrollTop = container.scrollHeight;
+		});
 	}
 
 	private scrollMessagesToBottom(): void {
-		const messagesContainer = this.querySelector(".messages");
-		if (messagesContainer) {
-			messagesContainer.scrollTop = messagesContainer.scrollHeight;
-		}
+		const containers = this.querySelectorAll(".messages");
+		containers.forEach(container => {
+			container.scrollTop = container.scrollHeight;
+		});
 	}
 
 	private setupSidebarListener(): void {
@@ -525,14 +716,14 @@ class Chat extends LocalizedComponent {
 	}
 
 	private updateOnlineStatusUI(): void {
-		const panelList = this.querySelector('[data-friend-list="panel"]');
-		if (panelList) {
-			panelList.innerHTML = this.renderFriendListContent(false);
+		const desktopList = this.querySelector('[data-friend-list="desktop-list"]');
+		if (desktopList) {
+			desktopList.innerHTML = this.renderFriendListContent();
 		}
 
-		const drawerList = this.querySelector('[data-friend-list="drawer"]');
-		if (drawerList) {
-			drawerList.innerHTML = this.renderFriendListContent(true);
+		const mobileList = this.querySelector('[data-friend-list="mobile-list"]');
+		if (mobileList) {
+			mobileList.innerHTML = this.renderFriendListContent();
 		}
 
 		// Conversation header'ı yeniden render et

@@ -41,7 +41,7 @@ export class LoginForm extends UserForm {
 				</div>
 				<div>
 					<label for="password" class="block mb-1.5 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">${t("login_form_password_label")}</label>
-					<input type="password" name="password" id="password" placeholder="••••••••" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 sm:p-3 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" required>
+					<input type="password" name="password" id="password" placeholder="${t("login_form_password_placeholder")}" class="bg-white/50 dark:bg-gray-700/70 border border-white/30 dark:border-gray-600 text-gray-900 dark:text-white text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 sm:p-3 backdrop-blur-sm placeholder-gray-600 dark:placeholder-gray-400" required>
 				</div>
 				<button type="submit" class="w-full text-white bg-blue-900 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-base px-4 py-2.5 sm:py-3 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 min-h-[44px]">${t("login_form_submit")}</button>
 				<button

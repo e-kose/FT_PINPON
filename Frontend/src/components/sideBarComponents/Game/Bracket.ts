@@ -20,8 +20,19 @@ export class Bracket extends LocalizedComponent {
         </div>
 
         <div id="bracketContainer" class="flex gap-12 overflow-x-auto w-full justify-start md:justify-center items-start p-12 custom-scrollbar min-h-[500px]">
-           <div class="flex flex-col items-center justify-center h-64 w-full text-blue-400/30 animate-pulse font-mono text-sm tracking-widest uppercase">
-              ${t("game_bracket_initializing")}
+           <div class="flex flex-col items-center justify-center h-64 w-full">
+               <div class="relative mb-6">
+                   <div class="w-16 h-16 sm:w-20 sm:h-20 border-4 border-violet-200/20 border-t-violet-500 rounded-full animate-spin"></div>
+                   <div class="absolute inset-0 flex items-center justify-center">
+                       <span class="text-2xl sm:text-3xl animate-pulse">🏆</span>
+                   </div>
+               </div>
+               <p class="text-base font-medium text-blue-300/80 mb-3">${t("game_bracket_initializing")}</p>
+               <div class="flex items-center gap-1.5">
+                   <span class="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                   <span class="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                   <span class="w-2 h-2 bg-fuchsia-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+               </div>
            </div>
         </div>
       </div>
@@ -36,7 +47,12 @@ export class Bracket extends LocalizedComponent {
 
 	private isCleanupActive: boolean = false;
 
-	public updateStatus(message: string, showAction: boolean = false, actionType: 'leave' | 'return' = 'leave'): void {
+	public updateStatus(
+		message: string,
+		showAction: boolean = false,
+		actionType: 'leave' | 'return' = 'leave',
+		variant: 'info' | 'success' | 'danger' = 'info'
+	): void {
 		if (this.isCleanupActive) return;
 
 		const statusEl = this.querySelector('#statusMessage');
@@ -45,8 +61,8 @@ export class Bracket extends LocalizedComponent {
 		if (statusEl) {
 			statusEl.textContent = message;
 			statusEl.className = "text-xl font-bold tracking-wider animate-pulse transition-colors duration-300";
-			if (message.includes(t('game_status_victory')) || message.includes("CHAMPION")) statusEl.className += " text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]";
-			else if (message.includes("Eliminated") || message.includes("ELIMINATED")) statusEl.className += " text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]";
+			if (variant === "success") statusEl.className += " text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]";
+			else if (variant === "danger") statusEl.className += " text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]";
 			else statusEl.className += " text-blue-300/80";
 		}
 

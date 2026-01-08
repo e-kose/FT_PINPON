@@ -84,11 +84,13 @@ class GameWebSocketService {
 		}
 	}
 
-	public sendMessage(type: GameWebSocketMessageType, payload?: any): void {
+	public sendMessage(type: GameWebSocketMessageType, payload?: any): boolean {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 			this.ws.send(JSON.stringify({ type, payload }));
+			return true;
 		} else {
 			console.warn("Game WS not connected, cannot send message:", type);
+			return false;
 		}
 	}
 
