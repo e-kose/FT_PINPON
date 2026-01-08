@@ -5,6 +5,8 @@ import type { SidebarStateListener } from "../../../router/SidebarStateManager";
 import { t } from "../../../i18n/lang";
 import { gameWebSocketService } from "../../../services/GameWebSocketService";
 import "../../utils/SideBar"; // Ensure SideBar is registered
+import "../../utils/Header";
+import { APP_CONTAINER, MAIN_CONTENT_SCROLL, PAGE_TOP_OFFSET } from "../../utils/Layout";
 
 
 import "./Dashboard";
@@ -22,6 +24,8 @@ export class Game extends LocalizedComponent {
 	private currentScreen: 'dashboard' | 'queue' | 'bracket' | 'game' = 'dashboard';
 	private gameMode: 'local' | 'online' | 'tournament' | null = null;
 	private connectTimeout: ReturnType<typeof setTimeout> | null = null;
+	private statusTimeout: ReturnType<typeof setTimeout> | null = null;
+	private lastSendErrorAt = 0;
 
 	protected onConnected(): void {
 		if (!this.sidebarListener) {
@@ -42,6 +46,11 @@ export class Game extends LocalizedComponent {
 			this.connectTimeout = null;
 		}
 
+		if (this.statusTimeout) {
+			clearTimeout(this.statusTimeout);
+			this.statusTimeout = null;
+		}
+
 		this.disconnect();
 		window.removeEventListener('keydown', this.handleKeyDown.bind(this));
 		window.removeEventListener('keyup', this.handleKeyUp.bind(this));
@@ -58,21 +67,51 @@ export class Game extends LocalizedComponent {
 		}
 
 		this.innerHTML = `
-            <div class="game-page-container w-full min-h-screen bg-gray-900 text-gray-100 font-sans overflow-hidden relative">
-                <!-- SIDEBAR -->
-                <sidebar-component></sidebar-component>
+            <style>
+                .status-toast {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                    transition: opacity 220ms ease, transform 240ms ease, box-shadow 240ms ease;
+                    pointer-events: none;
+                }
+                .status-toast.is-visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                .status-toast[data-variant="success"] {
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(14, 116, 144, 0.18));
+                    border-color: rgba(16, 185, 129, 0.4);
+                    color: #bbf7d0;
+                }
+                .status-toast[data-variant="warning"] {
+                    background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(249, 115, 22, 0.18));
+                    border-color: rgba(251, 191, 36, 0.4);
+                    color: #fde68a;
+                }
+                .status-toast[data-variant="danger"] {
+                    background: linear-gradient(135deg, rgba(248, 113, 113, 0.2), rgba(244, 63, 94, 0.18));
+                    border-color: rgba(248, 113, 113, 0.45);
+                    color: #fecaca;
+                }
+            </style>
+            <div class="min-h-screen bg-gray-900 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed">
+                <header-component></header-component>
+                <div class="${PAGE_TOP_OFFSET}">
+                    <sidebar-component current-route="game"></sidebar-component>
+                    <div id="mainContent" class="${sidebarStateManager.getMarginClass()} ${MAIN_CONTENT_SCROLL} min-w-0">
+                        <div class="${APP_CONTAINER}">
+                            <!-- STATUS BAR -->
+                            <div id="statusBar" role="status" aria-live="polite" class="status-toast fixed top-36 right-6 z-50 max-w-[90vw] sm:max-w-sm rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs sm:text-sm font-medium text-white/80 shadow-lg shadow-black/30 backdrop-blur-md">
+                                ${t('game_status_connecting')}
+                            </div>
 
-                <!-- STATUS BAR -->
-                <div id="statusBar" class="fixed bottom-4 right-4 bg-black/80 px-4 py-2 rounded-full text-xs text-white/50 z-50">
-                    Connecting...
-                </div>
-
-                <!-- MAIN CONTENT WRAPPER -->
-                <div id="mainContent" class="transition-all duration-300 w-full h-full flex flex-col items-center justify-center pt-20">
-                    <game-dashboard id="screen-dashboard" class="w-full"></game-dashboard>
-                    <game-queue id="screen-queue" class="hidden w-full"></game-queue>
-                    <game-bracket id="screen-bracket" class="hidden w-full"></game-bracket>
-                    <game-arena id="screen-game" class="hidden w-full h-full"></game-arena>
+                            <!-- SCREENS -->
+                            <game-dashboard id="screen-dashboard" class="w-full"></game-dashboard>
+                            <game-queue id="screen-queue" class="hidden w-full"></game-queue>
+                            <game-bracket id="screen-bracket" class="hidden w-full"></game-bracket>
+                            <game-arena id="screen-game" class="hidden w-full"></game-arena>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -140,22 +179,22 @@ export class Game extends LocalizedComponent {
 		const user = getUser();
 		if (!user) return;
 
-		this.updateStatus(t('game_status_connecting'));
+		this.updateStatus(t('game_status_connecting'), 'info', 4500);
 
 		gameWebSocketService.connect();
 
 		gameWebSocketService.addListener({
 			onOpen: () => {
-				this.updateStatus(t('game_status_connected'));
+				this.updateStatus(t('game_status_connected'), 'success', 4500);
 			},
 			onClose: () => {
-				this.updateStatus(t('game_status_disconnected'));
+				this.updateStatus(t('game_status_disconnected'), 'warning', 6000);
 				this.gameMode = null;
 				this.switchScreen('dashboard');
 			},
 			onError: (err) => {
 				console.error("WS Error", err);
-				this.updateStatus(t('game_status_error'));
+				this.updateStatus(t('game_status_error'), 'danger', 6500);
 			},
 			onMessage: (msg) => {
 				this.handleMessage(msg);
@@ -168,7 +207,14 @@ export class Game extends LocalizedComponent {
 	}
 
 	private sendMessage(type: any, payload?: any): void {
-		gameWebSocketService.sendMessage(type, payload);
+		const sent = gameWebSocketService.sendMessage(type, payload);
+		if (!sent && type !== 'PLAYER_INPUT') {
+			const now = Date.now();
+			if (now - this.lastSendErrorAt > 4000) {
+				this.lastSendErrorAt = now;
+				this.updateStatus(t('game_status_connection_failed_refresh'), 'danger', 6500);
+			}
+		}
 	}
 
 	private handleMessage(msg: GameMessage): void {
@@ -298,9 +344,20 @@ export class Game extends LocalizedComponent {
 		});
 	}
 
-	private updateStatus(text: string): void {
+	private updateStatus(text: string, variant: 'info' | 'success' | 'warning' | 'danger' = 'info', duration = 4500): void {
 		const el = this.querySelector('#statusBar');
-		if (el) el.textContent = text;
+		if (!el) return;
+
+		el.textContent = text;
+		el.setAttribute('data-variant', variant);
+		el.classList.add('is-visible');
+
+		if (this.statusTimeout) {
+			clearTimeout(this.statusTimeout);
+		}
+		this.statusTimeout = setTimeout(() => {
+			el.classList.remove('is-visible');
+		}, duration);
 	}
 
 	private updateQueueStatus(status: string, payload: any): void {
@@ -422,13 +479,11 @@ export class Game extends LocalizedComponent {
 		const mainContent = this.querySelector('#mainContent');
 		if (!mainContent) return;
 
-		if (isCollapsed) {
-			mainContent.classList.remove('pl-72');
-			mainContent.classList.add('pl-24');
-		} else {
-			mainContent.classList.remove('pl-24');
-			mainContent.classList.add('pl-72');
-		}
+		const transitionClasses = sidebarStateManager.getTransitionClasses();
+		mainContent.classList.add(...transitionClasses);
+		mainContent.classList.add('ml-0');
+		mainContent.classList.toggle('md:ml-72', !isCollapsed);
+		mainContent.classList.toggle('md:ml-16', isCollapsed);
 	}
 }
 

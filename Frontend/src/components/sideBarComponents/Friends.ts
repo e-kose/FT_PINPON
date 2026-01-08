@@ -48,7 +48,7 @@ class Friends extends LocalizedComponent {
 
 		if (!user) {
 			this.innerHTML = `
-				<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
+				<div class="min-h-screen bg-gray-50 dark:bg-gray-900 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed flex items-center justify-center p-6">
 					<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-10 text-center border border-white/20 dark:border-white/10">
 						<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">${t("friends_login_required_title")}</h2>
 						<p class="text-gray-600 dark:text-gray-300">${t("friends_login_required_description")}</p>
@@ -59,7 +59,7 @@ class Friends extends LocalizedComponent {
 		}
 
 		this.innerHTML = `
-			<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+			<div class="min-h-screen bg-gray-50 dark:bg-gray-900 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed">
 				<header-component></header-component>
 				<div class="${PAGE_TOP_OFFSET}">
 					<sidebar-component current-route="friends"></sidebar-component>

@@ -20,8 +20,19 @@ export class Bracket extends LocalizedComponent {
         </div>
 
         <div id="bracketContainer" class="flex gap-12 overflow-x-auto w-full justify-start md:justify-center items-start p-12 custom-scrollbar min-h-[500px]">
-           <div class="flex flex-col items-center justify-center h-64 w-full text-blue-400/30 animate-pulse font-mono text-sm tracking-widest uppercase">
-              ${t("game_bracket_initializing")}
+           <div class="flex flex-col items-center justify-center h-64 w-full">
+               <div class="relative mb-6">
+                   <div class="w-16 h-16 sm:w-20 sm:h-20 border-4 border-violet-200/20 border-t-violet-500 rounded-full animate-spin"></div>
+                   <div class="absolute inset-0 flex items-center justify-center">
+                       <span class="text-2xl sm:text-3xl animate-pulse">🏆</span>
+                   </div>
+               </div>
+               <p class="text-base font-medium text-blue-300/80 mb-3">${t("game_bracket_initializing")}</p>
+               <div class="flex items-center gap-1.5">
+                   <span class="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+                   <span class="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+                   <span class="w-2 h-2 bg-fuchsia-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+               </div>
            </div>
         </div>
       </div>
