@@ -36,13 +36,13 @@ services:
       - "3000:3000"
     depends_on:
       auth-service:
-        condition: service_healthy
+        condition: service_started
       user-service:
-        condition: service_healthy
+        condition: service_started
       chat-service:
-        condition: service_healthy
+        condition: service_started
       notification-service:
-        condition: service_healthy
+        condition: service_started
     env_file:
       - ./api-gateway/.env
     networks:
@@ -67,7 +67,7 @@ services:
       - ./auth-service/.env
     depends_on:
       logstash:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
     restart: always
@@ -90,7 +90,7 @@ services:
       - ./user-service/.env
     depends_on:
       logstash:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
     restart: always
@@ -112,7 +112,7 @@ services:
       - ./chat-service/.env
     depends_on:
       logstash:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
     restart: always
@@ -125,10 +125,12 @@ services:
 
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    build:
+      context: ./elastic-search
+      dockerfile: ES.Dockerfile
     container_name: "elasticsearch"
     environment:
-      - ES_JAVA_OPTS=-Xms512m -Xmx2048m
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - discovery.type=single-node
       - xpack.security.enabled=true
     env_file:
@@ -138,10 +140,10 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data
       - es_backups:/usr/share/elasticsearch/backups
-      - ./elastic-search/init-scripts.sh:/init-scripts.sh
+      # - ./elastic-search/init-scripts.sh:/init-scripts.sh
     networks:
       - internal-network
-    mem_limit: 2g
+    mem_limit: 1g
     healthcheck:
       test: ["CMD-SHELL", "curl -s -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
       interval: 30s
@@ -158,7 +160,9 @@ services:
     restart: always
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:8.14.0
+    build:
+      context: ./elastic-search
+      dockerfile: Dockerfile
     container_name: "logstash"
     ports:
       - "5044:5044"
@@ -171,15 +175,15 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
     env_file:
       - ./elastic-search/.env
-    volumes:
-      - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./elastic-search/logstash-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro
+    # volumes:
+    #   - ./elastic-search/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    #   - ./elastic-search/logstash.yml:/usr/share/logstash/config/logstash.yml
+    #   - ./elastic-search/logstash-entrypoint.sh:/usr/local/bin/custom-entrypoint.sh:ro
     networks:
       - internal-network
     depends_on:
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
     command: ["/bin/bash", "/usr/local/bin/custom-entrypoint.sh"]
     healthcheck:
       test: ["CMD-SHELL", "test -f /tmp/logstash.ready"]
@@ -187,7 +191,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 120s
-    mem_limit: 2g
+    mem_limit: 1g
     restart: always
 
   kibana:
@@ -204,17 +208,17 @@ services:
       - ./elastic-search/.env
     depends_on:
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
-    mem_limit: 2g
+    mem_limit: 1g
     restart: always
 
   redis:
     image: redis:7-alpine
     container_name: redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -224,14 +228,14 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "4343:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./certs:/etc/nginx/certs:ro 
     depends_on:
       api-gateway:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
     restart: always
@@ -254,7 +258,7 @@ services:
       - ./notification-service/.env
     depends_on:
       logstash:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
     restart: always
@@ -290,7 +294,7 @@ services:
       - ./game-service/.env
     depends_on:
       logstash:
-        condition: service_healthy
+        condition: service_started
     networks:
       - internal-network
     restart: always

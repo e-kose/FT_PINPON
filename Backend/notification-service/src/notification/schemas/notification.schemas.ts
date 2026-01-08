@@ -8,12 +8,14 @@ export const createNotificationSchema = {
         type: "string",
         minLength: 1,
         maxLength: 255,
-        pattern: "^[^<>&\\x22\\x27]+$",
+        // pattern: "^[^<>&\\x22\\x27]+$",
       },
-      message: { type: "string", minLength: 1, pattern: "^[^<>&\\x22\\x27]+$" },
+      message: { type: "string", minLength: 1, 
+        // pattern: "^[^<>&\\x22\\x27]+$"
+      },
       type: {
         type: "string",
-        enum: ["chat_message"],
+        enum: ["chat_message", "game_invite", "friend_request", "system_notification"],
         default: "chat_message",
       },
     },
