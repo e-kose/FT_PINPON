@@ -3,20 +3,20 @@
 // ==========================
 
 /** Matchmaking Stats */
-export interface MatchmakingStats {
+interface MatchmakingStats {
   total: number;
   wins: number;
   losses: number;
 }
 
 /** Tournament Summary Stats */
-export interface TournamentStats {
+interface TournamentStats {
   total: number;
   wins: number;
 }
 
 /** Combined Stats */
-export interface GameStats {
+interface GameStats {
   matchmaking: MatchmakingStats;
   tournaments: TournamentStats;
 }
@@ -25,7 +25,7 @@ export interface GameStats {
 // Recent Match Types
 // ==========================
 
-export interface MatchPlayer {
+interface MatchPlayer {
   id: string;
   username: string;
   score: number;
@@ -43,12 +43,12 @@ export interface RecentMatch {
 // Recent Tournament Types
 // ==========================
 
-export interface TournamentParticipant {
+interface TournamentParticipant {
   id: string;
   username: string;
 }
 
-export interface TournamentLastMatch {
+interface TournamentLastMatch {
   round: number;
   opponentId: string;
   opponentUsername: string;
@@ -58,7 +58,7 @@ export interface TournamentLastMatch {
   playedAt: string;
 }
 
-export interface TournamentMyStats {
+interface TournamentMyStats {
   isChampion: boolean;
   totalMatches: number;
   wins: number;

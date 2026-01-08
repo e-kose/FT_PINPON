@@ -32,12 +32,6 @@ declare module 'fastify' {
   }
 }
 
-declare module 'fastify' {
-  interface FastifyInstance {
-    vaultSecrets: Record<string, any>;
-  }
-}
-
 declare module "fastify" {
   interface FastifyInstance {
     db: BetterSqlite;

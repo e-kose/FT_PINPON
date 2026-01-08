@@ -12,7 +12,7 @@ import { UserRepository } from "../repository/user.repository.js";
 import { logError } from "../utils/log.utils.js";
 import axios from "axios";
 
-export const authService = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
+const authService = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
 
 export async function createUserHandler(
   req: FastifyRequest,

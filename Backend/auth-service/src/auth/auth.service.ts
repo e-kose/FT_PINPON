@@ -143,7 +143,7 @@ export async function googleAuthService(
   }
 }
 
-export async function updateRefreshToken(
+async function updateRefreshToken(
   db: Database,
   id: number,
   refreshToken: string
@@ -167,7 +167,7 @@ export async function updateRefreshToken(
   return { success: true };
 }
 
-export async function OAuthLoginService(app: FastifyInstance, user: any) {
+async function OAuthLoginService(app: FastifyInstance, user: any) {
   let oauth_id = "";
   const authValues = getAuthTable(app.db, user.id);
   if (authValues && authValues.oauth_id) {
@@ -185,7 +185,7 @@ export async function OAuthLoginService(app: FastifyInstance, user: any) {
   return { user: safeUser, accesstoken, refreshtoken };
 }
 
-export async function OAuthRegister(
+async function OAuthRegister(
   app: FastifyInstance,
   userName: string,
   user: any
@@ -329,7 +329,7 @@ export async function twoFactorDisableService(req: FastifyRequest) {
   return { success: true, message: "2FA disabled" };
 }
 
-export function findRefreshTokensUserId(db: Database, id: number) {
+function findRefreshTokensUserId(db: Database, id: number) {
   const tokenRecord = db
     .prepare("SELECT * FROM refresh_tokens WHERE user_id=?")
     .get(id) as refreshTokenDB;

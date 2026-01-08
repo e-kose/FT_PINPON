@@ -30,7 +30,7 @@ export enum InputAction {
   STOP = 'stop',
 }
 
-export interface Vector2D {
+interface Vector2D {
   x: number;
   y: number;
 }
@@ -136,10 +136,6 @@ export interface WSMessage<T = any> {
   payload?: T;
 }
 
-export interface SetUserIdPayload {
-  userId: string;
-}
-
 export interface CreateLocalGamePayload {
   config?: Partial<GameConfig>;
 }
@@ -152,60 +148,6 @@ export interface PlayerInputPayload {
 export interface ConnectedPayload {
   socketId: string;
   userId?: string | undefined;
-  timestamp: number;
-}
-
-export interface ErrorPayload {
-  message: string;
-  code?: string | undefined;
-}
-
-export interface RoomCreatedPayload {
-  roomId: string;
-  mode: GameMode;
-  timestamp: number;
-}
-
-export interface RoomJoinedPayload {
-  roomId: string;
-  mode: GameMode;
-  playerPosition?: PlayerPosition;
-  timestamp: number;
-}
-
-export interface PlayerAssignedPayload {
-  playerPosition: PlayerPosition;
-  userId: string;
-  username?: string;
-}
-
-export interface PlayerDisconnectedPayload {
-  userId: string;
-  username?: string;
-  playerPosition: PlayerPosition;
-  timeout?: number | undefined;
-  timestamp: number;
-}
-
-export interface PlayerReconnectedPayload {
-  roomId: string;
-  mode: GameMode;
-  playerPosition: PlayerPosition;
-  opponentId: string;
-  opponentUsername?: string;
-  timestamp: number;
-}
-
-export interface MatchmakingSearchingPayload {
-  message: string;
-  timestamp: number;
-}
-
-export interface MatchFoundPayload {
-  roomId: string;
-  opponentId: string;
-  opponentUsername?: string;
-  playerPosition: PlayerPosition;
   timestamp: number;
 }
 
@@ -255,14 +197,4 @@ export interface JoinTournamentPayload {
 
 export interface TournamentStateUpdatePayload {
   tournament: TournamentData;
-}
-
-export interface JoinTournamentQueuePayload {
-  size: TournamentSize;
-}
-
-export interface TournamentQueueJoinedPayload {
-  size: TournamentSize;
-  waitingCount: number;
-  neededCount: number;
 }

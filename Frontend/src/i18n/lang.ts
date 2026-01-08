@@ -100,7 +100,3 @@ export function setLanguage(language: SupportedLanguage): void {
 export function getLanguage(): SupportedLanguage {
 	return currentLanguage;
 }
-
-export function getAvailableLanguages(): SupportedLanguage[] {
-	return Object.keys(dictionaries).filter(isSupportedLanguage);
-}

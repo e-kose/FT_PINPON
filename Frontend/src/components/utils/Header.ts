@@ -5,7 +5,6 @@ import { sidebarStateManager } from "../../router/SidebarStateManager";
 import type { SidebarStateListener } from "../../router/SidebarStateManager";
 import { t } from "../../i18n/lang";
 import { LocalizedComponent } from "../base/LocalizedComponent";
-import { APP_CONTAINER } from "./Layout";
 
 const ICONS = {
     menu: (className: string) => `
@@ -72,21 +71,28 @@ class Header extends LocalizedComponent {
 
     protected renderComponent(): void {
         const user = getUser();
+        const sidebarState = sidebarStateManager.getState();
+        const logoMarginClass = sidebarState.isCollapsed 
+            ? 'md:ml-20 lg:ml-20' 
+            : 'md:ml-[17rem] lg:ml-[17rem]';
+        
         this.innerHTML = `
             <nav class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200/70 dark:border-slate-800/70 shadow-sm fixed top-0 w-full z-50">
-                <div class="${APP_CONTAINER} relative flex items-center justify-between gap-2 min-h-14 sm:min-h-16 md:min-h-20 lg:min-h-24 py-2 sm:py-3 min-w-0">
+                <div class="w-full px-4 sm:px-6 lg:px-8 relative flex items-center justify-between gap-2 min-h-14 sm:min-h-16 md:min-h-20 lg:min-h-24 py-2 sm:py-3 min-w-0">
                     ${user ? `
                     <button id="mobileSidebarToggle" aria-label="${t("sidebar_toggle_aria")}" class="md:hidden ${ICON_BUTTON}">
                         ${ICONS.menu("w-5 h-5")}
                     </button>
                     ` : ""}
-                    <!-- Logo Section - Sidebar ile çakışmaması için sağa kaydırıldı -->
-                    <div id="logoSection" class="flex items-center gap-2 sm:gap-3 md:gap-4 cursor-pointer hover:opacity-90 transition-opacity duration-200 ml-0 md:ml-16 min-w-0 flex-1 overflow-hidden pr-2 sm:pr-4" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
+                    <!-- Logo Section - Sidebar ile senkronize yumuşak geçiş -->
+                    <div id="logoSection" class="flex items-center gap-2 sm:gap-3 md:gap-4 cursor-pointer hover:opacity-90 min-w-0 flex-shrink-0 overflow-hidden pr-2 sm:pr-4 transition-all duration-300 ease-out ${logoMarginClass}" aria-label="${t("header_logo_aria")}" title="${t("header_logo_title")}">
                         <img class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex-shrink-0" src="/pong.png" alt="${t("header_logo_alt")}">
                         <h1 class="text-[11px] xs:text-sm sm:text-lg md:text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-tight truncate max-w-full">${t("app_brand_name")}</h1>
                     </div>
-                    <!-- User Section -->
-                    <div class="ml-auto flex items-center mr-0 sm:mr-1 md:mr-2 lg:mr-3 relative select-none flex-shrink-0">
+                    <!-- Spacer for flexible layout -->
+                    <div class="flex-1"></div>
+                    <!-- User Section - Sağa yaslanmış ve responsive -->
+                    <div class="flex items-center mr-2 sm:mr-4 md:mr-6 lg:mr-8 relative select-none flex-shrink-0">
                         ${user ? `
                         <div id="userDropdownBtn" class="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 px-2 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-3 rounded-xl cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors min-w-0">
                             <!-- Avatar with Status Indicator -->
@@ -258,18 +264,21 @@ class Header extends LocalizedComponent {
     private adjustLogoPosition(isCollapsed: boolean): void {
         const logoSection = this.querySelector('#logoSection');
         if (logoSection) {
-            // Transition sınıflarını ekle
-            const transitionClasses = sidebarStateManager.getTransitionClasses();
-            logoSection.classList.add(...transitionClasses);
+            // Sidebar ile aynı yumuşak geçiş - transition zaten render'da eklendi
+            // Eski class'ları temizle
+            logoSection.classList.remove(
+                'md:ml-20',
+                'lg:ml-20',
+                'md:ml-[17rem]',
+                'lg:ml-[17rem]'
+            );
             
             if (isCollapsed) {
-                // Sidebar kapalı - margin'i azalt
-                logoSection.classList.remove('md:ml-72');
-                logoSection.classList.add('md:ml-16');
+                // Sidebar kapalı (collapsed) - sidebar genişliği 64px (w-16), margin bırak
+                logoSection.classList.add('md:ml-20', 'lg:ml-20');
             } else {
-                // Sidebar açık - margin'i artır
-                logoSection.classList.remove('md:ml-16');
-                logoSection.classList.add('md:ml-72');
+                // Sidebar açık - sidebar genişliği 288px (w-72), margin bırak
+                logoSection.classList.add('md:ml-[17rem]', 'lg:ml-[17rem]');
             }
         }
     }

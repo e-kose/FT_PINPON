@@ -23,23 +23,3 @@ export function startLogError(app: FastifyInstance, error: any) {
     console.error("[Fallback Log]", error);
   }
 }
-
-export function logInfo(app: FastifyInstance, req: FastifyRequest, message: string) {
-  app.logger.info({
-    service: process.env.SERVICE_NAME,
-    method: req.method,
-    url: req.url,
-    msg: message,
-    time: new Date().toISOString()
-  });
-}
-
-export function logWarn(app: FastifyInstance, req: FastifyRequest, message: string) {
-  app.logger.warn({
-    service: process.env.SERVICE_NAME,
-    method: req.method,
-    url: req.url,
-    msg: message,
-    time: new Date().toISOString()
-  });
-}

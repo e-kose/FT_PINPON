@@ -6,57 +6,8 @@
 import type { UserCredentialsUpdate } from "../../types/SettingsType";
 import { t } from "../../i18n/lang";
 
-// XSS Koruması - HTML karakterlerini encode eder
-export function sanitizeHtml(input: string): string {
-	if (!input || typeof input !== 'string') return '';
-	
-	return input
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#x27;')
-		.replace(/\//g, '&#x2F;');
-}
-
-// Script taglerini ve tehlikeli kodları temizler
-export function removeScriptTags(input: string): string {
-	if (!input || typeof input !== 'string') return '';
-	
-	return input
-		.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-		.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-		.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-		.replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '')
-		.replace(/<applet\b[^<]*(?:(?!<\/applet>)<[^<]*)*<\/applet>/gi, '')
-		.replace(/<meta\b[^<]*(?:(?!<\/meta>)<[^<]*)*<\/meta>/gi, '')
-		.replace(/<link\b[^<]*(?:(?!<\/link>)<[^<]*)*<\/link>/gi, '');
-}
-
-// JavaScript protokollerini temizler
-export function removeJavaScriptProtocols(input: string): string {
-	if (!input || typeof input !== 'string') return '';
-	
-	return input
-		.replace(/javascript:/gi, '')
-		.replace(/vbscript:/gi, '')
-		.replace(/data:/gi, '')
-		.replace(/file:/gi, '');
-}
-
-// Olay işleyicileri temizler (onclick, onload vb.)
-export function removeEventHandlers(input: string): string {
-	if (!input || typeof input !== 'string') return '';
-	
-	return input
-		.replace(/on\w+\s*=/gi, '')
-		.replace(/style\s*=\s*['"'][^'"]*expression\s*\(/gi, '')
-		.replace(/style\s*=\s*['"'][^'"]*javascript\s*:/gi, '');
-}
-
-
 // SQL Injection koruması
-export function sanitizeSqlChars(input: string): string {
+function sanitizeSqlChars(input: string): string {
 	if (!input || typeof input !== 'string') return '';
 	
 	return input
@@ -70,7 +21,7 @@ export function sanitizeSqlChars(input: string): string {
 }
 
 // Genel XSS koruması ve input temizleme
-export function sanitizeInput(input: string): string {
+function sanitizeInput(input: string): string {
 	if (!input || typeof input !== 'string') return '';
 	
 	let cleaned = input.trim();
@@ -86,7 +37,7 @@ export function sanitizeInput(input: string): string {
 }
 
 // Email validasyonu
-export function validateEmail(email: string): { isValid: boolean; message: string } {
+function validateEmail(email: string): { isValid: boolean; message: string } {
 	if (!email || typeof email !== 'string') {
 		return { isValid: false, message: t("validation_email_required") };
 	}
@@ -108,7 +59,7 @@ export function validateEmail(email: string): { isValid: boolean; message: strin
 	return { isValid: true, message: '' };
 }
 
-export function validateUsername(username: string): { isValid: boolean; message: string } {
+function validateUsername(username: string): { isValid: boolean; message: string } {
 	if (!username || typeof username !== 'string') {
 		return { isValid: false, message: t("validation_username_required") };
 	}
@@ -130,7 +81,7 @@ export function validateUsername(username: string): { isValid: boolean; message:
 }
 
 // Ad soyad validasyonu
-export function validateFullName(fullName: string): { isValid: boolean; message: string } {
+function validateFullName(fullName: string): { isValid: boolean; message: string } {
 	if (!fullName || typeof fullName !== 'string') {
 		return { isValid: false, message: t("validation_fullname_required") };
 	}
@@ -154,7 +105,7 @@ export function validateFullName(fullName: string): { isValid: boolean; message:
 }
 
 // Bio/Açıklama validasyonu
-export function validateBio(bio: string): { isValid: boolean; message: string } {
+function validateBio(bio: string): { isValid: boolean; message: string } {
 	if (!bio || typeof bio !== 'string') {
 		return { isValid: true, message: t("validation_bio_optional") }; // Bio opsiyonel
 	}
@@ -189,86 +140,6 @@ export function validatePassword(password: string): { isValid: boolean; message:
 	
 	if (!passwordPattern.test(sanitized)) {
 		return { isValid: false, message: t("validation_password_complexity") };
-	}
-	
-	return { isValid: true, message: '' };
-}
-
-
-// Şifre değiştirme form validasyonu
-export function validatePasswordChangeForm(data: {
-	currentPassword: string;
-	newPassword: string;
-	confirmPassword: string;
-}): { isValid: boolean; errors: Record<string, string> } {
-	const errors: Record<string, string> = {};
-	
-	if (!data.currentPassword) {
-		errors.currentPassword = t("validation_current_password_required");
-	}
-	
-	const newPasswordValidation = validatePassword(data.newPassword);
-	if (!newPasswordValidation.isValid) {
-		errors.newPassword = newPasswordValidation.message;
-	}
-	
-	if (data.newPassword !== data.confirmPassword) {
-		errors.confirmPassword = t("validation_password_mismatch");
-	}
-	
-	if (data.currentPassword === data.newPassword) {
-		errors.newPassword = t("validation_password_new_different");
-	}
-	return {
-		isValid: Object.keys(errors).length === 0,
-		errors
-	};
-}
-
-// URL validasyonu (avatar URL için)
-export function validateUrl(url: string): { isValid: boolean; message: string } {
-	if (!url || typeof url !== 'string') {
-		return { isValid: false, message: t("validation_url_required") };
-	}
-	
-	// XSS ve SQL injection koruması
-	const cleanUrl = sanitizeInput(sanitizeSqlChars(url));
-	
-	try {
-		const urlObj = new URL(cleanUrl);
-		if (!['http:', 'https:'].includes(urlObj.protocol)) {
-			return { isValid: false, message: t("validation_url_protocol") };
-		}
-		
-		return { isValid: true, message: '' };
-	} catch {
-		return { isValid: false, message: t("validation_url_invalid") };
-	}
-}
-
-// Dosya boyutu kontrolü (MB cinsinden)
-export function validateFileSize(file: File, maxSizeMB: number): { isValid: boolean; message: string } {
-	if (!file) {
-		return { isValid: false, message: t("validation_file_required") };
-	}
-	
-	const maxSizeBytes = maxSizeMB * 1024 * 1024;
-	
-	if (file.size > maxSizeBytes) {
-		return { isValid: false, message: t("validation_file_size", { size: maxSizeMB }) };
-	}
-	
-	return { isValid: true, message: '' };
-}
-
-// Dosya türü kontrolü
-export function validateFileType(file: File, allowedTypes: string[]): { isValid: boolean; message: string } {
-	if (!file) {
-		return { isValid: false, message: t("validation_file_required") };
-	}
-	
-	if (!allowedTypes.includes(file.type)) {
-		return { isValid: false, message: t("validation_file_type", { types: allowedTypes.join(", ") }) };
 	}
 	
 	return { isValid: true, message: '' };

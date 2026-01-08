@@ -151,23 +151,7 @@ export function clearUser(): void {
 	currentUser = null;
 }
 
-export function getUserAvatar(): string {
-	return currentUser?.profile?.avatar_url || "Null";
-}
-
-export function getUserFuallNme(): string {
-	return currentUser?.profile?.full_name || currentUser?.username || t("user_store_default_username");
-}
-
-export function getUserBio(): string {
-	return currentUser?.profile?.bio || '';
-}
-
-export function isAuthenticated(): boolean {
-	return currentUser !== null && !!currentUser.id;
-}
-
-export function setAccessToken(token: string): void {
+function setAccessToken(token: string): void {
 	if (currentUser) {
 		currentUser.accesstoken = token;
 	}

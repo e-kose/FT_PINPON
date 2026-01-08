@@ -1,4 +1,4 @@
-export class LoadingAnimation extends HTMLElement {
+class LoadingAnimation extends HTMLElement {
 	connectedCallback(): void {
 		this.render();
 	}

@@ -167,17 +167,3 @@ class SidebarStateManager {
 
 // Singleton instance
 export const sidebarStateManager = new SidebarStateManager();
-
-// Convenience hooks for React-like usage
-export const useSidebarState = () => {
-    return {
-        state: sidebarStateManager.getState(),
-        toggle: () => sidebarStateManager.toggle(),
-        expand: () => sidebarStateManager.expand(),
-        collapse: () => sidebarStateManager.collapse(),
-        addListener: (listener: SidebarStateListener) => sidebarStateManager.addListener(listener),
-        removeListener: (listener: SidebarStateListener) => sidebarStateManager.removeListener(listener),
-        getMarginClass: () => sidebarStateManager.getMarginClass(),
-        getTransitionClasses: () => sidebarStateManager.getTransitionClasses()
-    };
-};

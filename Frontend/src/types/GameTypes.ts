@@ -13,7 +13,7 @@ export interface TournamentRound {
 	matches: GameMatch[];
 }
 
-export interface TournamentBracket {
+interface TournamentBracket {
 	rounds: TournamentRound[];
 	winnerId?: string | null;
 }
@@ -26,18 +26,18 @@ export interface TournamentData {
 	bracket: TournamentBracket;
 }
 
-export interface PaddleState {
+interface PaddleState {
 	y: number;
 }
 
-export interface PlayerState {
+interface PlayerState {
 	id: string; // User ID or socket ID
 	username: string;
 	score: number;
 	paddle: PaddleState;
 }
 
-export interface BallState {
+interface BallState {
 	x: number;
 	y: number;
 	vx: number;
@@ -69,59 +69,59 @@ export interface GameOverPayload {
 
 // WebSocket Messages
 
-export interface MatchmakingSearchingMessage {
+interface MatchmakingSearchingMessage {
 	type: 'MATCHMAKING_SEARCHING';
 	payload: any; // Payload structure not strictly defined yet, can be improved later
 }
 
-export interface TournamentQueueJoinedMessage {
+interface TournamentQueueJoinedMessage {
 	type: 'TOURNAMENT_QUEUE_JOINED';
 	payload: null;
 }
 
-export interface TournamentQueueLeftMessage {
+interface TournamentQueueLeftMessage {
 	type: 'TOURNAMENT_QUEUE_LEFT';
 	payload: null;
 }
 
-export interface LeaveTournamentMessage {
+interface LeaveTournamentMessage {
 	type: 'LEAVE_TOURNAMENT';
 	payload: null;
 }
 
-export interface TournamentCreatedMessage {
+interface TournamentCreatedMessage {
 	type: 'TOURNAMENT_CREATED';
 	payload: null;
 }
 
-export interface TournamentStateMessage {
+interface TournamentStateMessage {
 	type: 'TOURNAMENT_STATE';
 	payload: {
 		tournament: TournamentData;
 	};
 }
 
-export interface MatchFoundMessage {
+interface MatchFoundMessage {
 	type: 'MATCH_FOUND';
 	payload: any;
 }
 
-export interface RoomCreatedMessage {
+interface RoomCreatedMessage {
 	type: 'ROOM_CREATED';
 	payload: any;
 }
 
-export interface GameStateMessage {
+interface GameStateMessage {
 	type: 'GAME_STATE' | 'STATE_UPDATE';
 	payload: GameState;
 }
 
-export interface GameOverMessage {
+interface GameOverMessage {
 	type: 'GAME_OVER';
 	payload: GameOverPayload;
 }
 
-export interface ErrorMessage {
+interface ErrorMessage {
 	type: 'ERROR';
 	payload: string;
 }

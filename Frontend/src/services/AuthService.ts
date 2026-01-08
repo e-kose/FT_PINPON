@@ -69,7 +69,7 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	return false;
 }
 
-export async function refreshToken(): Promise<string | null> {
+async function refreshToken(): Promise<string | null> {
 	console.log("--------------------------- Refresh TOKEN -------------------------- ");
 	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh-token`, {
 		method: "POST",
