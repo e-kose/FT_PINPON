@@ -1,69 +1,38 @@
-import Database from 'better-sqlite3';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from "fs";
+import * as dotenv from "dotenv";
+import path from "path";
+import Database from "better-sqlite3";
 import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
+const dbPath = process.env.DATABASE_URL?.replace("file:", "") || "./db/notifications.db";
+const resDbPath = path.join(__dirname , "../" , dbPath); 
+const migrationsDir = __dirname + "/../migrations";
 
-async function runMigrations() {
-    const db = new Database('./db/notifications.db');
+if (!fs.existsSync(path.dirname(resDbPath))) {
+  fs.mkdirSync(path.dirname(resDbPath), { recursive: true });
+}
 
-    // Create migrations table if it doesn't exist
-    db.exec(`
-        CREATE TABLE IF NOT EXISTS migrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename VARCHAR(255) NOT NULL UNIQUE,
-            executed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        );
-    `);
+const db = new Database(resDbPath);
 
-    // Get all migration files
-    const migrationsDir = path.join(__dirname, '../migrations');
-    const migrationFiles = fs.readdirSync(migrationsDir)
-        .filter(file => file.endsWith('.sql'))
-        .sort();
+fs.readdir(migrationsDir, (error, files) => {
+  if (error) throw error;
 
-    console.log(`Found ${migrationFiles.length} migration files`);
+  const sqlFiles = files.filter((file) => file.endsWith(".sql"));
 
-    for (const filename of migrationFiles) {
-        // Check if migration has already been executed
-        const existingMigration = db.prepare('SELECT * FROM migrations WHERE filename = ?').get(filename);
-
-        if (existingMigration) {
-            console.log(`Migration ${filename} already executed, skipping...`);
-            continue;
-        }
-
-        console.log(`Executing migration: ${filename}`);
-
-        try {
-            // Read and execute migration file
-            const migrationPath = path.join(migrationsDir, filename);
-            const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
-
-            // Execute the migration in a transaction
-            const transaction = db.transaction(() => {
-                db.exec(migrationSQL);
-                db.prepare('INSERT INTO migrations (filename) VALUES (?)').run(filename);
-            });
-
-            transaction();
-            console.log(`Migration ${filename} executed successfully`);
-        } catch (error) {
-            console.error(`Error executing migration ${filename}:`, error);
-            process.exit(1);
-        }
+  sqlFiles.forEach((file) => {
+    const filePath = path.join(migrationsDir, file);
+    const sql = fs.readFileSync(filePath, "utf-8");
+    try {
+      db.exec(sql);
+      console.log(`✅ Migration applied: ${file}`);
+    } catch (err) {
+      console.error(`Migration failed: ${file}`);
+      console.error(err);
     }
-
-    db.close();
-    console.log('All migrations completed successfully!');
-}
-
-// Run migrations if this file is executed directly
-if (import.meta.url === `file://${__filename}`) {
-    runMigrations().catch(error => {
-        console.error('Migration failed:', error);
-        process.exit(1);
-    });
-}
+  });
+});

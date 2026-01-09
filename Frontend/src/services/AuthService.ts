@@ -177,7 +177,6 @@ export async function enable2Fa(code: string): Promise<{ ok: boolean; status: nu
 			const data = await res.json();
 			if (data.success) {
 				await handleLogin();
-				const updatedUser = getUser();
 				return { ok: true, status: res.status };
 			}
 		}
@@ -205,7 +204,6 @@ export async function disable2FA(): Promise<{ ok: boolean; status: number }> {
 			const data = await res.json();
 			if (data.success) {
 				await handleLogin();
-				const updatedUser = getUser();
 				return { ok: true, status: res.status };
 			}
 		}

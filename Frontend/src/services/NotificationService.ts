@@ -42,10 +42,10 @@ export async function initializeNotifications(): Promise<void> {
       notificationSocket.onopen = () => {
       };
 
-      notificationSocket.onerror = (error) => {
+      notificationSocket.onerror = (_error) => {
       };
 
-      notificationSocket.onclose = (event) => {
+      notificationSocket.onclose = (_event) => {
         notificationSocket = null;
       };
 

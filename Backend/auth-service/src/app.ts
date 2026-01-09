@@ -37,7 +37,6 @@ app.register(sensiblePlugin);
 app.register(dbPlug);
 app.register(cookiesPlugin);
 app.register(OAuthPlugins);
-// app.register(vaultPlugin);
 app.register(replyCookie);
 app.register(swaggerPlugin);
 app.register(jwtPlugin);

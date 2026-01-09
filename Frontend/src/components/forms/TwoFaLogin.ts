@@ -69,7 +69,7 @@ protected errorMappings: Record<number, { title: string; message: string; }> =
 				} else 
 					this.handleApiError(status, '#inline-msg');
 				this.isSubmitting = false;
-			}).catch((error) => {
+		}).catch((_error) => {
 				this.handleApiError(500, '#inline-msg');
 				this.isSubmitting = false;
 			});

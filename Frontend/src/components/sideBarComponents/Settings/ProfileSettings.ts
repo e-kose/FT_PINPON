@@ -271,7 +271,7 @@ class ProfileSettings extends Settings {
 
 			const token = getAccessToken();
 			if (token) {
-				const updateResult = setUser(user, token);
+				setUser(user, token);
 			}
 
 			// Render'dan önce DOM'daki avatar'ı direkt güncelle (immediate feedback)

@@ -192,7 +192,7 @@ export class Game extends LocalizedComponent {
 				this.gameMode = null;
 				this.switchScreen('dashboard');
 			},
-			onError: (err) => {
+			onError: (_err) => {
 				this.updateStatus(t('game_status_error'), 'danger', 6500);
 			},
 			onMessage: (msg) => {
