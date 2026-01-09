@@ -1,33 +1,4 @@
 services:
-  # vault:
-  #   image: hashicorp/vault
-  #   container_name: vault
-  #   ports:
-  #     - "8200:8200"
-  #   volumes:
-  #     - ./vault/config:/vault/config
-  #     - ./vault/data:/vault/data
-  #   cap_add:
-  #     - IPC_LOCK
-  #   command: server -config=/vault/config/vault.config.hcl
-  #   environment:
-  #     VAULT_ADDR: "http://127.0.0.1:8200"
-  #   networks:
-  #     - internal-network
-
-  #### HTTPS İÇİN
-  # caddy:
-  #   image: caddy:latest
-  #   container_name: caddy
-  #   ports:
-  #     - "443:443"
-  #     - "80:80"
-  #   volumes:
-  #     - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-  #     - caddy_data:/data
-  #     - caddy_config:/config
-  #   networks:
-  #     - internal-network
 
   api-gateway:
     build:
@@ -46,7 +17,8 @@ services:
     env_file:
       - ./api-gateway/.env
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.10
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
@@ -69,7 +41,8 @@ services:
       logstash:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.11
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
@@ -93,7 +66,8 @@ services:
       logstash:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.12
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
@@ -115,7 +89,8 @@ services:
       logstash:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.13
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
@@ -142,7 +117,8 @@ services:
       - es_data:/usr/share/elasticsearch/data
       - es_backups:/usr/share/elasticsearch/backups
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.20
     mem_limit: 1g
     healthcheck:
       test: ["CMD-SHELL", "curl -s -u elastic:$$ELASTIC_PASSWORD http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
@@ -176,7 +152,8 @@ services:
     env_file:
       - ./elastic-search/.env
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.21
     depends_on:
       elasticsearch:
         condition: service_started
@@ -206,7 +183,8 @@ services:
       elasticsearch:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.22
     mem_limit: 1g
     restart: always
 
@@ -218,7 +196,8 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.30
     restart: always
 
   nginx:
@@ -233,7 +212,8 @@ services:
       api-gateway:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.5
     restart: always
     deploy:
       restart_policy:
@@ -263,7 +243,8 @@ services:
       logstash:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.14
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
@@ -276,14 +257,14 @@ services:
     build:
       context: ./../Frontend
     expose:
-      - "5173"
+      - "4173"
+    ports:
+      - "4173:4173"
     env_file:
       - ./../Frontend/.env
-    volumes:
-      - ./../Frontend:/app
-      - /app/node_modules
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.100
     restart: always
     tty: true
   game-service:
@@ -299,7 +280,8 @@ services:
       logstash:
         condition: service_started
     networks:
-      - internal-network
+      internal-network:
+        ipv4_address: 172.20.0.15
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
@@ -318,3 +300,7 @@ volumes:
 networks:
   internal-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
