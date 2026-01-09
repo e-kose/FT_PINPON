@@ -45,3 +45,4 @@ dist/
 *.log
 *.pem
 certs/
+!default-profile.png

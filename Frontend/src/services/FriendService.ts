@@ -2,7 +2,7 @@ import { checkAndGetAccessToken } from './AuthService';
 import { getUser } from '../store/UserStore';
 import type { BlockedUser, ReceivedRequest, SentRequest } from '../types/FriendsType';
 
-const API_BASE = 'https://localhost:4343/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 async function baseHeaders(hasBody = false): Promise<HeadersInit> {
   const token = await checkAndGetAccessToken();
@@ -16,6 +16,7 @@ async function baseHeaders(hasBody = false): Promise<HeadersInit> {
 
 export async function sendFriendRequest(payload: { toId?: number; toUsername?: string }): Promise<{ status: number; ok: boolean; data: { success: boolean; message?: string } }> {
   const headers = await baseHeaders(true);
+  console.log(API_BASE);
   const res = await fetch(`${API_BASE}/friend/request`, {
     method: 'POST',
     headers,

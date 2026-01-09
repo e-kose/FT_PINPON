@@ -20,7 +20,8 @@ app.register(import('@fastify/cors'), {
     'http://localhost:3000',
     'http://127.0.0.1:5173',
     'https://localhost',
-    'https://localhost:4343'
+    'https://localhost:4343',
+    process.env.CORS_ORIGIN || "https://10.11.5.8:4343"
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']

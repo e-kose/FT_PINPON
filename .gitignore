@@ -54,6 +54,7 @@ Backend/**/db/*.sqlite
 Backend/**/db/*.sqlite3
 
 *png
+!default-profile.png
 *.jpg
 *.jpeg
 *.gif
