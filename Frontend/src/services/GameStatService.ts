@@ -43,7 +43,6 @@ export async function getUserStatistic(userId?: string | number): Promise<{
   });
 
   const data = await res.json().catch(() => ({ success: false, error: "Invalid response" }));
-  console.log("✅ GET USER STATISTIC Response data:", data);
   return { status: res.status, ok: res.ok, data };
 }
 

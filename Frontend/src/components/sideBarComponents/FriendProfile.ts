@@ -68,14 +68,12 @@ class FriendProfile extends LocalizedComponent {
 
 	private async fetchFriendProfile(): Promise<void> {
 		if (!this.friendId) return;
-		console.log("====================== Fetching profile for friend ID:", this.friendId);
 		this.loading = true;
 		this.error = null;
 		this.renderAndBind();
 
 		try {
 			const response = await FriendService.getFriendProfile(this.friendId);
-			console.log("------------------------------------------------------------------------------Friend profile response:", response);
 			if (response.status === 404) {
 				this.error = t("friend_profile_error_not_found");
 			} else if (response.status === 500) {
@@ -83,14 +81,12 @@ class FriendProfile extends LocalizedComponent {
 			} else if (!response.ok || !response.data.success) {
 				this.error = t("friend_profile_error_general");
 			} else {
-				console.log("------------------------------------------------------------------------------Friend profile data:", response.data);
 				this.friendData = response.data.user || response.data;
 				
 				// Fetch online status
 				await this.fetchOnlineStatus();
 			}
 		} catch (err) {
-			console.error("Error fetching friend profile:", err);
 			this.error = t("friend_profile_error_network");
 		} finally {
 			this.loading = false;
@@ -117,7 +113,6 @@ class FriendProfile extends LocalizedComponent {
 				this.isOnline = false;
 			}
 		} catch (error) {
-			console.error("Failed to fetch friend online status:", error);
 			this.isOnline = false;
 		}
 	}

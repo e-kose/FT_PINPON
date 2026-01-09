@@ -45,7 +45,6 @@ class SidebarStateManager {
             try {
                 listener(this.state);
             } catch (error) {
-                console.error('Sidebar state listener error:', error);
             }
         });
 
@@ -77,7 +76,6 @@ class SidebarStateManager {
             try {
                 listener(this.state);
             } catch (error) {
-                console.error('Sidebar state listener error:', error);
             }
         });
 

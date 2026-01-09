@@ -98,7 +98,6 @@ class Router
 		// Query parametrelerini ayır
 		const [pathWithoutQuery] = path.split('?');
 		const { route } = this.matchRoute(pathWithoutQuery);
-		console.log("Navigating to:", path);
 		if (route) {
 			!((previouesPath === "/signup" || previouesPath === "/login") && path === "/") ? this.handleRoute(path) : window.history.replaceState(null, '', path);
 			fillIndex(route.component, app);

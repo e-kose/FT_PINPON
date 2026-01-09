@@ -44,7 +44,6 @@ class GameWebSocketService {
 	public connect(): void {
 		const token = getAccessToken();
 		if (!token) {
-			console.error("Cannot connect to Game WS: No access token");
 			return;
 		}
 
@@ -63,7 +62,6 @@ class GameWebSocketService {
 		};
 
 		this.ws.onerror = (error) => {
-			console.error("Game WS Error", error);
 			this.listeners.forEach(l => l.onError?.(error));
 		};
 
@@ -72,7 +70,6 @@ class GameWebSocketService {
 				const data = JSON.parse(event.data);
 				this.listeners.forEach(l => l.onMessage?.(data));
 			} catch (e) {
-				console.error("Error parsing Game WS message", e);
 			}
 		};
 	}
@@ -89,7 +86,6 @@ class GameWebSocketService {
 			this.ws.send(JSON.stringify({ type, payload }));
 			return true;
 		} else {
-			console.warn("Game WS not connected, cannot send message:", type);
 			return false;
 		}
 	}

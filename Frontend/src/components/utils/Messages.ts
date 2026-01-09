@@ -89,7 +89,6 @@ export class Messages {
 
 		const parent = document.querySelector(parentSelector);
 		if (!parent) {
-			console.warn(`Parent element not found: ${parentSelector}`);
 			return;
 		}
 

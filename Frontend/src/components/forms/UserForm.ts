@@ -64,29 +64,22 @@ export abstract class UserForm extends HTMLElement {
 	// So we need to check against our own origin, not the API origin
 	const expectedOrigin = window.location.origin;
 
-	console.log("-----------------------------> Listening for messages from origin:", expectedOrigin);
 	const onMessage = (event: MessageEvent) => {
-		console.log("event.origin:", event.origin);
 		// Check if message is from our own origin (where backend sends the postMessage)
 		if (event.origin !== expectedOrigin) {
-			console.warn("Ignored message from unexpected origin:", event.origin);
 			return;
 		}
-		console.log("-----------------------------> Message received from origin:", event.origin);
 		if (!event.data || event.data.type !== "GOOGLE_AUTH_RESULT") {
-			console.log("Ignored message with wrong type:", event.data?.type);
 			return;
 		}
 		window.removeEventListener("message", onMessage);
 		try {
 			const payload = event.data.data;
-			console.log("-----------------------------> Received Google auth response:", payload);
 			void this.handleGoogleAuthResponse(payload, messageContainer);
 		} finally {
 			try {
 				popup.close();
 			} catch {
-				console.warn("Popup could not be closed automatically.");
 			}
 		}
 	};

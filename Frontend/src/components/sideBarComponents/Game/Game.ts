@@ -193,7 +193,6 @@ export class Game extends LocalizedComponent {
 				this.switchScreen('dashboard');
 			},
 			onError: (err) => {
-				console.error("WS Error", err);
 				this.updateStatus(t('game_status_error'), 'danger', 6500);
 			},
 			onMessage: (msg) => {
@@ -306,7 +305,6 @@ export class Game extends LocalizedComponent {
 				}
 				break;
 			case 'ERROR':
-				console.error(msg.payload);
 				if (this.currentScreen === 'queue') this.switchScreen('dashboard');
 				break;
 		}

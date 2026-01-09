@@ -36,46 +36,35 @@ export async function initializeNotifications(): Promise<void> {
   const token = await checkAndGetAccessToken();
 
   if (user && token && !notificationSocket) {
-    console.log('🔔 Initializing notification WebSocket connection...');
     try {
       notificationSocket = await connectNotificationWebSocket();
 
       notificationSocket.onopen = () => {
-        console.log('Notification WebSocket connected successfully');
       };
 
       notificationSocket.onerror = (error) => {
-        console.error('Notification WebSocket error:', error);
       };
 
       notificationSocket.onclose = (event) => {
-        console.log('Notification WebSocket disconnected');
-        console.log('Close code:', event.code, 'Close reason:', event.reason);
         notificationSocket = null;
       };
 
       notificationSocket.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
-          console.log('📨 Received WebSocket message:', message);
 
           if (message.type === 'ping') {
-            console.log('🏓 Received ping, sending pong...');
             if (notificationSocket && notificationSocket.readyState === WebSocket.OPEN) {
               notificationSocket.send(JSON.stringify({ type: 'pong' }));
             }
           }
           else {
-            console.log('📬 Other message type:', message.type);
           }
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-          console.log('Raw message:', event.data);
         }
       };
 
     } catch (error) {
-      console.error('Failed to initialize notifications:', error);
     }
   }
 }
@@ -151,7 +140,6 @@ export async function getUserOnlineStatus(userId: number): Promise<{ status: num
   const headers = await baseHeaders();
   const res = await fetch(`${API_BASE}/notification/ws/user/${userId}/online`, { method: 'GET', headers });
   const data = await res.json().catch(() => ({ success: false }));
-  console.log("???????????????????????*--------------------User Online Status Data:", data);
   return { status: res.status, ok: res.ok, data };
 }
 

@@ -70,7 +70,6 @@ protected errorMappings: Record<number, { title: string; message: string; }> =
 					this.handleApiError(status, '#inline-msg');
 				this.isSubmitting = false;
 			}).catch((error) => {
-				console.error(t("twofa_login_error_log"), error);
 				this.handleApiError(500, '#inline-msg');
 				this.isSubmitting = false;
 			});

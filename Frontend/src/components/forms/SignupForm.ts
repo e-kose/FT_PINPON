@@ -144,7 +144,6 @@ export default class SignupForm extends UserForm {
 				}
 			})
 			.catch(error => {
-				console.error("Registration error:", error);
 				this.handleNetworkError(error, "#messageContainer");
 			});
 	}

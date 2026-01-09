@@ -185,7 +185,6 @@ class ProfileSettings extends Settings {
 				window.dispatchEvent(new CustomEvent('user-profile-updated'));
 			}
 		} catch (error) {
-			console.error("Profile update error:", error);
 			this.showErrorMessage(
 				t("profile_settings_update_error_title"),
 				t("profile_settings_update_error_message"),
@@ -232,10 +231,8 @@ class ProfileSettings extends Settings {
 	private async performAvatarUpload(formData: FormData): Promise<void> {
 		try {
 			const response = await updateAvatar(formData);
-			console.log("Avatar upload response received:", response);
 			this.handleAvatarUploadResponse(response);
 		} catch (error) {
-			console.error("Avatar upload error:", error);
 			this.showErrorMessage(
 				t("profile_settings_avatar_upload_error_title"),
 				t("profile_settings_avatar_upload_error_message"),
@@ -247,7 +244,6 @@ class ProfileSettings extends Settings {
 	private handleAvatarUploadResponse(response: { success: boolean; avatar_url?: string; error?: string; status: number }): void {
 		// Status 200 değilse hata
 		if (response.status !== 200 || !response.success) {
-			console.log("Avatar upload failed:", response);
 			this.showErrorMessage(
 				t("profile_settings_avatar_upload_failed_title"),
 				response.error || t("profile_settings_avatar_upload_failed_message"),
@@ -260,7 +256,6 @@ class ProfileSettings extends Settings {
 		
 		// Avatar URL varsa user store'u güncelle
 		if (user && response.avatar_url) {
-			console.log("Updating user avatar from:", user.profile?.avatar_url, "to:", response.avatar_url);
 			
 			// Profile objesini güncelle
 			if (!user.profile) {
@@ -277,7 +272,6 @@ class ProfileSettings extends Settings {
 			const token = getAccessToken();
 			if (token) {
 				const updateResult = setUser(user, token);
-				console.log("setUser result:", updateResult, "New user data:", getUser());
 			}
 
 			// Render'dan önce DOM'daki avatar'ı direkt güncelle (immediate feedback)
@@ -298,7 +292,6 @@ class ProfileSettings extends Settings {
 			// Header'ı güncellemek için custom event fırlat
 			window.dispatchEvent(new CustomEvent('user-profile-updated'));
 		} else {
-			console.log("Avatar upload success but no URL in response:", response);
 			this.renderSection();
 			this.showErrorMessage(
 				t("profile_settings_avatar_update_fallback_title"),

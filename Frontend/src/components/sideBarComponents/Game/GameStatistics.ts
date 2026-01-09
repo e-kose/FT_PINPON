@@ -57,7 +57,6 @@ class GameStatistics extends LocalizedComponent {
 				this.error = null;
 			}
 		} catch (err) {
-			console.error(t("statistics_load_error_log"), err);
 			this.error = t("game_stats_error_network");
 			this.profile = null;
 		} finally {

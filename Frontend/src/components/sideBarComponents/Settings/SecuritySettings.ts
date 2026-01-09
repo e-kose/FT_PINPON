@@ -156,7 +156,6 @@ class SecuritySettings extends Settings {
 	};
 
 	private changePassword(): void {
-		console.log("Change Password button clicked");
 		const currentPasswordInput = this.querySelector<HTMLInputElement>("#currentPassword");
 		const newPasswordInput = this.querySelector<HTMLInputElement>("#newPassword");
 		const confirmPasswordInput = this.querySelector<HTMLInputElement>("#confirmPassword");
@@ -204,7 +203,6 @@ class SecuritySettings extends Settings {
 				}
 			})
 			.catch((error) => {
-				console.error(t("security_settings_change_password_error_log"), error);
 				const status = error?.status || 0;
 				const info = this.getUserResponseMessage(status);
 				this.showErrorMessage(info.title, info.message, MESSAGE_CONTAINER);

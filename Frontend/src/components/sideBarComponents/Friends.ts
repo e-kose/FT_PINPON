@@ -109,7 +109,6 @@ class Friends extends LocalizedComponent {
 			// Fetch online status for friends
 			await this.fetchFriendsOnlineStatus();
 		} catch (error) {
-			console.error(t("friends_fetch_error_log"), error);
 			this.loadError = true;
 			this.requests = [];
 			this.friends = [];
@@ -250,11 +249,9 @@ class Friends extends LocalizedComponent {
 					}
 				}
 			} else {
-				console.error("Failed to fetch friends online status:", onlineStatusResponse);
 				this.friendsOnlineStatus = {};
 			}
 		} catch (error) {
-			console.error("Failed to fetch friends online status:", error);
 			this.friendsOnlineStatus = {};
 		}
 	}

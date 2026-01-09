@@ -176,7 +176,6 @@ class ViewSettings extends Settings {
 
 	private changeLanguage(language: SupportedLanguage): void {
 		const label = this.getLanguageLabel(language);
-		console.log(t("view_settings_language_log", { language: label }));
 
 		setLanguage(language);
 		this.renderSection();

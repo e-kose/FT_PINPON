@@ -93,7 +93,6 @@ export async function updateAvatar(formData: FormData): Promise<{success: boolea
 	}	
 	try {
 		const uri = `${import.meta.env.VITE_API_BASE_URL}/user/avatar`;
-		console.log("Avatar update URL: ", uri);
 		const response = await fetch(uri, {
 			method: 'PATCH',
 			headers: {
@@ -103,7 +102,6 @@ export async function updateAvatar(formData: FormData): Promise<{success: boolea
 		});
 
 		const data = await response.json();
-		console.log("Avatar update response: ", data);
 		
 		// Backend success field göndermiyorsa, status code'a göre belirle
 		const isSuccess = data.success !== undefined ? data.success : (response.status === 200);
@@ -131,7 +129,6 @@ export async function changePasswordAsync(passwordData: { oldPass: string; newPa
 	const { accessToken, userId } = validation;
 	
 	try {
-		console.log("--->TOKEn: ", accessToken);
 		const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/password`, {
 			method: 'PATCH',
 			headers: {

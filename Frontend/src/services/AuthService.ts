@@ -6,7 +6,6 @@ import { initializeNotifications } from "./NotificationService";
 
 
 export async function loginAuth(userLoginData: UserLogin): Promise<{ status: number; ok: boolean; data: any }> {
-	console.log("Login Auth: userLoginData->", userLoginData);
 	return fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
 		method: 'POST',
 		headers: {
@@ -43,7 +42,6 @@ export async function loginAuth(userLoginData: UserLogin): Promise<{ status: num
 
 export async function 	fetchUser(token: string): Promise<boolean> {
 	const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
-	console.log("--------------------------- FETCH USER -------------------------- ");
 	const res = await fetch(url, {
 		method: "GET",
 		headers: {
@@ -53,24 +51,19 @@ export async function 	fetchUser(token: string): Promise<boolean> {
 	});
 
 	if (!res.ok) {
-		console.log("❌ FETCH USER FAILED - Response not OK:", res.status);
 		return false;
 	}
 	const data = await res.json();
-	console.log("✅ FETCH USER Response data:", data);
 	if (data.success) {
 		setUser(data.user, token);
 		await initializeNotifications();
 		
-		console.log("✅ FETCH USER SUCCESS - User set");
 		return true;
 	}
-	console.log("❌ FETCH USER FAILED - data.success is false");
 	return false;
 }
 
 async function refreshToken(): Promise<string | null> {
-	console.log("--------------------------- Refresh TOKEN -------------------------- ");
 	const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh-token`, {
 		method: "POST",
 		credentials: "include",
@@ -92,11 +85,9 @@ async function refreshToken(): Promise<string | null> {
 
 
 export async function handleLogin(): Promise<boolean> {
-	console.log("--------------------------- HANDLE LOGIN -------------------------- ");
 	const user = getUser();
 
 	if (user && user.accesstoken) {
-		console.log("2fa---->user found with token: ", user.accesstoken);
 		const valid = await fetchUser(user.accesstoken);
 		if (valid) return true;
 	}
@@ -138,12 +129,10 @@ export async function checkAndGetAccessToken(): Promise<string | null> {
 
 export async function set2FA(): Promise<{ ok: boolean; status: number; qr?: string }> {
 
-	console.log("--------------------------- SET 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
 		return { ok: false, status: 401 };
 	}
-	console.log("Setting 2FA to: ", accessToken);
 	try {
 		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/setup`, {
 			method: "POST",
@@ -166,14 +155,10 @@ export async function set2FA(): Promise<{ ok: boolean; status: number; qr?: stri
 }
 
 export async function enable2Fa(code: string): Promise<{ ok: boolean; status: number }> {
-	console.log("--------------------------- ENABLE 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
-		console.log("Acces token yok");
 		return { ok: false, status: 401 };
 	}
-	console.log("Access token_Enable: ", accessToken);
-	console.log("Enabling 2FA with code: ", code);
 	try {
 		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/enable`, {
 			method: "POST",
@@ -193,7 +178,6 @@ export async function enable2Fa(code: string): Promise<{ ok: boolean; status: nu
 			if (data.success) {
 				await handleLogin();
 				const updatedUser = getUser();
-				console.log("2FA enabled successfull----y---------------:", updatedUser?.is_2fa_enabled);
 				return { ok: true, status: res.status };
 			}
 		}
@@ -204,12 +188,10 @@ export async function enable2Fa(code: string): Promise<{ ok: boolean; status: nu
 }
 
 export async function disable2FA(): Promise<{ ok: boolean; status: number }> {
-	console.log("--------------------------- DISABLE 2FA -------------------------- ");
 	const accessToken = await checkAndGetAccessToken();
 	if (!accessToken) {
 		return { ok: false, status: 401 };
 	}
-	console.log("Disabling 2FA with token: ", accessToken);
 	try {
 		const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/2fa/disable`, {
 			method: "POST",
@@ -224,7 +206,6 @@ export async function disable2FA(): Promise<{ ok: boolean; status: number }> {
 			if (data.success) {
 				await handleLogin();
 				const updatedUser = getUser();
-				console.log("2FA disabled successfully:", updatedUser?.is_2fa_enabled);
 				return { ok: true, status: res.status };
 			}
 		}

@@ -24,7 +24,6 @@ function sanitizeString(str: string): string {
 
 // Validate and sanitize user data from API
 function validateAndSanitizeUser(userData: any): Partial<User> | null {
-	console.log('??????????????? Validating user data:', userData);
 	if (!userData || typeof userData !== 'object')
 		return null;
 	try {
@@ -50,7 +49,6 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			}
 		}
 		if (userData.is_2fa_enabled !== undefined) {
-			console.log("is_2fa_enabled value:", userData.is_2fa_enabled);
 			let is_2fa_enabled: number;
 			
 			// Handle both string and number values
@@ -70,7 +68,6 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 			
 			if (!isNaN(is_2fa_enabled)) {
 				sanitizedUser.is_2fa_enabled = is_2fa_enabled;
-				console.log("is_2fa_enabled sanitized to:", is_2fa_enabled);
 			}
 		}
 		if (userData.created_at) {
@@ -106,7 +103,6 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 				const avatarUrl = userData.profile.avatar_url.toString().trim();
 				if (avatarUrl !== '') {
 					profile.avatar_url = avatarUrl;
-					console.log("Avatar URL set in profile:", avatarUrl);
 				}
 			}
 			
@@ -120,7 +116,6 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 
 		return sanitizedUser;
 	} catch (error) {
-		console.error('Error validating user data:', error);
 		return null;
 	}
 }
@@ -129,17 +124,12 @@ function validateAndSanitizeUser(userData: any): Partial<User> | null {
 
 export function setUser(userData: any, token: string): boolean 
 {
-	console.log('Setting user with data:', userData, 'and token:', token);
 	const sanitizedData = validateAndSanitizeUser(userData);
 	if (!sanitizedData) {
-		console.warn('Failed to set user - invalid data:', userData);
 		return false;
 	}
-	console.log("----------------------> Sanitized User Data ----->", sanitizedData);
-	console.log("User_Token ----->", token);
 	currentUser ? Object.assign(currentUser, sanitizedData) : currentUser = sanitizedData as User;
 	setAccessToken(token);
-	console.log('User set successfully:', currentUser.accesstoken);
 	return true;
 }
 

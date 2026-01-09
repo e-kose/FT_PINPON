@@ -190,7 +190,6 @@ class Chat extends LocalizedComponent {
 				this.friends = [];
 			}
 		} catch (error) {
-			console.error(t("chat_fetch_friends_error_log"), error);
 			this.friends = [];
 		} finally {
 			if (this.requestedConversationId) {
@@ -225,11 +224,9 @@ class Chat extends LocalizedComponent {
 					}
 				}
 			} else {
-				console.error(t("chat_fetch_online_status_error_log"), onlineStatusResponse);
 				this.friendsOnlineStatus = {};
 			}
 		} catch (error) {
-			console.error(t("chat_fetch_online_status_exception_log"), error);
 			this.friendsOnlineStatus = {};
 		}
 	}
@@ -583,7 +580,6 @@ class Chat extends LocalizedComponent {
 					this.renderMessages();
 				}
 			} catch (error) {
-				console.error(t("chat_ws_parse_error_log"), error);
 			}
 		};
 	}
@@ -594,7 +590,6 @@ class Chat extends LocalizedComponent {
 			this.messages[friendId] = res.ok && res.data.success && Array.isArray(res.data.chat) ? res.data.chat : [];
 			this.activeConversationId = friendId;
 		} catch (error) {
-			console.error(t("chat_fetch_conversation_error_log"), error);
 			this.messages[friendId] = [];
 			this.activeConversationId = friendId;
 		} finally {
@@ -797,7 +792,6 @@ class Chat extends LocalizedComponent {
 				}
 			}
 		} catch (error) {
-			console.error(t("chat_notification_parse_error_log"), error);
 		}
 	}
 
@@ -824,7 +818,6 @@ class Chat extends LocalizedComponent {
 				this.updateFriendListUI();
 			}
 		} catch (error) {
-			console.error(t("chat_unread_counts_load_error_log"), error);
 		}
 	}
 
@@ -909,7 +902,6 @@ class Chat extends LocalizedComponent {
 				this.updateFriendListUI();
 			}
 		} catch (error) {
-			console.error(t("chat_mark_read_error_log"), error);
 		}
 	}
 
@@ -925,7 +917,6 @@ class Chat extends LocalizedComponent {
 				type: 'chat_message'
 			});
 		} catch (error) {
-			console.error(t("chat_create_notification_error_log"), error);
 		}
 	}
 
@@ -933,10 +924,8 @@ class Chat extends LocalizedComponent {
 		try {
 			const response = await deleteNotification(notificationId);
 			if (!response.ok || !response.data.success) {
-				console.error(t("chat_delete_notification_failed_log"), notificationId, response);
 			}
 		} catch (error) {
-			console.error(t("chat_delete_notification_error_log"), notificationId, error);
 		}
 	}
 

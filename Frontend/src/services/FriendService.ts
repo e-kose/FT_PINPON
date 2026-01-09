@@ -16,7 +16,6 @@ async function baseHeaders(hasBody = false): Promise<HeadersInit> {
 
 export async function sendFriendRequest(payload: { toId?: number; toUsername?: string }): Promise<{ status: number; ok: boolean; data: { success: boolean; message?: string } }> {
   const headers = await baseHeaders(true);
-  console.log(API_BASE);
   const res = await fetch(`${API_BASE}/friend/request`, {
     method: 'POST',
     headers,

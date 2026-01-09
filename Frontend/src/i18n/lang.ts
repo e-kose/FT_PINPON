@@ -81,7 +81,6 @@ export function t(key: string, vars?: InterpolationValues): string {
 
 export function setLanguage(language: SupportedLanguage): void {
 	if (!isSupportedLanguage(language)) {
-		console.warn(`[i18n] Unsupported language requested: ${language}`);
 		return;
 	}
 

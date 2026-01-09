@@ -131,7 +131,6 @@ class AccountSettings extends Settings {
 	}
 
 	private deleteAccount(): void {
-		console.log(t("account_settings_delete_log"));
 		this.hideDeleteAccountModal();
 		
 		deleteUser()
@@ -155,7 +154,6 @@ class AccountSettings extends Settings {
 				}
 			})
 			.catch((error) => {
-				console.error(t("account_settings_delete_error_log"), error);
 				const status = error?.status || 0;
 				const info = this.getUserResponseMessage(status);
 				this.showErrorMessage(info.title, info.message, MESSAGE_CONTAINER);
