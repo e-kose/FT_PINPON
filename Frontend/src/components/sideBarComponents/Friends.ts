@@ -165,7 +165,7 @@ class Friends extends LocalizedComponent {
 						<!-- Profile section with enhanced design -->
 						<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${friend.friend_id}">
 							<div class="relative flex-shrink-0">
-								<img src="${friend.friend_avatar_url || "/default-avatar.png"}" 
+						<img src="${friend.friend_avatar_url}" 
 									class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-white dark:border-gray-700 shadow-md" 
 									alt="${t("friends_avatar_alt")}">
 								<div class="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-3 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500 shadow-lg shadow-green-500/50' : 'bg-gray-400'} transition-all"></div>
@@ -424,7 +424,7 @@ class Friends extends LocalizedComponent {
 					<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${request.friend_id}">
 						<div class="relative flex-shrink-0">
 							<div class="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full opacity-0 group-hover:opacity-75 blur transition duration-300"></div>
-							<img src="${request.friend_avatar_url || "/default-avatar.png"}" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-white dark:border-gray-700 shadow-md" alt="${t("friends_avatar_alt")}">
+					<img src="${request.friend_avatar_url}" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-white dark:border-gray-700 shadow-md" alt="${t("friends_avatar_alt")}">
 						</div>
 						<div class="flex-1 min-w-0">
 							<h3 class="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">${request.friend_username}</h3>
@@ -473,7 +473,7 @@ class Friends extends LocalizedComponent {
 					<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${request.friend_id}">
 						<div class="relative flex-shrink-0">
 							<div class="absolute -inset-0.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full opacity-0 group-hover:opacity-75 blur transition duration-300"></div>
-							<img src="${request.friend_avatar_url || "/default-avatar.png"}" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-white dark:border-gray-700 shadow-md" alt="${t("friends_avatar_alt")}">
+					<img src="${request.friend_avatar_url}" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-white dark:border-gray-700 shadow-md" alt="${t("friends_avatar_alt")}">
 						</div>
 						<div class="flex-1 min-w-0">
 							<h3 class="font-bold text-sm sm:text-base text-gray-900 dark:text-white truncate">${request.friend_username}</h3>
@@ -517,7 +517,7 @@ class Friends extends LocalizedComponent {
 				<div class="group relative bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/10 dark:to-slate-900/10 rounded-xl p-3 sm:p-4 border-2 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-200">
 					<div class="profile-view-trigger flex items-center gap-3 cursor-pointer mb-3" data-id="${user.friend_id}">
 						<div class="relative flex-shrink-0">
-							<img src="${user.friend_avatar_url || "/default-avatar.png"}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-gray-400 dark:border-gray-600 shadow-md grayscale opacity-70 group-hover:opacity-90 transition-all" alt="${t("friends_avatar_alt")}">
+					<img src="${user.friend_avatar_url}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-3 border-gray-400 dark:border-gray-600 shadow-md grayscale opacity-70 group-hover:opacity-90 transition-all" alt="${t("friends_avatar_alt")}">
 							<div class="absolute inset-0 flex items-center justify-center">
 								<div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
 									<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

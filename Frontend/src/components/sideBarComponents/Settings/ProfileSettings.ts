@@ -43,7 +43,7 @@ class ProfileSettings extends Settings {
 							<h3 class="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">${t("profile_settings_avatar_section_title")}</h3>
 							<div class="flex flex-col sm:flex-row sm:items-start sm:gap-4 md:gap-6 gap-3">
 								<img 
-									src="${user.profile?.avatar_url || "/Avatar/1.png"}" 
+									src="${user.profile?.avatar_url }" 
 									alt="Profil Resmi" 
 									class="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full object-cover border-3 sm:border-4 border-white shadow-lg mx-auto sm:mx-0 shrink-0"
 								>

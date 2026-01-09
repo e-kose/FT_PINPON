@@ -236,7 +236,7 @@ class FriendProfile extends LocalizedComponent {
 											<div class="flex items-center gap-5">
 												<div class="relative">
 													<img 
-														src="${friend.profile?.avatar_url || '/default-avatar.png'}" 
+													src="${friend.profile?.avatar_url}" 
 														alt="${t("friend_profile_avatar_alt")}" 
 														class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-1 ring-slate-200/80 dark:ring-slate-700/80 shadow-md"
 													>

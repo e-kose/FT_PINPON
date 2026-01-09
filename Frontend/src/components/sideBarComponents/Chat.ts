@@ -264,7 +264,7 @@ class Chat extends LocalizedComponent {
 						<div data-id="${friendId}"
 							class="friend-card conversation-item flex items-center gap-3 p-3 rounded-xl cursor-pointer ${isActive ? "active" : ""}">
 							<div class="relative flex-shrink-0">
-								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-11 h-11 rounded-xl object-cover border-2 ${isOnline ? 'border-cyan-500/50' : 'border-slate-600/50'}" alt="${t("chat_friend_avatar_alt")}">
+						<img src="${friend.friend_avatar_url}" class="w-11 h-11 rounded-xl object-cover border-2 ${isOnline ? 'border-cyan-500/50' : 'border-slate-600/50'}" alt="${t("chat_friend_avatar_alt")}">
 								<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${isOnline ? 'bg-emerald-500 online-indicator' : 'bg-slate-500'}"></div>
 							</div>
 							<div class="flex-1 min-w-0">
@@ -396,7 +396,7 @@ class Chat extends LocalizedComponent {
 				</button>
 				<div class="flex items-center gap-3 flex-1 min-w-0">
 					<div class="relative flex-shrink-0">
-						<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-9 h-9 rounded-lg object-cover">
+						<img src="${owner.friend_avatar_url}" class="w-9 h-9 rounded-lg object-cover">
 						<div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-500'}"></div>
 					</div>
 					<div class="min-w-0">
@@ -419,7 +419,7 @@ class Chat extends LocalizedComponent {
 			<div data-chat-header="true" class="chat-header flex flex-wrap sm:flex-nowrap sm:flex-row sm:items-center gap-3 p-4 min-w-0">
 				<div class="flex items-center gap-3 min-w-0 flex-1">
 					<div class="relative flex-shrink-0">
-						<img src="${owner.friend_avatar_url || `/Avatar/${owner.friend_id}.png`}" class="w-11 h-11 rounded-xl object-cover border-2 ${isOnline ? 'border-cyan-500/50' : 'border-slate-600/50'}" alt="${t("chat_friend_avatar_alt")}">
+					<img src="${owner.friend_avatar_url}" class="w-11 h-11 rounded-xl object-cover border-2 ${isOnline ? 'border-cyan-500/50' : 'border-slate-600/50'}" alt="${t("chat_friend_avatar_alt")}">
 						<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${isOnline ? 'bg-emerald-500 online-indicator' : 'bg-slate-500'}"></div>
 					</div>
 					<div class="min-w-0 flex-1">
@@ -836,7 +836,7 @@ class Chat extends LocalizedComponent {
 						<div data-id="${friendId}"
 							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
 							<div class="relative">
-								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+						<img src="${friend.friend_avatar_url}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
 								<!-- Online/Offline Badge -->
 								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
 							</div>
@@ -868,7 +868,7 @@ class Chat extends LocalizedComponent {
 						<div data-id="${friendId}"
 							class="conversation-item flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${isActive ? "bg-gray-100 dark:bg-gray-700" : ""}">
 							<div class="relative">
-								<img src="${friend.friend_avatar_url || `/Avatar/${friendId}.png`}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
+							<img src="${friend.friend_avatar_url}" class="w-12 h-12 rounded-full" alt="${t("chat_friend_avatar_alt")}">
 								<!-- Online/Offline Badge -->
 								<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}"></div>
 							</div>
