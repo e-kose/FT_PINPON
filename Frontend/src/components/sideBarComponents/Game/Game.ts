@@ -68,6 +68,23 @@ export class Game extends LocalizedComponent {
 
 		this.innerHTML = `
             <style>
+                .game-container-wrapper {
+                    position: relative;
+                    min-height: 100vh;
+                }
+                .game-container-wrapper::before {
+                    content: '';
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: -2;
+                    background-color: #000000;
+                    background-image: radial-gradient(#ffffff33 1px, #00091d 1px);
+                    background-size: 20px 20px;
+                    pointer-events: none;
+                }
                 .status-toast {
                     opacity: 0;
                     transform: translateY(-10px);
@@ -94,7 +111,7 @@ export class Game extends LocalizedComponent {
                     color: #fecaca;
                 }
             </style>
-            <div class="min-h-screen bg-gray-900 bg-[url('/DashboardBackground.jpg')] bg-cover bg-center bg-fixed">
+            <div class="game-container-wrapper">
                 <header-component></header-component>
                 <div class="${PAGE_TOP_OFFSET}">
                     <sidebar-component current-route="game"></sidebar-component>

@@ -5,46 +5,47 @@ import "../../LoadingAniamtion";
 export class Queue extends LocalizedComponent {
 	protected renderComponent(): void {
 		this.innerHTML = `
-            <div class="flex flex-col items-center justify-center min-h-[80vh] w-full px-4 sm:px-6 lg:px-8">
-                <div class="w-full max-w-xl bg-slate-900/50 rounded-3xl border border-slate-700/30 shadow-xl p-10 sm:p-14 lg:p-20">
-                    <div class="flex flex-col items-center justify-center text-center space-y-8">
-                        
-                        <!-- Loading Animation -->
-                        <div class="w-full flex items-center justify-center py-6 sm:py-8">
-                            <div class="transform scale-125 sm:scale-150 lg:scale-[1.75]">
-                                <loading-animation></loading-animation>
-                            </div>
-                        </div>
-                        
-                        <!-- Status Text -->
-                        <div class="space-y-3">
-                            <h2 id="queueStatus" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-wider uppercase">
-                                ${t('game_queue_searching')}
-                            </h2>
-                            <p class="text-sm sm:text-base text-slate-300 font-medium">
-                                ${t('game_queue_please_wait')}
-                            </p>
-                        </div>
-                        
-                        <!-- Animated Dots -->
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
-                            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-200 rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
-                            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-300 rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
-                        </div>
-                        
-                        <!-- Cancel Button -->
-                        <button id="btnCancelQueue" class="group mt-4 px-8 sm:px-10 py-3.5 sm:py-4 bg-slate-800/60 border border-slate-600/40 rounded-2xl text-slate-300 font-medium text-sm sm:text-base hover:border-slate-500/60 hover:bg-slate-700/50 hover:text-slate-100 transition-all duration-300 flex items-center gap-3">
-                            <svg class="w-5 h-5 text-slate-400 group-hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <span>${t('game_queue_cancel')}</span>
-                        </button>
-                        
-                    </div>
-                </div>
-            </div>
-        `;
+			<div class="flex flex-col items-center justify-center min-h-[80vh] w-full px-4 sm:px-6 lg:px-8 text-slate-900 dark:text-slate-100">
+				<div class="w-full max-w-xl rounded-3xl border border-slate-200/70 dark:border-slate-700/50 bg-white/90 dark:bg-slate-900/70 shadow-lg shadow-slate-900/10 dark:shadow-black/40 p-6 sm:p-8 lg:p-10">
+					<div class="flex flex-col items-center justify-center text-center gap-5 sm:gap-6">
+						<div class="w-14 h-14 rounded-2xl bg-amber-500/15 dark:bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+							<svg class="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							</svg>
+						</div>
+
+						<div class="flex flex-col items-center gap-3 max-w-full">
+							<h2 id="queueStatus" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-center max-w-full break-words whitespace-normal">
+								${t('game_queue_searching')}
+							</h2>
+							<p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md break-words whitespace-normal">
+								${t('game_queue_please_wait')}
+							</p>
+						</div>
+
+						<div class="w-full flex items-center justify-center py-2">
+							<div class="scale-110 sm:scale-125">
+								<loading-animation></loading-animation>
+							</div>
+						</div>
+
+						<div class="flex items-center justify-center gap-2">
+							<span class="w-2 h-2 rounded-full bg-slate-400/80 animate-pulse" style="animation-delay: 0ms;"></span>
+							<span class="w-2 h-2 rounded-full bg-slate-300/70 animate-pulse" style="animation-delay: 160ms;"></span>
+							<span class="w-2 h-2 rounded-full bg-slate-400/80 animate-pulse" style="animation-delay: 320ms;"></span>
+						</div>
+
+						<button id="btnCancelQueue" class="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-xl border border-slate-200/70 dark:border-slate-700/50 bg-slate-100/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 text-sm font-semibold hover:bg-slate-200/80 dark:hover:bg-slate-700/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950">
+							<svg class="w-4 h-4 text-slate-500 dark:text-slate-300 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+							<span>${t('game_queue_cancel')}</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		`;
 	}
 
 	protected afterRender(): void {
