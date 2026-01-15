@@ -352,7 +352,7 @@ class GameStatistics extends LocalizedComponent {
 						</div>
 						<div class="min-w-0 flex-1 overflow-hidden">
 							<div class="flex items-center gap-1 mb-0.5">
-								<span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide ${isWinner ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'} whitespace-nowrap">${t("game_stats_match_memo")}</span>
+								<span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide ${isWinner ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'} whitespace-nowrap">${t("game_stats_mode_ranked")}</span>
 							</div>
 							<p class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-0.5 min-w-0">
 								<span class="text-slate-700 dark:text-slate-200 truncate max-w-[40%]">${this.profile.username}</span>
